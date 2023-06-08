@@ -11,6 +11,7 @@
 #include "core/SkTypes.h"
 
 int main() {
+    Canvas canvas = Canvas(200, 200);
     sk_sp<SkData> imageData = SkData::MakeFromFileName("./assets/arena/Bone.png");
     if (!imageData) {
         std::cout << "Failed to read image file!" << std::endl;
