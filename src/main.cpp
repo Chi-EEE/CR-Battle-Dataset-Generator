@@ -1,4 +1,6 @@
 #include <iostream>
+#include "Canvas.h"
+
 #include "core/SkBitmap.h"
 #include "core/SkCanvas.h"
 #include "core/SkData.h"
@@ -21,8 +23,8 @@ int main() {
         return -1;
     }
 
-    sk_sp<SkSurface> surface(SkSurface::MakeRasterN32Premul(200, 200));
-    SkCanvas* canvas = surface->getCanvas();
+    /*sk_sp<SkSurface> surface(SkSurface::MakeRasterN32Premul(200, 200));
+    SkCanvas* canvas = surface->getCanvas();*/
 
     SkRect dstRect = SkRect::MakeXYWH(50, 50, 200, 200); // Left, top, width, height
 

@@ -1,10 +1,13 @@
 add_rules("mode.debug", "mode.release")
 add_requires("skia")
+add_requires("tl_expected")
 
 target("CR-Battle-Dataset-Generator")
     set_kind("binary")
     add_files("src/*.cpp")
+    add_headerfiles("src/*.h")
     add_packages("skia")
+    add_packages("tl_expected")
 --
 -- If you want to known more usage about xmake, please see https://xmake.io
 --
