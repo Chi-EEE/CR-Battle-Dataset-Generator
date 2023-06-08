@@ -2,19 +2,19 @@
 
 tl::expected<Image, std::string> Image::create()
 {
-	std::unique_ptr<sk_sp<SkData>> imageData = std::make_unique<sk_sp<SkData>>(SkData::MakeFromFileName("./assets/arena/Bone.png"));
-	if (!imageData.get()) {
+	sk_sp<SkData> imageData = SkData::MakeFromFileName("./assets/arena/Bone.png");
+	if (!imageData) {
 		return tl::make_unexpected("Failed to read image file!");
 	}
 
-	std::unique_ptr<sk_sp<SkImage>> image = std::make_unique<sk_sp<SkImage>>(SkImage::MakeFromEncoded(*imageData.get()));
+	sk_sp<SkImage> image = SkImage::MakeFromEncoded(imageData);
 	if (!image) {
 		return tl::make_unexpected("Failed to create SkImage from encoded data!");
 	}
-	return Image();
+	return Image(imageData, image);
 }
 
-Image::Image()
+Image::Image(sk_sp<SkData> imageData, sk_sp<SkImage> image): imageData(imageData), image(image)
 {
 }
 

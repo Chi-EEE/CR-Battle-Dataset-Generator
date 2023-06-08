@@ -4,6 +4,9 @@
 #pragma once
 
 #include <iostream>
+
+#include "Image.h"
+
 #include "tl/expected.hpp"
 
 #include "core/SkBitmap.h"
@@ -18,15 +21,16 @@
 class Canvas
 {
 public:
-    Canvas(int width, int height);
-    ~Canvas();
+	Canvas(int width, int height);
+	~Canvas();
+	void drawImage(Image image, SkRect dstRect);
 
 private:
-    void clear();
-    tl::expected<void, std::string> save(std::string fileName);
+	void clear();
+	tl::expected<void, std::string> save(std::string fileName);
 
-    std::unique_ptr<sk_sp<SkSurface>> surface;
-    std::unique_ptr<SkCanvas> canvas;
+	sk_sp<SkSurface> surface;
+	std::unique_ptr<SkCanvas> canvas;
 };
 
 #endif

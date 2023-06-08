@@ -11,12 +11,16 @@
 class Image
 {
 public:
-    static tl::expected<Image, std::string> create();
-    ~Image();
+	static tl::expected<Image, std::string> create();
+	~Image();
+	sk_sp<SkImage> getImage() {
+		return image;
+	}
 
 private:
-    Image();
-
+	Image(sk_sp<SkData> imageData, sk_sp<SkImage> image);
+	sk_sp<SkData> imageData;
+	sk_sp<SkImage> image;
 };
 
 #endif
