@@ -1,0 +1,9 @@
+{
+    "recommendations": [
+        "bungcip.better-toml",
+        "ms-vscode.cpptools-extension-pack",
+        "vadimcn.vscode-lldb",
+        "swellaby.rust-pack",
+        "sonarsource.sonarlint-vscode"
+    ]
+}
