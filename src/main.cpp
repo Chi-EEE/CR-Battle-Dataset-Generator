@@ -10,6 +10,8 @@
 #include "core/SkSurface.h"
 #include "core/SkTypes.h"
 
+using namespace canvas;
+
 int main() {
     Canvas* canvas = new Canvas(200, 200);
     SkRect dstRect = SkRect::MakeXYWH(50, 50, 200, 200); // Left, top, width, height

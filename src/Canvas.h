@@ -18,18 +18,19 @@
 #include "core/SkSurface.h"
 #include "core/SkTypes.h"
 
-class Canvas
-{
-public:
-	Canvas(int width, int height);
-	~Canvas();
-	void drawImage(Image image, SkRect dstRect);
-	void clear();
-	tl::expected<bool, std::string> save(std::string fileName);
+namespace canvas {
+	class Canvas
+	{
+	public:
+		Canvas(int width, int height);
+		~Canvas();
+		void drawImage(Image image, SkRect dstRect);
+		void clear();
+		tl::expected<nullptr_t, std::string> save(std::string fileName);
 
-private:
-	sk_sp<SkSurface> surface;
-	//std::unique_ptr<SkCanvas> canvas;
-};
+	private:
+		sk_sp<SkSurface> surface;
+	};
+}
 
 #endif

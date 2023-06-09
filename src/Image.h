@@ -8,19 +8,21 @@
 #include "core/SkImage.h"
 #include <string>
 
-class Image
-{
-public:
-	static tl::expected<Image, std::string> create(std::string fileName);
-	~Image();
-	sk_sp<SkImage> getImage() {
-		return image;
-	}
+namespace canvas {
+	class Image
+	{
+	public:
+		static tl::expected<Image, std::string> create(std::string fileName);
+		~Image();
+		sk_sp<SkImage> getImage() {
+			return image;
+		}
 
-private:
-	Image(sk_sp<SkData> imageData, sk_sp<SkImage> image);
-	sk_sp<SkData> imageData;
-	sk_sp<SkImage> image;
-};
+	private:
+		Image(sk_sp<SkData> imageData, sk_sp<SkImage> image);
+		sk_sp<SkData> imageData;
+		sk_sp<SkImage> image;
+	};
+}
 
 #endif
