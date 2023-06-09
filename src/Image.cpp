@@ -1,8 +1,8 @@
 #include "Image.h"
 
-tl::expected<Image, std::string> Image::create()
+tl::expected<Image, std::string> Image::create(std::string fileName)
 {
-	sk_sp<SkData> imageData = SkData::MakeFromFileName("./assets/arena/Bone.png");
+	sk_sp<SkData> imageData = SkData::MakeFromFileName(fileName.c_str());
 	if (!imageData) {
 		return tl::make_unexpected("Failed to read image file!");
 	}

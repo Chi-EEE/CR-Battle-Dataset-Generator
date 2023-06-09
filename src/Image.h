@@ -11,7 +11,7 @@
 class Image
 {
 public:
-	static tl::expected<Image, std::string> create();
+	static tl::expected<Image, std::string> create(std::string fileName);
 	~Image();
 	sk_sp<SkImage> getImage() {
 		return image;

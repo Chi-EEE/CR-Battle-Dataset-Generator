@@ -24,13 +24,12 @@ public:
 	Canvas(int width, int height);
 	~Canvas();
 	void drawImage(Image image, SkRect dstRect);
+	void clear();
+	tl::expected<bool, std::string> save(std::string fileName);
 
 private:
-	void clear();
-	tl::expected<void, std::string> save(std::string fileName);
-
 	sk_sp<SkSurface> surface;
-	std::unique_ptr<SkCanvas> canvas;
+	//std::unique_ptr<SkCanvas> canvas;
 };
 
 #endif

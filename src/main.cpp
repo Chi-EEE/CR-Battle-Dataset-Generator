@@ -11,13 +11,13 @@
 #include "core/SkTypes.h"
 
 int main() {
-    Canvas canvas = Canvas(200, 200);
-
-    /*sk_sp<SkSurface> surface(SkSurface::MakeRasterN32Premul(200, 200));
-    SkCanvas* canvas = surface->getCanvas();*/
-
+    Canvas* canvas = new Canvas(200, 200);
     SkRect dstRect = SkRect::MakeXYWH(50, 50, 200, 200); // Left, top, width, height
-
-
+    auto imageResult = Image::create("./assets/arena/Bone.png");
+    if (imageResult.has_value()) {
+        auto image = imageResult.value();
+        canvas->drawImage(image, dstRect);
+        canvas->save("./tests.png");
+    }
     return 0;
 }

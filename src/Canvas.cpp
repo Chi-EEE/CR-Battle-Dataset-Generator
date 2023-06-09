@@ -3,7 +3,7 @@
 Canvas::Canvas(int width, int height)
 {
 	surface = SkSurface::MakeRasterN32Premul(width, height);
-	canvas = std::make_unique<SkCanvas>(surface->getCanvas());
+	//canvas = std::make_unique<SkCanvas>(surface->getCanvas());
 }
 
 Canvas::~Canvas()
@@ -13,15 +13,15 @@ Canvas::~Canvas()
 
 void Canvas::drawImage(Image image, SkRect dstRect)
 {
-	this->canvas->drawImageRect(image.getImage(), dstRect, SkSamplingOptions());
+	surface->getCanvas()->drawImageRect(image.getImage(), dstRect, SkSamplingOptions());
 }
 
 void Canvas::clear()
 {
-	canvas->clear(SK_ColorTRANSPARENT);
+	surface->getCanvas()->clear(SK_ColorTRANSPARENT);
 }
 
-tl::expected<void, std::string> Canvas::save(std::string fileName)
+tl::expected<bool, std::string> Canvas::save(std::string fileName)
 {
 	sk_sp<SkImage> imageFromSurface(surface->makeImageSnapshot());
 	if (!imageFromSurface) {
@@ -38,4 +38,5 @@ tl::expected<void, std::string> Canvas::save(std::string fileName)
 		return tl::make_unexpected("Failed to create output file!");
 	}
 	fileStream.write(imageEncoded->data(), imageEncoded->size());
+	return true;
 }
