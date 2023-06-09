@@ -6,6 +6,8 @@ target("CR-Battle-Dataset-Generator")
     set_kind("binary")
     add_files("src/*.cpp")
     add_headerfiles("src/*.h")
+    add_files("src/*/*.cpp")
+    add_headerfiles("src/*/*.h")
     add_packages("skia")
     add_packages("tl_expected")
 --

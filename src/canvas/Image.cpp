@@ -1,7 +1,7 @@
 #include "Image.h"
 
 namespace canvas {
-	tl::expected<Image, std::string> Image::create(std::string fileName)
+	tl::expected<Image, std::string> Image::fromFile(std::string fileName)
 	{
 		sk_sp<SkData> imageData = SkData::MakeFromFileName(fileName.c_str());
 		if (!imageData) {
@@ -12,10 +12,10 @@ namespace canvas {
 		if (!image) {
 			return tl::make_unexpected("Failed to create SkImage from encoded data!");
 		}
-		return Image(imageData, image);
+		return Image(image);
 	}
 
-	Image::Image(sk_sp<SkData> imageData, sk_sp<SkImage> image) : imageData(imageData), image(image)
+	Image::Image(sk_sp<SkImage> image) : image(image)
 	{
 	}
 

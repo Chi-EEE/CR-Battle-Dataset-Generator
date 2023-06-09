@@ -23,10 +23,20 @@ namespace canvas {
 	{
 	public:
 		Canvas(int width, int height);
+		Canvas clone();
 		~Canvas();
-		void drawImage(Image image, SkRect dstRect);
-		void clear();
+		int get_width() {
+			return this->surface->width();
+		}
+		int get_height() {
+			return this->surface->height();
+		}
+		void draw_image(Image image, SkRect dstRect);
+		Canvas crop(const SkRect& cropRect);
+		Canvas stretch(const SkPoint& stretchVector);
+		sk_sp<SkImage> snapshot();
 		tl::expected<nullptr_t, std::string> save(std::string fileName);
+		void clear();
 
 	private:
 		sk_sp<SkSurface> surface;

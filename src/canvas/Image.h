@@ -12,15 +12,19 @@ namespace canvas {
 	class Image
 	{
 	public:
-		static tl::expected<Image, std::string> create(std::string fileName);
+		static tl::expected<Image, std::string> fromFile(std::string file);
+		Image(sk_sp<SkImage> image);
 		~Image();
 		sk_sp<SkImage> getImage() {
 			return image;
 		}
-
+		int get_width() {
+			return this->image->width();
+		}
+		int get_height() {
+			return this->image->height();
+		}
 	private:
-		Image(sk_sp<SkData> imageData, sk_sp<SkImage> image);
-		sk_sp<SkData> imageData;
 		sk_sp<SkImage> image;
 	};
 }
