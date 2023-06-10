@@ -11,7 +11,7 @@ namespace arena {
 		switch (arena_type)
 		{
 		case Training:
-			arenaFile = "./assets/arena/Bone.png";
+			arenaFile = "./assets/arena/Training.png";
 			break;
 		default:
 			break;

@@ -5,9 +5,11 @@
 
 #include <string>
 
-enum ArenaType
-{
-	Training,
-};
+namespace arena {
+	enum ArenaType
+	{
+		Training,
+	};
+}
 
 #endif

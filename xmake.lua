@@ -4,12 +4,23 @@ add_requires("tl_expected")
 
 target("CR-Battle-Dataset-Generator")
     set_kind("binary")
+    add_rules("utils.bin2c", {extensions = {".json"}})
+    add_packages("skia")
+    add_packages("tl_expected")
+    if is_mode("debug") then 
+        set_targetdir("$(buildir)/debug/$(os)/$(arch)")
+        set_configdir("$(buildir)/debug/$(os)/$(arch)/res")
+    else 
+        set_targetdir("$(buildir)/release/$(os)/$(arch)")
+        set_configdir("$(buildir)/release/$(os)/$(arch)/res")
+    end
     add_files("src/*.cpp")
     add_headerfiles("src/*.h")
     add_files("src/*/*.cpp")
     add_headerfiles("src/*/*.h")
-    add_packages("skia")
-    add_packages("tl_expected")
+    -- add_files("res/TowerPosition/*.json")
+    add_configfiles("res/config.json")
+
 --
 -- If you want to known more usage about xmake, please see https://xmake.io
 --
