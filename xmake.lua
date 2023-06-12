@@ -1,12 +1,14 @@
 add_rules("mode.debug", "mode.release")
 add_requires("skia")
 add_requires("tl_expected")
+add_requires("magic_enum")
 
 target("CR-Battle-Dataset-Generator")
     set_kind("binary")
     add_rules("utils.bin2c", {extensions = {".json"}})
     add_packages("skia")
     add_packages("tl_expected")
+    add_packages("magic_enum")
     if is_mode("debug") then 
         set_targetdir("$(buildir)/debug/$(os)/$(arch)")
         set_configdir("$(buildir)/debug/$(os)/$(arch)/res")
