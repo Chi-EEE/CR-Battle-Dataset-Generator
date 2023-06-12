@@ -5,3 +5,6 @@ Arena should have a checkered pattern which makes the YOLO understand shadows
 There are no known tower skins in the files...
 
 Characters: 1.680555555555555
+
+You will find anything that’s downloaded from the SC server inside: /data/data/com.supercell.clashroyale/update
+
