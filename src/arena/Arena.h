@@ -1,9 +1,13 @@
-#include "ArenaType.h"
-#include "../canvas/Canvas.h"
 #ifndef ARENA_H
 #define ARENA_H
 
 #pragma once
+
+#include <magic_enum.hpp>
+
+#include "ArenaType.h"
+#include "../canvas/Canvas.h"
+#include "TowerSkin.h"
 
 using namespace canvas;
 
@@ -11,7 +15,7 @@ namespace arena {
     class Arena
     {
     public:
-        static tl::expected<Arena, std::string> create(ArenaType arena_type);
+        static tl::expected<Arena, std::string> create(ArenaType arena_type, TowerSkin red, TowerSkin blue);
         ~Arena();
         Arena clone();
         tl::expected<nullptr_t, std::string> save(std::string fileName);

@@ -5,9 +5,10 @@ namespace arena {
 	{
 	}
 
-	tl::expected<Arena, std::string> Arena::create(ArenaType arena_type)
+	tl::expected<Arena, std::string> Arena::create(ArenaType arena_type, TowerSkin red, TowerSkin blue)
 	{
 		std::string arenaFile;
+		auto arena_name = magic_enum::enum_name(arena_type);
 		switch (arena_type)
 		{
 		case Training:
