@@ -8,3 +8,5 @@ build/
 vsxmake2022
 
 /assets
+out
+__pycache__

@@ -1,11 +1,20 @@
+
+/**
+ ********************************************************************
+ *
+ * WARNING! This file was automatically generated. Do not edit it, as your
+ * changes will be lost. Edit scripts/generateTowerSkinEnum.py instead.
+ *
+ ********************************************************************
+ */
 #ifndef TOWERSKIN_H
 #define TOWERSKIN_H
-
-#pragma once
-
-#include <magic_enum.hpp>
-
-enum TowerSkin
+#include <ostream>
+#include <vector>
+#include <string>
+class TowerSkin
+{
+enum Value
 {
     Default,
     Red,
@@ -77,6 +86,11 @@ enum TowerSkin
     S46,
     S47,
     S48,
+    _Count
 };
-
-#endif
+std::vector<Value> values();
+std::string name(Value e);
+Value valueOf(std::string str);
+}
+std::ostream& operator<<(std::ostream& os, const TowerSkin::Value& e);
+#endif // TOWERSKIN_H

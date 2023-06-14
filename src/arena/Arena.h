@@ -3,8 +3,6 @@
 
 #pragma once
 
-#include <magic_enum.hpp>
-
 #include "ArenaType.h"
 #include "../canvas/Canvas.h"
 #include "TowerSkin.h"
@@ -15,7 +13,7 @@ namespace arena {
     class Arena
     {
     public:
-        static tl::expected<Arena, std::string> create(ArenaType arena_type, TowerSkin red, TowerSkin blue);
+        static tl::expected<Arena, std::string> create(ArenaType arena_type, TowerSkin::Enum red, TowerSkin blue);
         ~Arena();
         Arena clone();
         tl::expected<nullptr_t, std::string> save(std::string fileName);
