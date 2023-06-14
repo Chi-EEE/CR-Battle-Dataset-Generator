@@ -3,10 +3,13 @@
 
 #pragma once
 
+#include <string>
+#include <unordered_map>
+
 class ArenaType
 {
 public:
-    enum Value : uint8_t
+    enum Value
     {
         Training,
 
@@ -20,13 +23,32 @@ public:
     constexpr bool operator==(ArenaType a) const { return value == a.value; }
     constexpr bool operator!=(ArenaType a) const { return value != a.value; }
 
-    static std::string name(Value value)
+    std::string name() const
     {
-        switch (value)
-        {
-        case ArenaType::Training: return "Training";
-        default: return "Unknown";
-        }
+        static const std::unordered_map<Value, std::string> name_map = {
+
+            { ArenaType::Training, "Training" },
+
+        };
+
+        auto it = name_map.find(value);
+        if (it != name_map.end())
+            return it->second;
+        return "Unknown"; // Return default if no match is found
+    }
+
+    static Value valueOf(const std::string& name)
+    {
+        static const std::unordered_map<std::string, Value> value_map = {
+
+            { "Training", ArenaType::Training },
+
+        };
+
+        auto it = value_map.find(name);
+        if (it != value_map.end())
+            return it->second;
+        return ArenaType::Training; // Return default value if no match is found
     }
 
 private:

@@ -1,4 +1,5 @@
 import os
+from collections import defaultdict
 
 
 def generate_cpp_class(class_name: str, enum_values):
@@ -7,10 +8,13 @@ def generate_cpp_class(class_name: str, enum_values):
 
 #pragma once
 
+#include <string>
+#include <unordered_map>
+
 class {class_name}
 {{
 public:
-  enum Value : uint8_t
+  enum Value
   {{
 '''
 
@@ -18,18 +22,17 @@ public:
     for value in enum_values:
         cpp_code += f'    {value},\n'
 
-    cpp_code += f'''
-  }};
+    cpp_code += f'''  }};
 
   {class_name}() = default;
   constexpr {class_name}(Value value) : value(value) {{ }}
 
-	constexpr operator Value() const {{ return value; }}
-	explicit operator bool() const = delete;
+  constexpr operator Value() const {{ return value; }}
+  explicit operator bool() const = delete;
   constexpr bool operator==({class_name} a) const {{ return value == a.value; }}
   constexpr bool operator!=({class_name} a) const {{ return value != a.value; }}
 
-  static std::string name(Value value)
+  std::string name() const
   {{
     switch (value)
     {{
@@ -41,6 +44,23 @@ public:
 
     cpp_code += f'''      default: return "Unknown";
     }}
+  }}
+
+  static Value valueOf(const std::string& name)
+  {{
+    static const std::unordered_map<std::string, Value> value_map = {{
+'''
+
+    # Generate mapping from string to enum value using unordered_map
+    for value in enum_values:
+        cpp_code += f'        {{ "{value}", {class_name}::{value} }},\n'
+
+    cpp_code += f'''    }};
+
+    auto it = value_map.find(name);
+    if (it != value_map.end())
+        return it->second;
+    return {class_name}::{enum_values[0]}; // Return default value if no match is found
   }}
 
 private:

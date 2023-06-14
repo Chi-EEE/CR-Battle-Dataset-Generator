@@ -8,15 +8,14 @@ namespace arena {
 	tl::expected<Arena, std::string> Arena::create(ArenaType arena_type, TowerSkin red, TowerSkin blue)
 	{
 		std::string arenaFile;
-		auto arena_name = magic_enum::enum_name(arena_type);
 		switch (arena_type)
 		{
-		case Training:
+		case ArenaType::Value::Training:
 			arenaFile = "./assets/arena/Training.png";
 			break;
 		default:
 			break;
-		}
+		} 
 		auto imageResult = Image::fromFile(arenaFile);
 		if (!imageResult.has_value()) {
 			return tl::make_unexpected(imageResult.error());

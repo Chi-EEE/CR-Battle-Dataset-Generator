@@ -3,10 +3,13 @@
 
 #pragma once
 
+#include <string>
+#include <unordered_map>
+
 class TowerSkin
 {
 public:
-    enum Value : uint8_t
+    enum Value
     {
         Default,
         Red,
@@ -89,7 +92,7 @@ public:
     constexpr bool operator==(TowerSkin a) const { return value == a.value; }
     constexpr bool operator!=(TowerSkin a) const { return value != a.value; }
 
-    static std::string name(Value value)
+    std::string name() const
     {
         switch (value)
         {
@@ -165,6 +168,88 @@ public:
         case TowerSkin::S48: return "S48";
         default: return "Unknown";
         }
+    }
+
+    static Value valueOf(const std::string& name)
+    {
+        static const std::unordered_map<std::string, Value> value_map = {
+
+            { "Default", TowerSkin::Default },
+            { "Red", TowerSkin::Red },
+            { "Ice_House", TowerSkin::Ice_House },
+            { "Gingerbread_House", TowerSkin::Gingerbread_House },
+            { "Clan_Boat_Bastion", TowerSkin::Clan_Boat_Bastion },
+            { "Logmas", TowerSkin::Logmas },
+            { "Clashmas_Tavern", TowerSkin::Clashmas_Tavern },
+            { "Tiger", TowerSkin::Tiger },
+            { "Gem_Mine", TowerSkin::Gem_Mine },
+            { "Giant_Skeleton", TowerSkin::Giant_Skeleton },
+            { "Duck_Hunt", TowerSkin::Duck_Hunt },
+            { "Royal_Fest", TowerSkin::Royal_Fest },
+            { "Spooky_Town", TowerSkin::Spooky_Town },
+            { "Sheep", TowerSkin::Sheep },
+            { "Nutcracker", TowerSkin::Nutcracker },
+            { "Clashmas_Tree", TowerSkin::Clashmas_Tree },
+            { "Clashmas_Sweater", TowerSkin::Clashmas_Sweater },
+            { "Rabbit", TowerSkin::Rabbit },
+            { "Magic_Archer", TowerSkin::Magic_Archer },
+            { "Disco_Defense", TowerSkin::Disco_Defense },
+            { "Boot_Camp", TowerSkin::Boot_Camp },
+            { "Bookz", TowerSkin::Bookz },
+            { "S1", TowerSkin::S1 },
+            { "S2", TowerSkin::S2 },
+            { "S3", TowerSkin::S3 },
+            { "S4", TowerSkin::S4 },
+            { "S5", TowerSkin::S5 },
+            { "S6", TowerSkin::S6 },
+            { "S7", TowerSkin::S7 },
+            { "S8", TowerSkin::S8 },
+            { "S9", TowerSkin::S9 },
+            { "S10", TowerSkin::S10 },
+            { "S11", TowerSkin::S11 },
+            { "S12", TowerSkin::S12 },
+            { "S13", TowerSkin::S13 },
+            { "S14", TowerSkin::S14 },
+            { "S15", TowerSkin::S15 },
+            { "S16", TowerSkin::S16 },
+            { "S17", TowerSkin::S17 },
+            { "S18", TowerSkin::S18 },
+            { "S19", TowerSkin::S19 },
+            { "S20", TowerSkin::S20 },
+            { "S21", TowerSkin::S21 },
+            { "S22", TowerSkin::S22 },
+            { "S23", TowerSkin::S23 },
+            { "S24", TowerSkin::S24 },
+            { "S25", TowerSkin::S25 },
+            { "S26", TowerSkin::S26 },
+            { "S27", TowerSkin::S27 },
+            { "S28", TowerSkin::S28 },
+            { "S29", TowerSkin::S29 },
+            { "S30", TowerSkin::S30 },
+            { "S31", TowerSkin::S31 },
+            { "S32", TowerSkin::S32 },
+            { "S33", TowerSkin::S33 },
+            { "S34", TowerSkin::S34 },
+            { "S35", TowerSkin::S35 },
+            { "S36", TowerSkin::S36 },
+            { "S37", TowerSkin::S37 },
+            { "S38", TowerSkin::S38 },
+            { "S39", TowerSkin::S39 },
+            { "S40", TowerSkin::S40 },
+            { "S41", TowerSkin::S41 },
+            { "S42", TowerSkin::S42 },
+            { "S43", TowerSkin::S43 },
+            { "S44", TowerSkin::S44 },
+            { "S45", TowerSkin::S45 },
+            { "S46", TowerSkin::S46 },
+            { "S47", TowerSkin::S47 },
+            { "S48", TowerSkin::S48 },
+        };
+
+        auto it = value_map.find(name);
+        if (it != value_map.end())
+            return it->second;
+        return TowerSkin::Default; // Return default value if no match is found
     }
 
 private:
