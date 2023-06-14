@@ -32,7 +32,7 @@ public:
   constexpr bool operator==({class_name} a) const {{ return value == a.value; }}
   constexpr bool operator!=({class_name} a) const {{ return value != a.value; }}
 
-  std::string name() const
+  std::string to_string() const
   {{
     switch (value)
     {{
@@ -46,7 +46,7 @@ public:
     }}
   }}
 
-  static Value valueOf(const std::string& name)
+  static Value from_string(const std::string& name)
   {{
     static const std::unordered_map<std::string, Value> value_map = {{
 '''

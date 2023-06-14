@@ -7,15 +7,7 @@ namespace arena {
 
 	tl::expected<Arena, std::string> Arena::create(ArenaType arena_type, TowerSkin red, TowerSkin blue)
 	{
-		std::string arenaFile;
-		switch (arena_type)
-		{
-		case ArenaType::Value::Training:
-			arenaFile = "./assets/arena/Training.png";
-			break;
-		default:
-			break;
-		} 
+		std::string arenaFile = fmt::format("./assets/arena/{}.png", arena_type.to_string());
 		auto imageResult = Image::fromFile(arenaFile);
 		if (!imageResult.has_value()) {
 			return tl::make_unexpected(imageResult.error());

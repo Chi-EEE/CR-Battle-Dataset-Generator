@@ -34,6 +34,8 @@ namespace canvas {
 		void draw_image(Image image, SkRect dstRect);
 		Canvas crop(const SkRect& cropRect);
 		Canvas stretch(const SkPoint& stretchVector);
+		Canvas vertical_flip();
+		Canvas horizonal_flip();
 		sk_sp<SkImage> snapshot();
 		tl::expected<nullptr_t, std::string> save(std::string fileName);
 		void clear();

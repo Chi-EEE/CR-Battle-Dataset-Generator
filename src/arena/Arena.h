@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "fmt/format.h"
+
 #include "ArenaType.h"
 #include "../canvas/Canvas.h"
 #include "TowerSkin.h"

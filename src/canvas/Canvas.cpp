@@ -39,6 +39,34 @@ namespace canvas {
 		return stretchedCanvas;
 	}
 
+	Canvas Canvas::vertical_flip()
+	{
+		int width = this->get_width();
+		int height = this->get_height();
+		Canvas verticalFlippedCanvas = Canvas(width, height);
+		SkCanvas* flippedCanvas = verticalFlippedCanvas.surface->getCanvas();
+
+		flippedCanvas->translate(0, height);
+		flippedCanvas->scale(1, -1);
+		verticalFlippedCanvas.draw_image(this->surface->makeImageSnapshot(), SkRect::MakeXYWH(0, 0, width, height));
+
+		return verticalFlippedCanvas;
+	}
+
+	Canvas Canvas::horizonal_flip()
+	{
+		int width = this->get_width();
+		int height = this->get_height();
+		Canvas verticalFlippedCanvas = Canvas(width, height);
+		SkCanvas* flippedCanvas = verticalFlippedCanvas.surface->getCanvas();
+
+		flippedCanvas->translate(width, 0);
+		flippedCanvas->scale(-1, 1);
+		verticalFlippedCanvas.draw_image(this->surface->makeImageSnapshot(), SkRect::MakeXYWH(0, 0, width, height));
+
+		return verticalFlippedCanvas;
+	}
+
 	sk_sp<SkImage> Canvas::snapshot()
 	{
 		return this->surface->makeImageSnapshot();
