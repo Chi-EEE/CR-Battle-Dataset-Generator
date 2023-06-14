@@ -1,8 +1,12 @@
 import os
 
 
-def generate_cpp_class(class_name, enum_values):
-    cpp_code = f'''
+def generate_cpp_class(class_name: str, enum_values):
+    cpp_code = f'''#ifndef {class_name.upper()}_H
+#define {class_name.upper()}_H
+
+#pragma once
+
 class {class_name}
 {{
 public:
@@ -14,26 +18,18 @@ public:
     for value in enum_values:
         cpp_code += f'    {value},\n'
 
-    cpp_code += '''
-  };
+    cpp_code += f'''
+  }};
 
   {class_name}() = default;
-  constexpr {class_name}(Value aFruit) : value(aFruit) {{ }}
+  constexpr {class_name}(Value value) : value(value) {{ }}
 
-#if Enable switch(fruit) use case:
-  // Allow switch and comparisons.
-  constexpr operator Value() const {{ return value; }}
-
-  // Prevent usage: if(fruit)
-  explicit operator bool() const = delete;        
-#else
+	constexpr operator Value() const {{ return value; }}
+	explicit operator bool() const = delete;
   constexpr bool operator==({class_name} a) const {{ return value == a.value; }}
   constexpr bool operator!=({class_name} a) const {{ return value != a.value; }}
-#endif
 
-  constexpr bool IsYellow() const {{ return value == Banana; }}
-
-  std::string name() const
+  static std::string name(Value value)
   {{
     switch (value)
     {{
@@ -43,30 +39,15 @@ public:
     for value in enum_values:
         cpp_code += f'      case {class_name}::{value}: return "{value}";\n'
 
-    cpp_code += '''
-      default: return "Unknown";
+    cpp_code += f'''      default: return "Unknown";
     }}
-  }}
-
-  static Value valueOf(const std::string& name)
-  {{
-    if (name == "Unknown")
-      return Value(0); // Assuming the first enum value is the default/unknown value
-
-'''
-
-    # Generate mapping from string to enum value
-    for i, value in enumerate(enum_values):
-        cpp_code += f'    else if (name == "{value}")\n'
-        cpp_code += f'      return {class_name}::{value};\n'
-
-    cpp_code += '''
-    return Value(0); // Return default/unknown value if no match is found
   }}
 
 private:
   Value value;
 }};
+
+#endif
 '''
 
     return cpp_code

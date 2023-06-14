@@ -7,6 +7,8 @@ using namespace arena;
 
 int main() {
     auto arenaResult = Arena::create(ArenaType::Training, TowerSkin::Default, TowerSkin::Default);
+    auto a = ArenaType::Training;
+    ArenaType::name(a);
     if (arenaResult.has_value()) {
         Arena arena = arenaResult.value();
         arena.save("./testArena.png");
