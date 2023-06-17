@@ -56,9 +56,10 @@ namespace arena {
 		auto left_princess_tower_rect = SkRect::MakeXYWH(257 - (princess_tower_width / 2), 1182 - (princess_tower_height / 2), princess_tower_width, princess_tower_height);
 		auto flipped_canvas = Canvas(princess_tower_width, princess_tower_height);
 		flipped_canvas.draw_image(princess_tower_image, SkRect::MakeXYWH(0, 0, princess_tower_width, princess_tower_height));
-		flipped_canvas = flipped_canvas.stretch(SkPoint::Make(flipped_canvas.get_width() * 0.43, flipped_canvas.get_height() * 0.43));
+		auto new_height = std::floor(flipped_canvas.get_height() * 0.71751412429378531073446327683616);
+		flipped_canvas = flipped_canvas.stretch(SkPoint::Make(princess_tower_width, new_height));
 		flipped_canvas = flipped_canvas.vertical_flip();
-		auto left_princess_shadow_rect = SkRect::MakeXYWH(left_princess_tower_rect.x() - 10, left_princess_tower_rect.y() + 50, left_princess_tower_rect.width(), left_princess_tower_rect.height());
+		auto left_princess_shadow_rect = SkRect::MakeXYWH(left_princess_tower_rect.x() - 15, left_princess_tower_rect.y() + 70, flipped_canvas.get_width(), flipped_canvas.get_height());
 		this->canvas.draw_image(flipped_canvas.replace_pixels_to(), left_princess_shadow_rect);
 		this->canvas.draw_image(princess_tower_image, left_princess_tower_rect);
 		return nullptr;

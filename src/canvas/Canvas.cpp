@@ -85,12 +85,9 @@ namespace canvas {
 		for (int y = 0; y < info.height(); y++) {
 			for (int x = 0; x < info.width(); x++) {
 				SkPMColor* pixel = bitmap.getAddr32(x, y);
-				uint8_t r = SkColorGetR(*pixel);
-				uint8_t g = SkColorGetG(*pixel);
-				uint8_t b = SkColorGetB(*pixel);
+				uint8_t alpha = SkColorGetA(*pixel);
 
-				if (r + g + b > 0) {
-					uint8_t alpha = SkColorGetA(*pixel);
+				if (alpha > 0) {
 					uint8_t newAlpha = std::max(alpha - 125, 0);
 					*pixel = SkColorSetARGB(newAlpha, 0, 0, 0);  // Set to semi-transparent black
 				}
