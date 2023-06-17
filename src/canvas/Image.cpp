@@ -5,12 +5,11 @@ namespace canvas {
 	{
 		sk_sp<SkData> imageData = SkData::MakeFromFileName(fileName.c_str());
 		if (!imageData) {
-			return tl::make_unexpected("Failed to read image file!");
+			return tl::make_unexpected(fmt::format("Failed to read image file! [{}]", fileName));
 		}
-
 		sk_sp<SkImage> image = SkImage::MakeFromEncoded(imageData);
 		if (!image) {
-			return tl::make_unexpected("Failed to create SkImage from encoded data!");
+			return tl::make_unexpected(fmt::format("Failed to create SkImage from encoded data! [{}]", fileName));
 		}
 		return Image(image);
 	}

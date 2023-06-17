@@ -20,6 +20,11 @@ namespace canvas {
 	{
 	}
 
+	void Canvas::draw_canvas(Canvas canvas, SkRect dstRect)
+	{
+		surface->getCanvas()->drawImageRect(canvas.surface->makeImageSnapshot(), dstRect, SkSamplingOptions());
+	}
+
 	void Canvas::draw_image(Image image, SkRect dstRect)
 	{
 		surface->getCanvas()->drawImageRect(image.getImage(), dstRect, SkSamplingOptions());
@@ -65,6 +70,34 @@ namespace canvas {
 		verticalFlippedCanvas.draw_image(this->surface->makeImageSnapshot(), SkRect::MakeXYWH(0, 0, width, height));
 
 		return verticalFlippedCanvas;
+	}
+
+	Image Canvas::replace_pixels_to() {
+		auto image = this->surface->makeImageSnapshot();
+		SkBitmap bitmap;
+		SkImageInfo info = SkImageInfo::MakeN32Premul(image->width(), image->height());
+		bitmap.allocPixels(info);
+
+		SkCanvas canvas(bitmap);
+		canvas.drawImage(image, 0, 0);
+
+		// Modify the pixel values in the bitmap
+		for (int y = 0; y < info.height(); y++) {
+			for (int x = 0; x < info.width(); x++) {
+				SkPMColor* pixel = bitmap.getAddr32(x, y);
+				uint8_t r = SkColorGetR(*pixel);
+				uint8_t g = SkColorGetG(*pixel);
+				uint8_t b = SkColorGetB(*pixel);
+
+				if (r + g + b > 0) {
+					uint8_t alpha = SkColorGetA(*pixel);
+					uint8_t newAlpha = std::max(alpha - 125, 0);
+					*pixel = SkColorSetARGB(newAlpha, 0, 0, 0);  // Set to semi-transparent black
+				}
+			}
+		}
+
+		return SkImage::MakeFromBitmap(bitmap);
 	}
 
 	sk_sp<SkImage> Canvas::snapshot()

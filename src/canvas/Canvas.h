@@ -31,11 +31,13 @@ namespace canvas {
 		int get_height() {
 			return this->surface->height();
 		}
+		void draw_canvas(Canvas canvas, SkRect dstRect);
 		void draw_image(Image image, SkRect dstRect);
 		Canvas crop(const SkRect& cropRect);
 		Canvas stretch(const SkPoint& stretchVector);
 		Canvas vertical_flip();
 		Canvas horizonal_flip();
+		Image replace_pixels_to();
 		sk_sp<SkImage> snapshot();
 		tl::expected<nullptr_t, std::string> save(std::string fileName);
 		void clear();

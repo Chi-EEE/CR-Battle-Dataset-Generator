@@ -15,13 +15,18 @@ namespace arena {
     class Arena
     {
     public:
-        static tl::expected<Arena, std::string> create(ArenaType arena_type, TowerSkin red, TowerSkin blue);
+        static tl::expected<Arena, std::string> create(ArenaType arena_type, TowerSkin blue_side, TowerSkin red_side);
         ~Arena();
         Arena clone();
         tl::expected<nullptr_t, std::string> save(std::string fileName);
     private:
-        Arena(ArenaType arena_type, Canvas canvas);
+        Arena(ArenaType arena_type, TowerSkin blue_side, TowerSkin red_side, Canvas canvas);
+        tl::expected<nullptr_t, std::string> draw_blue_side();
+        tl::expected<Image, std::string> get_blue_princess_tower();
+        tl::expected<nullptr_t, std::string> draw_red_side();
         ArenaType arena_type;
+        TowerSkin blue_side;
+        TowerSkin red_side;
         Canvas canvas;
     };
 }

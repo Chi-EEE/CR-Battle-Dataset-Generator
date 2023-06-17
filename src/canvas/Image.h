@@ -6,6 +6,7 @@
 #include "tl/expected.hpp"
 #include "core/SkData.h"
 #include "core/SkImage.h"
+#include "fmt/format.h"
 #include <string>
 
 namespace canvas {
