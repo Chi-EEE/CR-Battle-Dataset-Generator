@@ -12,7 +12,7 @@ namespace canvas {
 		if (it != this->images.end())
 			return it->second;
 
-		auto image_result = Image::fromFile(file_name);
+		auto image_result = Image::from_file(file_name);
 		if (image_result.has_value()) {
 			this->images.insert(std::make_pair(file_name, image_result.value()));
 		}

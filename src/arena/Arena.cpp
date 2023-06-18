@@ -7,12 +7,13 @@ namespace arena {
 
 	tl::expected<Arena, std::string> Arena::create(ArenaType arena_type, TowerSkin blue_side, TowerSkin red_side)
 	{
+		ImageLoader& image_loader = ImageLoader::getInstance();
 		std::string arenaFile = fmt::format("./assets/arena/{}.png", arena_type.to_string());
-		auto imageResult = Image::fromFile(arenaFile);
-		if (!imageResult.has_value()) {
-			return tl::make_unexpected(imageResult.error());
+		auto image_result = image_loader.load_image(arenaFile);
+		if (!image_result.has_value()) {
+			return tl::make_unexpected(image_result.error());
 		}
-		auto image = imageResult.value();
+		auto image = image_result.value();
 		Canvas canvas = Canvas(image.get_width(), image.get_height());
 		canvas.draw_image(image, SkRect::MakeXYWH(0, 0, image.get_width(), image.get_height()));
 		return Arena(arena_type, blue_side, red_side, canvas);
@@ -37,8 +38,9 @@ namespace arena {
 
 	tl::expected<Image, std::string> Arena::get_blue_princess_tower()
 	{
+		ImageLoader& image_loader = ImageLoader::getInstance();
 		std::string arenaFile = fmt::format("./assets/towers/princess/Blue-{}.png", blue_side.to_string());
-		auto imageResult = Image::fromFile(arenaFile);
+		auto imageResult = image_loader.load_image(arenaFile);
 		if (!imageResult.has_value()) {
 			return tl::make_unexpected(imageResult.error());
 		}
@@ -48,12 +50,18 @@ namespace arena {
 
 	tl::expected<nullptr_t, std::string> Arena::draw_blue_side()
 	{
+		draw_blue_princess_tower(257, 1182);
+		return nullptr;
+	}
+
+	tl::expected<nullptr_t, std::string> Arena::draw_blue_princess_tower(int x, int y)
+	{
 		auto princess_tower_result = get_blue_princess_tower();
 		if (!princess_tower_result.has_value()) return tl::make_unexpected(princess_tower_result.error());
 		auto princess_tower_image = princess_tower_result.value();
 		auto princess_tower_width = princess_tower_image.get_width() * 1.69;
 		auto princess_tower_height = princess_tower_image.get_height() * 1.69;
-		auto left_princess_tower_rect = SkRect::MakeXYWH(257 - (princess_tower_width / 2), 1182 - (princess_tower_height / 2), princess_tower_width, princess_tower_height);
+		auto left_princess_tower_rect = SkRect::MakeXYWH(x - (princess_tower_width / 2), y - (princess_tower_height / 2), princess_tower_width, princess_tower_height);
 		auto flipped_canvas = Canvas(princess_tower_width, princess_tower_height);
 		flipped_canvas.draw_image(princess_tower_image, SkRect::MakeXYWH(0, 0, princess_tower_width, princess_tower_height));
 		auto new_height = std::floor(flipped_canvas.get_height() * 0.71751412429378531073446327683616);
@@ -67,8 +75,9 @@ namespace arena {
 
 	tl::expected<nullptr_t, std::string> Arena::draw_red_side()
 	{
+		ImageLoader& image_loader = ImageLoader::getInstance();
 		std::string arenaFile = fmt::format("./assets/towers/princess/Red-{}.png", red_side.to_string());
-		auto imageResult = Image::fromFile(arenaFile);
+		auto imageResult = image_loader.load_image(arenaFile);
 		if (!imageResult.has_value()) return tl::make_unexpected(imageResult.error());
 		auto image = imageResult.value();
 		this->canvas.draw_image(image, SkRect::MakeXYWH(0, 0, image.get_width() * 1.69, image.get_height() * 1.69));

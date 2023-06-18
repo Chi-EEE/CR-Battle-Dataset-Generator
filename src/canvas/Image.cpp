@@ -1,7 +1,7 @@
 #include "Image.h"
 
 namespace canvas {
-	tl::expected<Image, std::string> Image::fromFile(std::string fileName)
+	tl::expected<Image, std::string> Image::from_file(std::string fileName)
 	{
 		sk_sp<SkData> imageData = SkData::MakeFromFileName(fileName.c_str());
 		if (!imageData) {
