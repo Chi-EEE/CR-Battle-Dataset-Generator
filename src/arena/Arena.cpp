@@ -39,7 +39,19 @@ namespace arena {
 	tl::expected<Image, std::string> Arena::get_blue_princess_tower()
 	{
 		ImageLoader& image_loader = ImageLoader::getInstance();
-		std::string arenaFile = fmt::format("./assets/towers/princess/Blue-{}.png", blue_side.to_string());
+		std::string arenaFile = fmt::format("./assets/towers/princess/Blue-{}.png", this->blue_side.to_string());
+		auto imageResult = image_loader.load_image(arenaFile);
+		if (!imageResult.has_value()) {
+			return tl::make_unexpected(imageResult.error());
+		}
+		auto image = imageResult.value();
+		return image;
+	}
+
+	tl::expected<Image, std::string> Arena::get_blue_king_tower()
+	{
+		ImageLoader& image_loader = ImageLoader::getInstance();
+		std::string arenaFile = fmt::format("./assets/towers/king/Blue-{}.png", this->blue_side.to_string());
 		auto imageResult = image_loader.load_image(arenaFile);
 		if (!imageResult.has_value()) {
 			return tl::make_unexpected(imageResult.error());
@@ -51,6 +63,28 @@ namespace arena {
 	tl::expected<nullptr_t, std::string> Arena::draw_blue_side()
 	{
 		draw_blue_princess_tower(257, 1182);
+		draw_blue_princess_tower(823, 1182);
+		draw_blue_king_tower(540, 1322);
+		return nullptr;
+	}
+
+	tl::expected<nullptr_t, std::string> Arena::draw_blue_king_tower(int x, int y)
+	{
+		auto princess_tower_result = get_blue_king_tower();
+		if (!princess_tower_result.has_value()) return tl::make_unexpected(princess_tower_result.error());
+		Image princess_tower_image = princess_tower_result.value();
+		double princess_tower_width = princess_tower_image.get_width() * 1.71;
+		double princess_tower_height = princess_tower_image.get_height() * 1.71;
+		SkRect left_princess_tower_rect = SkRect::MakeXYWH(x - (princess_tower_width / 2), y - (princess_tower_height / 2), princess_tower_width, princess_tower_height);
+		Canvas shadow_princess_tower_canvas = Canvas(princess_tower_width, princess_tower_height);
+		shadow_princess_tower_canvas.draw_image(princess_tower_image, SkRect::MakeXYWH(0, 0, princess_tower_width, princess_tower_height));
+		double new_height = std::floor(shadow_princess_tower_canvas.get_height() * 0.71751412429378531073446327683616);
+		shadow_princess_tower_canvas = shadow_princess_tower_canvas.stretch(SkPoint::Make(princess_tower_width, new_height));
+		shadow_princess_tower_canvas = shadow_princess_tower_canvas.vertical_flip();
+		shadow_princess_tower_canvas = shadow_princess_tower_canvas.skew(-0.25, 0);
+		SkRect left_princess_shadow_rect = SkRect::MakeXYWH(left_princess_tower_rect.x() - 15, left_princess_tower_rect.y() + 70, shadow_princess_tower_canvas.get_width(), shadow_princess_tower_canvas.get_height());
+		this->canvas.draw_image(shadow_princess_tower_canvas.replace_pixels_to(), left_princess_shadow_rect);
+		this->canvas.draw_image(princess_tower_image, left_princess_tower_rect);
 		return nullptr;
 	}
 
@@ -58,17 +92,18 @@ namespace arena {
 	{
 		auto princess_tower_result = get_blue_princess_tower();
 		if (!princess_tower_result.has_value()) return tl::make_unexpected(princess_tower_result.error());
-		auto princess_tower_image = princess_tower_result.value();
-		auto princess_tower_width = princess_tower_image.get_width() * 1.69;
-		auto princess_tower_height = princess_tower_image.get_height() * 1.69;
-		auto left_princess_tower_rect = SkRect::MakeXYWH(x - (princess_tower_width / 2), y - (princess_tower_height / 2), princess_tower_width, princess_tower_height);
-		auto flipped_canvas = Canvas(princess_tower_width, princess_tower_height);
-		flipped_canvas.draw_image(princess_tower_image, SkRect::MakeXYWH(0, 0, princess_tower_width, princess_tower_height));
-		auto new_height = std::floor(flipped_canvas.get_height() * 0.71751412429378531073446327683616);
-		flipped_canvas = flipped_canvas.stretch(SkPoint::Make(princess_tower_width, new_height));
-		flipped_canvas = flipped_canvas.vertical_flip();
-		auto left_princess_shadow_rect = SkRect::MakeXYWH(left_princess_tower_rect.x() - 15, left_princess_tower_rect.y() + 70, flipped_canvas.get_width(), flipped_canvas.get_height());
-		this->canvas.draw_image(flipped_canvas.replace_pixels_to(), left_princess_shadow_rect);
+		Image princess_tower_image = princess_tower_result.value();
+		double princess_tower_width = princess_tower_image.get_width() * 1.69;
+		double princess_tower_height = princess_tower_image.get_height() * 1.69;
+		SkRect left_princess_tower_rect = SkRect::MakeXYWH(x - (princess_tower_width / 2), y - (princess_tower_height / 2), princess_tower_width, princess_tower_height);
+		Canvas shadow_princess_tower_canvas = Canvas(princess_tower_width, princess_tower_height);
+		shadow_princess_tower_canvas.draw_image(princess_tower_image, SkRect::MakeXYWH(0, 0, princess_tower_width, princess_tower_height));
+		double new_height = std::floor(shadow_princess_tower_canvas.get_height() * 0.71751412429378531073446327683616);
+		shadow_princess_tower_canvas = shadow_princess_tower_canvas.stretch(SkPoint::Make(princess_tower_width, new_height));
+		shadow_princess_tower_canvas = shadow_princess_tower_canvas.vertical_flip();
+		shadow_princess_tower_canvas = shadow_princess_tower_canvas.skew(-0.25, 0);
+		SkRect left_princess_shadow_rect = SkRect::MakeXYWH(left_princess_tower_rect.x() - 15, left_princess_tower_rect.y() + 70, shadow_princess_tower_canvas.get_width(), shadow_princess_tower_canvas.get_height());
+		this->canvas.draw_image(shadow_princess_tower_canvas.replace_pixels_to(), left_princess_shadow_rect);
 		this->canvas.draw_image(princess_tower_image, left_princess_tower_rect);
 		return nullptr;
 	}

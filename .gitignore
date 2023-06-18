@@ -10,3 +10,4 @@ vsxmake2022
 /assets
 out
 __pycache__
+.vscode/compile_commands.json

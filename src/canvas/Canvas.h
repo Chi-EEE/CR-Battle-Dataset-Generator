@@ -37,6 +37,7 @@ namespace canvas {
 		Canvas stretch(const SkPoint& stretchVector);
 		Canvas vertical_flip();
 		Canvas horizonal_flip();
+		Canvas skew(SkScalar sx, SkScalar sy);
 		Image replace_pixels_to();
 		sk_sp<SkImage> snapshot();
 		tl::expected<nullptr_t, std::string> save(std::string fileName);

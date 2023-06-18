@@ -25,3 +25,6 @@ Gold Rush: Drop gold coins in circle around destroyed tower
 Troop: Health & Level & If evolution
 Troop Spawn: Clock / Timer for deploy
 Troop death: Drop elixir
+
+
+Use Skew for shadows

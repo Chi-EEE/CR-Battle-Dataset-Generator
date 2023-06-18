@@ -62,14 +62,27 @@ namespace canvas {
 	{
 		int width = this->get_width();
 		int height = this->get_height();
-		Canvas verticalFlippedCanvas = Canvas(width, height);
-		SkCanvas* flippedCanvas = verticalFlippedCanvas.surface->getCanvas();
+		Canvas vertical_flipped_canvas = Canvas(width, height);
+		SkCanvas* flipped_sk_canvas = vertical_flipped_canvas.surface->getCanvas();
 
-		flippedCanvas->translate(width, 0);
-		flippedCanvas->scale(-1, 1);
-		verticalFlippedCanvas.draw_image(this->surface->makeImageSnapshot(), SkRect::MakeXYWH(0, 0, width, height));
+		flipped_sk_canvas->translate(width, 0);
+		flipped_sk_canvas->scale(-1, 1);
+		vertical_flipped_canvas.draw_image(this->surface->makeImageSnapshot(), SkRect::MakeXYWH(0, 0, width, height));
 
-		return verticalFlippedCanvas;
+		return vertical_flipped_canvas;
+	}
+
+	Canvas Canvas::skew(SkScalar sx, SkScalar sy)
+	{
+		int width = this->get_width();
+		int height = this->get_height();
+		Canvas skewed_canvas = Canvas(width, height);
+		SkCanvas* skewed_sk_canvas = skewed_canvas.surface->getCanvas();
+		
+		skewed_sk_canvas->skew(sx, sy);
+		skewed_canvas.draw_image(this->surface->makeImageSnapshot(), SkRect::MakeXYWH(width * ((sx / 3) * -1), 0, width, height));
+
+		return skewed_canvas;
 	}
 
 	Image Canvas::replace_pixels_to() {
