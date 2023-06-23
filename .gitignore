@@ -11,3 +11,6 @@ vsxmake2022
 out
 __pycache__
 .vscode/compile_commands.json
+scripts/csv/*.csv
+scripts/out/*
+!scripts/out/.gitkeep
