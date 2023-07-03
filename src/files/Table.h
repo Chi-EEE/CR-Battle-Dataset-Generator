@@ -10,12 +10,11 @@
 #include "CSVReader/CSVIterator.h"
 #include "CSVLogic/Data.h"
 
-template<typename T>
-concept IsData = std::is_base_of_v<CSV::Logic::Data, T>;
+#include "SupercellFlash.h"
 
 namespace CSV
 {
-    template<IsData T>
+    template<typename T>
     class Table : public AbstractTable
     {
     public:

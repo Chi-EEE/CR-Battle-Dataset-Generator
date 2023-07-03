@@ -8,8 +8,6 @@ namespace CSV
     enum File
     {
         Entity,
-        Projectile,
-        Spell
     };
 }
 

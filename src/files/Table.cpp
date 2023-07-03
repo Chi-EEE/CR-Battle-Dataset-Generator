@@ -5,12 +5,12 @@ using namespace CSV::Reader;
 
 namespace CSV
 {
-	template<IsData T>
+	template<typename T>
 	Table<T>::Table()
 	{
 	}
 
-	template<IsData T>
+	template<typename T>
 	void Table<T>::insert(std::string fileName)
 	{
 		std::ifstream file(fileName);
@@ -23,7 +23,7 @@ namespace CSV
 		}
 	}
 
-	template<IsData T>
+	template<typename T>
 	T Table<T>::getData(std::string name)
 	{
 		for (T entry : this->entries)

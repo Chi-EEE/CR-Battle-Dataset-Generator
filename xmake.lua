@@ -2,7 +2,9 @@ add_rules("mode.debug", "mode.release")
 add_requires("skia")
 add_requires("tl_expected")
 add_requires("fmt")
-set_languages("cxx20")
+add_requires("libpng")
+
+set_languages("cxx17")
 
 target("CR-Battle-Dataset-Generator")
     set_kind("binary")
@@ -10,6 +12,7 @@ target("CR-Battle-Dataset-Generator")
     add_packages("skia")
     add_packages("tl_expected")
     add_packages("fmt")
+    add_packages("libpng")
     if is_mode("debug") then 
         set_targetdir("$(buildir)/debug/$(os)/$(arch)")
         set_configdir("$(buildir)/debug/$(os)/$(arch)/res")
@@ -17,12 +20,20 @@ target("CR-Battle-Dataset-Generator")
         set_targetdir("$(buildir)/release/$(os)/$(arch)")
         set_configdir("$(buildir)/release/$(os)/$(arch)/res")
     end
-    add_files("src/*.cpp")
-    add_headerfiles("src/*.h")
-    add_files("src/*/*.cpp")
-    add_headerfiles("src/*/*.h")
-    add_files("src/*/*/*.cpp")
-    add_headerfiles("src/*/*/*.h")
+   
+    add_files("src/**.cpp")
+    add_headerfiles("src/**.h")
+    
+    add_includedirs("include", { public = true })
+    
+    add_links("SupercellFlas")
+    add_linkdirs("lib")
+    -- add_files("include/**.cpp")
+    -- add_headerfiles("include/**.h")
+
+    -- add_includedirs("$(projectdir)/lib")
+
+    -- add_deps("SupercellFlash")
     -- add_files("res/TowerPosition/*.json")
     add_configfiles("res/config.json")
 

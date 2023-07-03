@@ -9,6 +9,8 @@
 #include "../canvas/Canvas.h"
 #include "../canvas/ImageLoader.h"
 #include "TowerSkin.h"
+#include "png.h"
+#include "../include/SupercellFlash.h"
 
 using namespace canvas;
 
