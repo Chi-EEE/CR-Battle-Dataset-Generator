@@ -9,7 +9,7 @@ namespace CSV
 	class AbstractTable
 	{
 	public:
-		virtual ~AbstractTable() = 0;
+		virtual ~AbstractTable() {}
 
 		virtual void insert(std::string fileName) = 0;
 	private:

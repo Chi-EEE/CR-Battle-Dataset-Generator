@@ -6,9 +6,9 @@ namespace CSV
 {
 	CSV::CSV()
 	{
-		this->tables.insert(std::make_pair(File::Entity, new Table<EntityData>()));
-		addFile(File::Entity, "entities.csv");
-		addFile(File::Entity, "buildings.csv");
+		this->tables.insert(std::make_pair(File::Entity, new Table<EntityData>{}));
+		//addFile(File::Entity, "entities.csv");
+		//addFile(File::Entity, "buildings.csv");
 	}
 
 	CSV::~CSV()
@@ -29,6 +29,7 @@ namespace CSV
 		else
 		{
 			std::cerr << "Unable to find the CSVFile Enum for " << csvFileType;
+			return nullptr;
 		}
 	}
 
@@ -44,13 +45,8 @@ namespace CSV
 		}
 	}
 
-	inline AbstractTable* CSV::contains(File csvFileType) {
+	inline bool CSV::contains(File csvFileType) {
 		auto it = this->tables.find(csvFileType);
-		if (it != this->tables.end()) {
-			return it->second;
-		}
-		else {
-			return nullptr;
-		}
+		return it != this->tables.end();
 	}
 }

@@ -26,7 +26,7 @@ target("CR-Battle-Dataset-Generator")
     
     add_includedirs("include", { public = true })
     
-    add_links("SupercellFlas")
+    add_links("SupercellFlash")
     add_linkdirs("lib")
     -- add_files("include/**.cpp")
     -- add_headerfiles("include/**.h")

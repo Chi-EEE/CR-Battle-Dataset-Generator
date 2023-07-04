@@ -1,7 +1,7 @@
 #pragma once
 
-#include "SupercellCompression/compression/"
-#include "SupercellCompression.h"
+#include <SupercellCompression.h>
+#include <SupercellBytestream.h>
 
 #include <stdexcept>
 #include <cstdarg>

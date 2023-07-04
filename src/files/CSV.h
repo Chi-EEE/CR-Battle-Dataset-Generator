@@ -29,7 +29,7 @@ namespace CSV
         AbstractTable* getTable(File csvFileType);
     private:
         void addFile(File csvFileType, std::string fileName);
-        AbstractTable* contains(File csvFileType);
+        bool contains(File csvFileType);
         std::unordered_map<File, AbstractTable*> tables;
     };
 }

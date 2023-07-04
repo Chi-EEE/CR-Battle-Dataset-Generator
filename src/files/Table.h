@@ -4,13 +4,13 @@
 #pragma once
 
 #include <fstream>
+#include <string>
+#include <vector>
 
 #include "AbstractTable.h"
 #include "File.h"
 #include "CSVReader/CSVIterator.h"
 #include "CSVLogic/Data.h"
-
-#include "SupercellFlash.h"
 
 namespace CSV
 {
@@ -18,9 +18,19 @@ namespace CSV
     class Table : public AbstractTable
     {
     public:
-        Table();
+        Table() {};
 
-        void insert(std::string fileName);
+        void insert(std::string fileName)
+		{
+			std::ifstream file(fileName);
+			CSVIterator csvIterator(file);
+			++csvIterator;
+			++csvIterator;
+			for (; csvIterator != CSVIterator(); ++csvIterator)
+			{
+				this->entries.emplace_back(T(*csvIterator));
+			}
+		};
 
         T getData(std::string name);
     private:
