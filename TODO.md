@@ -13,6 +13,7 @@ All arenaws when filled with the background are the same size.
 Bridge shadow opacity is 40
 Building shadows are the same sprite but flipped vertically and squashed and in a black semi transparent
 Arena Map: Troops can drop things, Clouds, Shadows
+Start: Text
 Normal time: No effects
 60 seconds: Countdown pops up in the middle of screen
 30 seconds: Countdown pops up in the middle of screen
