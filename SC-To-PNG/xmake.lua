@@ -12,4 +12,4 @@ target("SC-To-PNG")
     add_includedirs("include", { public = true })
 
     add_links("SupercellFlash", "SupercellCompression", "SupercellCompression", "LZMA", "LZHAM", "Zstandard")
-    add_linkdirs("lib")
+    add_linkdirs("lib/$(mode)")
