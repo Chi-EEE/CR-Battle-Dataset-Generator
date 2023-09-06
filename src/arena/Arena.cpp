@@ -8,8 +8,30 @@ namespace arena {
 	tl::expected<Arena, std::string> Arena::create(ArenaType arena_type, TowerSkin blue_side, TowerSkin red_side)
 	{
 		ImageLoader& image_loader = ImageLoader::getInstance();
-		std::string arenaFile = fmt::format("./assets/arena/{}.png", arena_type.to_string());
-		auto image_result = image_loader.load_image(arenaFile);
+		std::string arena_type_name = arena_type.to_string();
+		std::transform(arena_type_name.begin(), arena_type_name.end(), arena_type_name.begin(), ::tolower);
+		std::filesystem::path assetDirectory(Global::getJson()["assetDirectory"].get<std::string>());
+
+		std::string time = "default";
+		if (Random::getInstance().randomIntFromInterval(0, 1)) time = "overtime";
+
+		std::string path;
+
+		size_t n = 1;
+		std::default_random_engine generator(std::random_device{}());
+		std::uniform_real_distribution<double> distribution(0.0, 1.0);
+
+		for (const auto& entry : std::filesystem::directory_iterator(assetDirectory / "arenas" / arena_type_name / time)) {
+			if (!entry.is_directory()) {
+				if (distribution(generator) < 1.0 / n) {
+					path = entry.path().string();
+				}
+				n++;
+			}
+		}
+
+
+		auto image_result = image_loader.load_image(path);
 		if (!image_result.has_value()) {
 			return tl::make_unexpected(image_result.error());
 		}

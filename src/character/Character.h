@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "../util/Random.h"
+#include "../utils/Random.h"
 #include "Orientation.h"
 
 namespace character {

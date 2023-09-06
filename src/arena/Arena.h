@@ -3,6 +3,13 @@
 
 #pragma once
 
+#include <filesystem>
+
+#include <random>
+
+#include "../utils/Random.h"
+#include "../utils/Global.hpp"
+
 #include "fmt/format.h"
 
 #include "ArenaType.h"
