@@ -29,7 +29,7 @@ namespace arena {
 	{
 	public:
 		static tl::expected<Arena, std::string> try_create(ArenaType arena_type, TowerSkin blue_side, TowerSkin red_side);
-		void add_character(Character character);
+		void add_character(std::shared_ptr<Character> character);
 		void draw();
 		~Arena();
 		Arena clone();

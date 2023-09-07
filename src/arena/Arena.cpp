@@ -59,9 +59,11 @@ namespace arena {
 		return Arena(arena_type, blue_side, red_side, canvas);
 	}
 
-	void Arena::add_character(Character character)
+	void Arena::add_character(std::shared_ptr<Character> character)
 	{
+		this->entities.push_back(character);
 	}
+
 	void Arena::draw()
 	{
 		std::sort(this->entities.begin(), this->entities.end(), [](const auto& e1, const auto& e2) -> bool {
@@ -72,6 +74,7 @@ namespace arena {
 			else /*e2->is_air*/ return false;
 		});
 		for (auto& entity : this->entities) {
+			std::cout << entity->file_path << '\n';
 			entity->draw(this->canvas);
 		}
 	}

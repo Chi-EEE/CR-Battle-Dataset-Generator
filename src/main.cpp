@@ -58,12 +58,12 @@ int main() {
 	auto arena_result = Arena::try_create(ArenaType::Goblin_Stadium, TowerSkin::Default, TowerSkin::Default);
 	if (arena_result.has_value()) {
 		Arena arena = arena_result.value();
-		arena.add_character(Character(
-			asset_directory / "sprites" / "characters" / "chr_knight.sc" / "Knight_idle1_1_001.png", 
-			Random::get_instance().random_int_from_interval(58, 609), 
+		arena.add_character(std::make_shared<Character>(Character(
+			asset_directory / "sprites" / "characters" / "chr_knight.sc" / "Knight_idle1_1_001.png",
+			Random::get_instance().random_int_from_interval(58, 609),
 			Random::get_instance().random_int_from_interval(126, 831),
 			false
-		));
+		)));
 		arena.draw();
 		{
 			auto result = arena.try_save("./testArena.png");
