@@ -120,7 +120,7 @@ namespace canvas {
 		surface->getCanvas()->clear(SK_ColorTRANSPARENT);
 	}
 
-	tl::expected<nullptr_t, std::string> Canvas::save(std::string fileName)
+	tl::expected<nullptr_t, std::string> Canvas::try_save(std::string fileName)
 	{
 		sk_sp<SkImage> imageFromSurface(surface->makeImageSnapshot());
 		if (!imageFromSurface) {

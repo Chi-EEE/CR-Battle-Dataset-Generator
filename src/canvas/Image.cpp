@@ -1,15 +1,16 @@
 #include "Image.h"
-
+#include <iostream>
 namespace canvas {
-	tl::expected<Image, std::string> Image::from_file(std::string fileName)
+	tl::expected<Image, std::string> Image::try_from_file(std::filesystem::path file_path)
 	{
-		sk_sp<SkData> imageData = SkData::MakeFromFileName(fileName.c_str());
-		if (!imageData) {
-			return tl::make_unexpected(fmt::format("Failed to read image file! [{}]", fileName));
+		std::string file_string = file_path.string();
+		sk_sp<SkData> image_data = SkData::MakeFromFileName(file_string.c_str());
+		if (!image_data) {
+			return tl::make_unexpected(fmt::format("Failed to read image file! [{}]", file_string));
 		}
-		sk_sp<SkImage> image = SkImage::MakeFromEncoded(imageData);
+		sk_sp<SkImage> image = SkImage::MakeFromEncoded(image_data);
 		if (!image) {
-			return tl::make_unexpected(fmt::format("Failed to create SkImage from encoded data! [{}]", fileName));
+			return tl::make_unexpected(fmt::format("Failed to create SkImage from encoded data! [{}]", file_string));
 		}
 		return Image(image);
 	}

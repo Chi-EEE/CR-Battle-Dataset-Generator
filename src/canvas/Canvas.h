@@ -40,7 +40,7 @@ namespace canvas {
 		Canvas skew(SkScalar sx, SkScalar sy);
 		Image replace_pixels_to();
 		sk_sp<SkImage> snapshot();
-		tl::expected<nullptr_t, std::string> save(std::string fileName);
+		tl::expected<nullptr_t, std::string> try_save(std::string fileName);
 		void clear();
 
 	private:

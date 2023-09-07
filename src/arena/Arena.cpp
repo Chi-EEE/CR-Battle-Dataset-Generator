@@ -3,35 +3,70 @@
 namespace arena {
 	Arena::Arena(ArenaType arena_type, TowerSkin blue_side, TowerSkin red_side, Canvas canvas) : arena_type(arena_type), blue_side(blue_side), red_side(red_side), canvas(canvas)
 	{
+#pragma region Blue
+		{
+			auto result = try_get_arena_tower_path("princess", "blue", this->blue_side);
+			if (!result.has_value()) throw std::exception(result.error().c_str());
+			this->entities.push_back(Entity(result.value(), 171, 788, false));
+		}
+		{
+			auto result = try_get_arena_tower_path("princess", "blue", this->blue_side);
+			if (!result.has_value()) throw std::exception(result.error().c_str());
+			this->entities.push_back(Entity(result.value(), 548, 788, false));
+		}
+		{
+			auto result = try_get_arena_tower_path("king", "blue", this->blue_side);
+			if (!result.has_value()) throw std::exception(result.error().c_str());
+			this->entities.push_back(Entity(result.value(), 360, 875, false));
+		}
+#pragma endregion Initalize Blue Side
+#pragma region Red
+		{
+			auto result = try_get_arena_tower_path("princess", "red", this->red_side);
+			if (!result.has_value()) throw std::exception(result.error().c_str());
+			this->entities.push_back(Entity(result.value(), 171, 262, false));
+		}
+		{
+			auto result = try_get_arena_tower_path("princess", "red", this->red_side);
+			if (!result.has_value()) throw std::exception(result.error().c_str());
+			this->entities.push_back(Entity(result.value(), 548, 262, false));
+		}
+		{
+			auto result = try_get_arena_tower_path("king", "red", this->red_side);
+			if (!result.has_value()) throw std::exception(result.error().c_str());
+			this->entities.push_back(Entity(result.value(), 360, 167, false));
+		}
+#pragma endregion Initalize Red Side
 	}
 
-	tl::expected<Arena, std::string> Arena::create(ArenaType arena_type, TowerSkin blue_side, TowerSkin red_side)
+	tl::expected<std::filesystem::path, std::string> Arena::try_get_arena_tower_path(std::string character, std::string team_side, TowerSkin tower_skin)
 	{
-		ImageLoader& image_loader = ImageLoader::getInstance();
+		std::string blue_side_name = tower_skin.to_string();
+		std::transform(blue_side_name.begin(), blue_side_name.end(), blue_side_name.begin(), ::tolower);
+		std::filesystem::path asset_directory(Global::get_json()["assetDirectory"].get<std::string>());
+		std::filesystem::path arena_tower_file = asset_directory / "essentials" / character / team_side / "tower" / blue_side_name / "01.png";
+		if (!std::filesystem::exists(arena_tower_file)) return tl::make_unexpected(fmt::format("Unable to find the arena tower path containing: {}, {}, {}", character, team_side));
+		return arena_tower_file;
+	}
+
+	tl::expected<Arena, std::string> Arena::try_create(ArenaType arena_type, TowerSkin blue_side, TowerSkin red_side)
+	{
+		Random& random = Random::get_instance();
+		ImageLoader& image_loader = ImageLoader::get_instance();
 		std::string arena_type_name = arena_type.to_string();
 		std::transform(arena_type_name.begin(), arena_type_name.end(), arena_type_name.begin(), ::tolower);
-		std::filesystem::path assetDirectory(Global::getJson()["assetDirectory"].get<std::string>());
+		std::filesystem::path assetDirectory(Global::get_json()["assetDirectory"].get<std::string>());
 
 		std::string time = "default";
-		if (Random::getInstance().randomIntFromInterval(0, 1)) time = "overtime";
+		if (random.random_int_from_interval(0, 1)) time = "overtime";
 
-		std::string path;
-
-		size_t n = 1;
-		std::default_random_engine generator(std::random_device{}());
-		std::uniform_real_distribution<double> distribution(0.0, 1.0);
-
-		for (const auto& entry : std::filesystem::directory_iterator(assetDirectory / "arenas" / arena_type_name / time)) {
-			if (!entry.is_directory()) {
-				if (distribution(generator) < 1.0 / n) {
-					path = entry.path().string();
-				}
-				n++;
-			}
+		auto arena_file_path_result = random.try_get_random_file_from_directory(assetDirectory / "arenas" / arena_type_name / time);
+		if (!arena_file_path_result.has_value()) {
+			return tl::make_unexpected(arena_file_path_result.error());
 		}
+		std::string arena_file_path = arena_file_path_result.value();
 
-
-		auto image_result = image_loader.load_image(path);
+		auto image_result = image_loader.try_load_image(arena_file_path);
 		if (!image_result.has_value()) {
 			return tl::make_unexpected(image_result.error());
 		}
@@ -39,6 +74,17 @@ namespace arena {
 		Canvas canvas = Canvas(image.get_width(), image.get_height());
 		canvas.draw_image(image, SkRect::MakeXYWH(0, 0, image.get_width(), image.get_height()));
 		return Arena(arena_type, blue_side, red_side, canvas);
+	}
+
+	void Arena::draw()
+	{
+		std::sort(this->entities.begin(), this->entities.end(), [](const auto& e1, const auto& e2) -> bool {
+			return e1.y < e2.y;
+		});
+		for (auto entity : this->entities) {
+			auto result = try_draw_entity(entity);
+			if (!result.has_value()) throw std::exception(result.error().c_str());
+		}
 	}
 
 	Arena::~Arena()
@@ -51,93 +97,44 @@ namespace arena {
 		return Arena(this->arena_type, blue_side, red_side, this->canvas.clone());
 	}
 
-	tl::expected<nullptr_t, std::string> Arena::save(std::string fileName)
+	tl::expected<nullptr_t, std::string> Arena::try_save(std::string file_name)
 	{
-		auto blue_side = this->draw_blue_side();
-		if (!blue_side.has_value()) return blue_side;
-		return this->canvas.save(fileName);
+		return this->canvas.try_save(file_name);
 	}
 
-	tl::expected<Image, std::string> Arena::get_blue_princess_tower()
+	tl::expected<Image, std::string> Arena::try_get_image(Entity entity)
 	{
-		ImageLoader& image_loader = ImageLoader::getInstance();
-		std::string arenaFile = fmt::format("./assets/towers/princess/Blue-{}.png", this->blue_side.to_string());
-		auto imageResult = image_loader.load_image(arenaFile);
-		if (!imageResult.has_value()) {
-			return tl::make_unexpected(imageResult.error());
+		ImageLoader& image_loader = ImageLoader::get_instance();
+		auto image_result = image_loader.try_load_image(entity.file_path);
+		if (!image_result.has_value()) {
+			return tl::make_unexpected(image_result.error());
 		}
-		auto image = imageResult.value();
+		auto image = image_result.value();
 		return image;
 	}
 
-	tl::expected<Image, std::string> Arena::get_blue_king_tower()
+	tl::expected<nullptr_t, std::string> Arena::try_draw_entity(Entity entity)
 	{
-		ImageLoader& image_loader = ImageLoader::getInstance();
-		std::string arenaFile = fmt::format("./assets/towers/king/Blue-{}.png", this->blue_side.to_string());
-		auto imageResult = image_loader.load_image(arenaFile);
-		if (!imageResult.has_value()) {
-			return tl::make_unexpected(imageResult.error());
-		}
-		auto image = imageResult.value();
-		return image;
-	}
+		auto image_result = try_get_image(entity);
+		if (!image_result.has_value()) return tl::make_unexpected(image_result.error());
 
-	tl::expected<nullptr_t, std::string> Arena::draw_blue_side()
-	{
-		draw_blue_princess_tower(257, 1182);
-		draw_blue_princess_tower(823, 1182);
-		draw_blue_king_tower(540, 1322);
-		return nullptr;
-	}
+		Image image = image_result.value();
+		double entity_width = image.get_width() * 1.161616;
+		double entity_height = image.get_height() * 1.161616;
 
-	tl::expected<nullptr_t, std::string> Arena::draw_blue_king_tower(int x, int y)
-	{
-		auto princess_tower_result = get_blue_king_tower();
-		if (!princess_tower_result.has_value()) return tl::make_unexpected(princess_tower_result.error());
-		Image princess_tower_image = princess_tower_result.value();
-		double princess_tower_width = princess_tower_image.get_width() * 1.71;
-		double princess_tower_height = princess_tower_image.get_height() * 1.71;
-		SkRect left_princess_tower_rect = SkRect::MakeXYWH(x - (princess_tower_width / 2), y - (princess_tower_height / 2), princess_tower_width, princess_tower_height);
-		Canvas shadow_princess_tower_canvas = Canvas(princess_tower_width, princess_tower_height);
-		shadow_princess_tower_canvas.draw_image(princess_tower_image, SkRect::MakeXYWH(0, 0, princess_tower_width, princess_tower_height));
-		double new_height = std::floor(shadow_princess_tower_canvas.get_height() * 0.71751412429378531073446327683616);
-		shadow_princess_tower_canvas = shadow_princess_tower_canvas.stretch(SkPoint::Make(princess_tower_width, new_height));
-		shadow_princess_tower_canvas = shadow_princess_tower_canvas.vertical_flip();
-		shadow_princess_tower_canvas = shadow_princess_tower_canvas.skew(-0.25, 0);
-		SkRect left_princess_shadow_rect = SkRect::MakeXYWH(left_princess_tower_rect.x() - 15, left_princess_tower_rect.y() + 70, shadow_princess_tower_canvas.get_width(), shadow_princess_tower_canvas.get_height());
-		this->canvas.draw_image(shadow_princess_tower_canvas.replace_pixels_to(), left_princess_shadow_rect);
-		this->canvas.draw_image(princess_tower_image, left_princess_tower_rect);
-		return nullptr;
-	}
+		SkRect entity_rect = SkRect::MakeXYWH(entity.x - (entity_width / 2), entity.y - (entity_height / 2), entity_width, entity_height);
 
-	tl::expected<nullptr_t, std::string> Arena::draw_blue_princess_tower(int x, int y)
-	{
-		auto princess_tower_result = get_blue_princess_tower();
-		if (!princess_tower_result.has_value()) return tl::make_unexpected(princess_tower_result.error());
-		Image princess_tower_image = princess_tower_result.value();
-		double princess_tower_width = princess_tower_image.get_width() * 1.69;
-		double princess_tower_height = princess_tower_image.get_height() * 1.69;
-		SkRect left_princess_tower_rect = SkRect::MakeXYWH(x - (princess_tower_width / 2), y - (princess_tower_height / 2), princess_tower_width, princess_tower_height);
-		Canvas shadow_princess_tower_canvas = Canvas(princess_tower_width, princess_tower_height);
-		shadow_princess_tower_canvas.draw_image(princess_tower_image, SkRect::MakeXYWH(0, 0, princess_tower_width, princess_tower_height));
-		double new_height = std::floor(shadow_princess_tower_canvas.get_height() * 0.71751412429378531073446327683616);
-		shadow_princess_tower_canvas = shadow_princess_tower_canvas.stretch(SkPoint::Make(princess_tower_width, new_height));
-		shadow_princess_tower_canvas = shadow_princess_tower_canvas.vertical_flip();
-		shadow_princess_tower_canvas = shadow_princess_tower_canvas.skew(-0.25, 0);
-		SkRect left_princess_shadow_rect = SkRect::MakeXYWH(left_princess_tower_rect.x() - 15, left_princess_tower_rect.y() + 70, shadow_princess_tower_canvas.get_width(), shadow_princess_tower_canvas.get_height());
-		this->canvas.draw_image(shadow_princess_tower_canvas.replace_pixels_to(), left_princess_shadow_rect);
-		this->canvas.draw_image(princess_tower_image, left_princess_tower_rect);
-		return nullptr;
-	}
+		Canvas entity_canvas = Canvas(entity_width, entity_height);
+		entity_canvas.draw_image(image, SkRect::MakeXYWH(0, 0, entity_width, entity_height));
 
-	tl::expected<nullptr_t, std::string> Arena::draw_red_side()
-	{
-		ImageLoader& image_loader = ImageLoader::getInstance();
-		std::string arenaFile = fmt::format("./assets/towers/princess/Red-{}.png", red_side.to_string());
-		auto imageResult = image_loader.load_image(arenaFile);
-		if (!imageResult.has_value()) return tl::make_unexpected(imageResult.error());
-		auto image = imageResult.value();
-		this->canvas.draw_image(image, SkRect::MakeXYWH(0, 0, image.get_width() * 1.69, image.get_height() * 1.69));
+		double new_height = std::floor(entity_canvas.get_height() * 0.71751412429378531073446327683616);
+		entity_canvas = entity_canvas.stretch(SkPoint::Make(entity_width, new_height));
+		entity_canvas = entity_canvas.vertical_flip();
+		entity_canvas = entity_canvas.skew(-0.25, 0);
+		SkRect entity_shadow_rect = SkRect::MakeXYWH(entity_rect.x() - (entity_width / 7), entity_rect.y() + (entity_height / 2.75), entity_canvas.get_width(), entity_canvas.get_height());
+
+		this->canvas.draw_image(entity_canvas.replace_pixels_to(), entity_shadow_rect);
+		this->canvas.draw_image(image, entity_rect);
 		return nullptr;
 	}
 }

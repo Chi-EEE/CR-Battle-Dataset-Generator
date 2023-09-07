@@ -11,11 +11,13 @@
 #include "../utils/Global.hpp"
 
 #include "fmt/format.h"
+#include "tl/expected.hpp"
 
 #include "ArenaType.h"
 #include "../canvas/Canvas.h"
 #include "../canvas/ImageLoader.h"
 #include "TowerSkin.h"
+#include "Entity.h"
 
 using namespace canvas;
 
@@ -23,21 +25,23 @@ namespace arena {
     class Arena
     {
     public:
-        static tl::expected<Arena, std::string> create(ArenaType arena_type, TowerSkin blue_side, TowerSkin red_side);
+        static tl::expected<Arena, std::string> try_create(ArenaType arena_type, TowerSkin blue_side, TowerSkin red_side);
+        void draw();
         ~Arena();
         Arena clone();
-        tl::expected<nullptr_t, std::string> save(std::string fileName);
+        tl::expected<nullptr_t, std::string> try_save(std::string fileName);
+        tl::expected<Image, std::string> try_get_image(Entity entity);
+        tl::expected<nullptr_t, std::string> try_draw_entity(Entity entity);
     private:
         Arena(ArenaType arena_type, TowerSkin blue_side, TowerSkin red_side, Canvas canvas);
-        tl::expected<nullptr_t, std::string> draw_blue_side();
-        tl::expected<nullptr_t, std::string> draw_blue_king_tower(int x, int y);
-        tl::expected<nullptr_t, std::string> draw_blue_princess_tower(int x, int y);
-        tl::expected<Image, std::string> get_blue_princess_tower();
-        tl::expected<Image, std::string> get_blue_king_tower();
-        tl::expected<nullptr_t, std::string> draw_red_side();
+        tl::expected<std::filesystem::path, std::string> try_get_arena_tower_path(std::string character, std::string team_side, TowerSkin tower_skin);
+
+        std::vector<Entity> entities;
+
         ArenaType arena_type;
         TowerSkin blue_side;
         TowerSkin red_side;
+
         Canvas canvas;
     };
 }

@@ -7,13 +7,15 @@
 #include "core/SkData.h"
 #include "core/SkImage.h"
 #include "fmt/format.h"
+
+#include <filesystem>
 #include <string>
 
 namespace canvas {
 	class Image
 	{
 	public:
-		static tl::expected<Image, std::string> from_file(std::string file);
+		static tl::expected<Image, std::string> try_from_file(std::filesystem::path file_path);
 		Image(sk_sp<SkImage> image);
 		~Image();
 		sk_sp<SkImage> get_image() {

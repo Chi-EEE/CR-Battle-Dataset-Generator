@@ -3,7 +3,9 @@
 
 #pragma once
 
+#include <filesystem>
 #include <unordered_map>
+
 #include "tl/expected.hpp"
 
 #include "Image.h"
@@ -16,14 +18,14 @@ namespace canvas {
 		ImageLoader(ImageLoader const&) = delete;
 		ImageLoader& operator=(ImageLoader const&) = delete;
 
-		tl::expected<Image, std::string> load_image(std::string file_name);
+		tl::expected<Image, std::string> try_load_image(std::filesystem::path file_path);
 
-		static ImageLoader& getInstance() {
+		static ImageLoader& get_instance() {
 			static ImageLoader instance;
 			return instance;
 		}
 	private:
-		std::unordered_map<std::string, Image> images;
+		std::unordered_map<std::filesystem::path, Image> images;
 	};
 }
 
