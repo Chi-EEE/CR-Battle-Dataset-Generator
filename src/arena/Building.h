@@ -1,20 +1,22 @@
-#include "../canvas/Image.h"
 #ifndef BUILDING_H
 #define BUILDING_H
 
 #pragma once
 
+#include "Entity.h"
+#include "../canvas/Image.h"
+
 using namespace canvas;
 
 namespace arena {
-    class Building
+    class Building : public Entity
     {
     public:
-        Building(Image image);
+        static tl::expected<Building, std::string> create(std::filesystem::path file_path, int x, int y, bool is_air);
+        void draw(Canvas& canvas) override;
         ~Building();
-        void draw();
     private:
-
+        Building(std::filesystem::path file_path, int x, int y, bool is_air);
     };
 }
 #endif

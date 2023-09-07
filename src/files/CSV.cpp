@@ -7,8 +7,6 @@ namespace CSV
 	CSV::CSV()
 	{
 		this->tables.insert(std::make_pair(File::Entity, new Table<EntityData>{}));
-		//addFile(File::Entity, "entities.csv");
-		//addFile(File::Entity, "buildings.csv");
 	}
 
 	CSV::~CSV()

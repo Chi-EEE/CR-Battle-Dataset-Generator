@@ -1,11 +1,12 @@
-#include "Building.h"
+#include "Character.h"
 
 namespace arena {
-	Building::Building(std::filesystem::path file_path, int x, int y, bool is_air): Entity(file_path, x, y, is_air)
+	Character::Character(std::filesystem::path file_path, int x, int y, bool is_air) : Entity(file_path, x, y, is_air)
 	{
+
 	}
 
-	tl::expected<Building, std::string> Building::create(std::filesystem::path file_path, int x, int y, bool is_air)
+	tl::expected<Character, std::string> Character::create(std::filesystem::path file_path, int x, int y, bool is_air)
 	{
 		ImageLoader& image_loader = ImageLoader::get_instance();
 		auto image_result = image_loader.try_load_image(file_path);
@@ -13,10 +14,10 @@ namespace arena {
 			return tl::make_unexpected(image_result.error());
 		}
 		auto image = image_result.value();
-		return Building(file_path, x, y, is_air);
+		return Character(file_path, x, y, is_air);
 	}
 
-	void Building::draw(Canvas& canvas)
+	void Character::draw(Canvas& canvas)
 	{
 		Image image = ImageLoader::get_instance().try_load_image(this->file_path).value();
 
@@ -38,7 +39,7 @@ namespace arena {
 		canvas.draw_image(image, entity_rect);
 	}
 
-	Building::~Building()
+	Character::~Character()
 	{
 
 	}

@@ -6,12 +6,14 @@
 #include <optional>
 
 #include "utils/Global.hpp"
+#include "files/CSV.h"
 
 #include "nlohmann/json.hpp"
 #include "tl/expected.hpp"
 
 #include "canvas/Canvas.h"
 #include "arena/Arena.h"
+#include "arena/Character.h"
 
 using namespace canvas;
 using namespace arena;
@@ -50,15 +52,25 @@ int main() {
 		std::cerr << "Please set 'ready' to true when you are ready." << '\n';
 		return 0;
 	}
+	std::filesystem::path asset_directory(Global::get_json()["assetDirectory"].get<std::string>());
+	CSV::CSV::getInstance().addFile(CSV::File::Entity, (asset_directory / "csv" / "entities.csv").string());
 
 	auto arena_result = Arena::try_create(ArenaType::Goblin_Stadium, TowerSkin::Default, TowerSkin::Default);
 	if (arena_result.has_value()) {
 		Arena arena = arena_result.value();
+		arena.add_character(Character(
+			asset_directory / "sprites" / "characters" / "chr_knight.sc" / "Knight_idle1_1_001.png", 
+			Random::get_instance().random_int_from_interval(58, 609), 
+			Random::get_instance().random_int_from_interval(126, 831),
+			false
+		));
 		arena.draw();
-		auto result = arena.try_save("./testArena.png");
-		if (!result.has_value()) {
-			std::cerr << "An error has occurred while trying to save the arena: " << result.error() << '\n';
-			return 0;
+		{
+			auto result = arena.try_save("./testArena.png");
+			if (!result.has_value()) {
+				std::cerr << "An error has occurred while trying to save the arena: " << result.error() << '\n';
+				return 0;
+			}
 		}
 		std::cout << "Successful in creating 'testArena.png'!" << '\n';
 	}

@@ -11,11 +11,16 @@ namespace canvas {
 		auto it = this->images.find(file_path);
 		if (it != this->images.end())
 			return it->second;
-
-		auto image_result = Image::try_from_file(file_path);
-		if (image_result.has_value()) {
-			this->images.insert(std::make_pair(file_path, image_result.value()));
+		std::string file_string = file_path.string();
+		sk_sp<SkData> image_data = SkData::MakeFromFileName(file_string.c_str());
+		if (!image_data) {
+			return tl::make_unexpected(fmt::format("Failed to read image file! '{}'", file_string));
 		}
-		return image_result;
+		sk_sp<SkImage> image = SkImage::MakeFromEncoded(image_data);
+		if (!image) {
+			return tl::make_unexpected(fmt::format("Failed to create SkImage from encoded data! '{}'", file_string));
+		}
+		this->images.insert(std::make_pair(file_path, image));
+		return image;
 	}
 }
