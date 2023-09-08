@@ -18,7 +18,8 @@ namespace CSV
     class Table : public AbstractTable
     {
     public:
-        Table() {};
+		static_assert(std::is_base_of<Logic::Data, T>::value, "T must be derived from Data");
+		Table() {};
 
         void insert(std::string fileName)
 		{
@@ -31,8 +32,9 @@ namespace CSV
 				this->entries.emplace_back(T(*csvIterator));
 			}
 		};
-
-        T getData(std::string name);
+		const std::vector<T>& getEntries() const {
+			return this->entries;
+		}
     private:
         std::vector<T> entries;
     };

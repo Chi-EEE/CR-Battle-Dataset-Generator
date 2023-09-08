@@ -4,20 +4,20 @@
 namespace arena {
 	Arena::Arena(ArenaType arena_type, TowerSkin blue_side, TowerSkin red_side, Canvas canvas) : arena_type(arena_type), blue_side_tower_skin(blue_side), red_side_tower_skin(red_side), canvas(canvas)
 	{
-		add_arena_tower("princess", "blue", this->blue_side_tower_skin, 171, 788, false);
-		add_arena_tower("princess", "blue", this->blue_side_tower_skin, 548, 788, false);
-		add_arena_tower("king", "blue", this->blue_side_tower_skin, 360, 875, false);
+		add_arena_tower("PrincessTower", "princess", "blue", this->blue_side_tower_skin, 171, 788, false);
+		add_arena_tower("PrincessTower", "princess", "blue", this->blue_side_tower_skin, 548, 788, false);
+		add_arena_tower("KingTower", "king", "blue", this->blue_side_tower_skin, 360, 875, false);
 
-		add_arena_tower("princess", "red", this->red_side_tower_skin, 171, 262, false);
-		add_arena_tower("princess", "red", this->red_side_tower_skin, 548, 262, false);
-		add_arena_tower("king", "red", this->red_side_tower_skin, 360, 167, false);
+		add_arena_tower("PrincessTower", "princess", "red", this->red_side_tower_skin, 171, 262, false);
+		add_arena_tower("PrincessTower", "princess", "red", this->red_side_tower_skin, 548, 262, false);
+		add_arena_tower("KingTower", "king", "red", this->red_side_tower_skin, 360, 167, false);
 	}
 
-	void Arena::add_arena_tower(std::string character, std::string team_side, TowerSkin tower_skin, int x, int y, bool is_air)
+	void Arena::add_arena_tower(std::string name, std::string character, std::string team_side, TowerSkin tower_skin, int x, int y, bool is_air)
 	{
 		auto result = try_get_arena_tower_path(character, team_side, tower_skin);
 		if (!result.has_value()) throw std::exception(result.error().c_str());
-		auto building_instance_result = Building::create(result.value(), x, y, is_air);
+		auto building_instance_result = Building::create(name, result.value(), x, y, is_air);
 		if (!building_instance_result.has_value()) throw std::exception(building_instance_result.error().c_str());
 		this->entities.push_back(std::make_shared<Building>(building_instance_result.value()));
 	}

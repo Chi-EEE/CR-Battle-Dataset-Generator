@@ -11,7 +11,7 @@
 #include "AbstractTable.h"
 #include "File.h"
 #include "CSVReader/CSVIterator.h"
-#include "Table.h"
+#include "Table.hpp"
 
 namespace CSV
 {

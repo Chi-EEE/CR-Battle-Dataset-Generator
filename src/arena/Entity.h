@@ -15,12 +15,13 @@ namespace arena {
 		virtual void draw(canvas::Canvas& canvas) = 0;
 		~Entity();
 
+		std::string name;
 		std::filesystem::path file_path;
 		int x;
 		int y;
 		bool is_air;
 	protected:
-		Entity(std::filesystem::path file_path, int x, int y, bool is_air);
+		Entity(std::string name, std::filesystem::path file_path, int x, int y, bool is_air);
 	};
 }
 

@@ -1,6 +1,10 @@
 {
     "sonarlint.pathToCompileCommands": "${workspaceFolder}\\.vscode\\compile_commands.json",
     "files.associations": {
-        "iostream": "cpp"
+        "iostream": "cpp",
+        "xstring": "cpp",
+        "chrono": "cpp",
+        "system_error": "cpp",
+        "xlocale": "cpp"
     }
 }
