@@ -2,11 +2,13 @@
 #include <fstream>
 
 #include <filesystem>
-
 #include <optional>
+
+#include <unordered_map>
 
 #include "utils/Global.hpp"
 #include "files/CSV.h"
+#include "arena_files/EntityDataIndexer.h"
 
 #include "nlohmann/json.hpp"
 #include "tl/expected.hpp"
@@ -17,6 +19,7 @@
 
 using namespace canvas;
 using namespace arena;
+using namespace arena_files;
 using json = nlohmann::json;
 
 tl::expected<bool, std::string> try_read_settings_json() {
@@ -53,19 +56,21 @@ int main() {
 		return 0;
 	}
 	std::filesystem::path asset_directory(Global::get_json()["assetDirectory"].get<std::string>());
-	CSV::CSV::getInstance().addFile(CSV::File::Entity, (asset_directory / "csv" / "buildings.csv").string());
-	CSV::CSV::getInstance().addFile(CSV::File::Entity, (asset_directory / "csv" / "characters.csv").string());
+	auto& entity_data_indexer = EntityDataIndexer::getInstance();
+	auto knight = entity_data_indexer.getEntityData("Knight");
 
 	auto arena_result = Arena::try_create(ArenaType::Goblin_Stadium, TowerSkin::Default, TowerSkin::Default);
 	if (arena_result.has_value()) {
 		Arena arena = arena_result.value();
-		arena.add_character(std::make_shared<Character>(Character::create(
-			"Knight",
-			asset_directory / "sprites" / "characters" / "chr_knight.sc" / "Knight_idle1_1_001.png",
-			Random::get_instance().random_int_from_interval(58, 609),
-			Random::get_instance().random_int_from_interval(126, 831),
-			false
-		).value()));
+		for (int i = 0; i < 30; i++) {
+			arena.try_add_character(std::make_shared<Character>(Character::create(
+				knight,
+				asset_directory / "sprites" / "characters" / "chr_knight.sc" / "Knight_idle1_1_001.png",
+				Random::get_instance().random_int_from_interval(58, 609),
+				Random::get_instance().random_int_from_interval(126, 831),
+				false
+			).value()));
+		}
 		arena.draw();
 		{
 			auto result = arena.try_save("./testArena.png");

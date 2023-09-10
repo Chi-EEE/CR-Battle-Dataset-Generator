@@ -4,6 +4,7 @@
 #pragma once
 
 #include <optional>
+#include "fmt/format.h"
 
 #include "Entity.h"
 #include "../canvas/Canvas.h"
@@ -18,12 +19,12 @@ namespace arena {
     class Character : public Entity
     {
     public:
-        static tl::expected<Character, std::string> create(std::string name, std::filesystem::path file_path, int x, int y, bool is_air);
+        static tl::expected<Character, std::string> create(std::shared_ptr<EntityData> entity_data, std::filesystem::path file_path, int x, int y, bool is_air);
         void draw(Canvas& canvas);
         ~Character();
 
     private:
-        Character(std::string name, std::filesystem::path file_path, int x, int y, bool is_air);
+        Character(std::shared_ptr<EntityData> entity_data, std::filesystem::path file_path, int x, int y, bool is_air);
 
     };
 }

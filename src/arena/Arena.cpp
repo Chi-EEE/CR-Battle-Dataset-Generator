@@ -1,23 +1,31 @@
 #include "Arena.h"
 #include "Character.h"
 
+using namespace arena_files;
+using namespace CSV::Logic;
+
 namespace arena {
 	Arena::Arena(ArenaType arena_type, TowerSkin blue_side, TowerSkin red_side, Canvas canvas) : arena_type(arena_type), blue_side_tower_skin(blue_side), red_side_tower_skin(red_side), canvas(canvas)
 	{
-		add_arena_tower("PrincessTower", "princess", "blue", this->blue_side_tower_skin, 171, 788, false);
-		add_arena_tower("PrincessTower", "princess", "blue", this->blue_side_tower_skin, 548, 788, false);
-		add_arena_tower("KingTower", "king", "blue", this->blue_side_tower_skin, 360, 875, false);
+		auto& entity_data_indexer = EntityDataIndexer::getInstance();
 
-		add_arena_tower("PrincessTower", "princess", "red", this->red_side_tower_skin, 171, 262, false);
-		add_arena_tower("PrincessTower", "princess", "red", this->red_side_tower_skin, 548, 262, false);
-		add_arena_tower("KingTower", "king", "red", this->red_side_tower_skin, 360, 167, false);
+		auto princess_tower = entity_data_indexer.getEntityData("PrincessTower");
+		auto king_tower = entity_data_indexer.getEntityData("KingTower");
+
+		add_arena_tower(princess_tower,  "princess", "blue", this->blue_side_tower_skin, 171, 788, false);
+		add_arena_tower(princess_tower, "princess", "blue", this->blue_side_tower_skin, 548, 788, false);
+		add_arena_tower(king_tower, "king", "blue", this->blue_side_tower_skin, 360, 875, false);
+
+		add_arena_tower(princess_tower, "princess", "red", this->red_side_tower_skin, 171, 262, false);
+		add_arena_tower(princess_tower, "princess", "red", this->red_side_tower_skin, 548, 262, false);
+		add_arena_tower(king_tower, "king", "red", this->red_side_tower_skin, 360, 167, false);
 	}
 
-	void Arena::add_arena_tower(std::string name, std::string character, std::string team_side, TowerSkin tower_skin, int x, int y, bool is_air)
+	void Arena::add_arena_tower(std::shared_ptr<EntityData> entity_data, std::string character, std::string team_side, TowerSkin tower_skin, int x, int y, bool is_air)
 	{
 		auto result = try_get_arena_tower_path(character, team_side, tower_skin);
 		if (!result.has_value()) throw std::exception(result.error().c_str());
-		auto building_instance_result = Building::create(name, result.value(), x, y, is_air);
+		auto building_instance_result = Building::create(entity_data, result.value(), x, y, is_air);
 		if (!building_instance_result.has_value()) throw std::exception(building_instance_result.error().c_str());
 		this->entities.push_back(std::make_shared<Building>(building_instance_result.value()));
 	}
@@ -59,8 +67,13 @@ namespace arena {
 		return Arena(arena_type, blue_side, red_side, canvas);
 	}
 
-	void Arena::add_character(std::shared_ptr<Character> character)
+	void Arena::try_add_character(std::shared_ptr<Character> character)
 	{
+		for (auto entity : this->entities) {
+			double distance = sqrt(pow(entity->x - character->x, 2) + pow(entity->y - character->y, 2));
+			if (distance + entity->entity_data->getCollisionRadius() <= character->entity_data->getCollisionRadius())
+				return;
+		}
 		this->entities.push_back(character);
 	}
 

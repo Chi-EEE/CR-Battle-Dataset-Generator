@@ -8,6 +8,10 @@
 #include "../canvas/Drawable.h"
 #include "../canvas/Canvas.h"
 
+#include "../files/CSVLogic/EntityData.h"
+
+using namespace CSV::Logic;
+
 namespace arena {
 	class Entity : public canvas::Drawable
 	{
@@ -15,13 +19,13 @@ namespace arena {
 		virtual void draw(canvas::Canvas& canvas) = 0;
 		~Entity();
 
-		std::string name;
+		std::shared_ptr<EntityData> entity_data;
 		std::filesystem::path file_path;
 		int x;
 		int y;
 		bool is_air;
 	protected:
-		Entity(std::string name, std::filesystem::path file_path, int x, int y, bool is_air);
+		Entity(std::shared_ptr<EntityData> entity_data, std::filesystem::path file_path, int x, int y, bool is_air);
 	};
 }
 

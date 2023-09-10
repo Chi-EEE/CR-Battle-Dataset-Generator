@@ -29,14 +29,14 @@ namespace CSV
 			++csvIterator;
 			for (; csvIterator != CSVIterator(); ++csvIterator)
 			{
-				this->entries.emplace_back(T(*csvIterator));
+				this->entries.push_back(std::make_shared<T>(T(*csvIterator)));
 			}
 		};
-		const std::vector<T>& getEntries() const {
+		const std::vector<std::shared_ptr<T>>& getEntries() const {
 			return this->entries;
 		}
     private:
-        std::vector<T> entries;
+		std::vector<std::shared_ptr<T>> entries;
     };
 }
 

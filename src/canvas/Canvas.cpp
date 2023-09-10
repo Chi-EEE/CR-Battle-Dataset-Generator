@@ -78,7 +78,6 @@ namespace canvas {
 		int height = this->get_height();
 		Canvas skewed_canvas = Canvas(width, height);
 		SkCanvas* skewed_sk_canvas = skewed_canvas.surface->getCanvas();
-		
 		skewed_sk_canvas->skew(sx, sy);
 		skewed_canvas.draw_image(this->surface->makeImageSnapshot(), SkRect::MakeXYWH(width * ((sx / 3) * -1), 0, width, height));
 
@@ -101,7 +100,7 @@ namespace canvas {
 				uint8_t alpha = SkColorGetA(*pixel);
 
 				if (alpha > 0) {
-					uint8_t newAlpha = std::max(alpha - 125, 0);
+					uint8_t newAlpha = std::max(alpha - 150, 0);
 					*pixel = SkColorSetARGB(newAlpha, 0, 0, 0);  // Set to semi-transparent black
 				}
 			}

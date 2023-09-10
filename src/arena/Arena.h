@@ -6,6 +6,7 @@
 #include <filesystem>
 
 #include <random>
+#include <optional>
 
 #include "../utils/Random.h"
 #include "../utils/Global.hpp"
@@ -22,6 +23,9 @@
 #include "Building.h"
 #include "Character.h"
 
+#include "../arena_files/EntityDataIndexer.h"
+#include "../files/CSVLogic/EntityData.h"
+
 using namespace canvas;
 
 namespace arena {
@@ -29,14 +33,14 @@ namespace arena {
 	{
 	public:
 		static tl::expected<Arena, std::string> try_create(ArenaType arena_type, TowerSkin blue_side, TowerSkin red_side);
-		void add_character(std::shared_ptr<Character> character);
+		void try_add_character(std::shared_ptr<Character> character);
 		void draw();
 		~Arena();
 		Arena clone();
 		tl::expected<nullptr_t, std::string> try_save(std::string fileName);
 	private:
 		Arena(ArenaType arena_type, TowerSkin blue_side, TowerSkin red_side, Canvas canvas);
-		void add_arena_tower(std::string name, std::string character, std::string team_side, TowerSkin tower_skin, int x, int y, bool is_air);
+		void add_arena_tower(std::shared_ptr<EntityData> entity_data, std::string character, std::string team_side, TowerSkin tower_skin, int x, int y, bool is_air);
 		tl::expected<std::filesystem::path, std::string> try_get_arena_tower_path(std::string character, std::string team_side, TowerSkin tower_skin);
 
 		std::vector<std::shared_ptr<Entity>> entities;
