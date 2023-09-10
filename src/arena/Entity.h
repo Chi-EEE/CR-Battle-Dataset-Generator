@@ -19,14 +19,15 @@ namespace arena {
 		virtual void draw(canvas::Canvas& canvas) = 0;
 		~Entity();
 
-		std::shared_ptr<EntityData> entity_data;
+		pEntityData entity_data;
 		std::filesystem::path file_path;
 		int x;
 		int y;
 		bool is_air;
 	protected:
-		Entity(std::shared_ptr<EntityData> entity_data, std::filesystem::path file_path, int x, int y, bool is_air);
+		Entity(pEntityData entity_data, std::filesystem::path file_path, int x, int y, bool is_air);
 	};
+	typedef std::shared_ptr<Entity> pEntity;
 }
 
 #endif

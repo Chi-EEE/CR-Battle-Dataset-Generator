@@ -1697,6 +1697,7 @@ namespace CSV::Logic
 		std::string OnAttackAction;
 		std::string ClonedVersion;
 	};
+	typedef std::shared_ptr<EntityData> pEntityData;
 }
 
 #endif

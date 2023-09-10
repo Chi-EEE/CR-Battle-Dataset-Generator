@@ -66,6 +66,7 @@ public:
 private:
   Value value;
 }};
+typedef std::shared_ptr<{class_name}> p{class_name};
 
 #endif
 '''

@@ -1,11 +1,11 @@
 #include "Building.h"
 
 namespace arena {
-	Building::Building(std::shared_ptr<EntityData> entity_data, std::filesystem::path file_path, int x, int y, bool is_air): Entity(entity_data, file_path, x, y, is_air)
+	Building::Building(pEntityData entity_data, std::filesystem::path file_path, int x, int y, bool is_air): Entity(entity_data, file_path, x, y, is_air)
 	{
 	}
 
-	tl::expected<Building, std::string> Building::create(std::shared_ptr<EntityData> entity_data, std::filesystem::path file_path, int x, int y, bool is_air)
+	tl::expected<Building, std::string> Building::create(pEntityData entity_data, std::filesystem::path file_path, int x, int y, bool is_air)
 	{
 		ImageLoader& image_loader = ImageLoader::get_instance();
 		auto image_result = image_loader.try_load_image(file_path);

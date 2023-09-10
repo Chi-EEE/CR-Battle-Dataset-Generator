@@ -4,7 +4,7 @@ namespace arena_files
 {
 	EntityDataIndexer::EntityDataIndexer()
 	{
-		std::filesystem::path asset_directory(Global::get_json()["assetDirectory"].get<std::string>());
+		std::filesystem::path asset_directory(Global::get_json()["asset_directory"].get<std::string>());
 		auto& csv_instance = CSV::CSV::getInstance();
 		csv_instance.addFile(CSV::File::Entity, (asset_directory / "csv" / "buildings.csv").string());
 		csv_instance.addFile(CSV::File::Entity, (asset_directory / "csv" / "characters.csv").string());
@@ -19,7 +19,7 @@ namespace arena_files
 
 	}
 
-	std::shared_ptr<EntityData> EntityDataIndexer::getEntityData(std::string name)
+	pEntityData EntityDataIndexer::getEntityData(std::string name)
 	{
 		return this->entity_data_map[name];
 	}

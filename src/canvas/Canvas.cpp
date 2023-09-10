@@ -4,7 +4,6 @@ namespace canvas {
 	Canvas::Canvas(int width, int height)
 	{
 		this->surface = SkSurface::MakeRasterN32Premul(width, height);
-		//canvas = std::make_unique<SkCanvas>(surface->getCanvas());
 	}
 
 	Canvas Canvas::clone()
@@ -119,7 +118,7 @@ namespace canvas {
 		surface->getCanvas()->clear(SK_ColorTRANSPARENT);
 	}
 
-	tl::expected<nullptr_t, std::string> Canvas::try_save(std::string fileName)
+	tl::expected<nullptr_t, std::string> Canvas::try_save(std::filesystem::path file_path)
 	{
 		sk_sp<SkImage> imageFromSurface(surface->makeImageSnapshot());
 		if (!imageFromSurface) {
@@ -131,7 +130,7 @@ namespace canvas {
 			return tl::make_unexpected("Failed to encode image to PNG!");
 		}
 
-		SkFILEWStream fileStream(fileName.c_str());
+		SkFILEWStream fileStream(file_path.string().c_str());
 		if (!fileStream.isValid()) {
 			return tl::make_unexpected("Failed to create output file!");
 		}

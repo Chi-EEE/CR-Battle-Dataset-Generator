@@ -8,6 +8,7 @@
 
 #include "nlohmann/json.hpp"
 #include "tl/expected.hpp"
+#include "spdlog/spdlog.h"
 
 #include "canvas/Canvas.h"
 #include "arena/Arena.h"
@@ -24,8 +25,12 @@ tl::expected<bool, std::string> try_read_settings_json() {
 	}
 	if (!std::filesystem::is_regular_file("config/settings.json") || !std::filesystem::exists("config/settings.json")) {
 		json j = {
-			{"assetDirectory", ""},
+			{"image_count", 0},
+			{"character_count", 0},
+			{"asset_directory", ""},
+			{"output_directory", ""},
 			{"ready", false},
+			{"debug", false},
 		};
 		std::ofstream outfile("config/settings.json");
 		outfile << j.dump(4) << std::endl;
@@ -48,25 +53,44 @@ int main() {
 		return 0;
 	}
 	if (!read_setting_json_result.value()) {
-		std::cerr << "Please set 'ready' to true when you are ready." << '\n';
+		std::cerr << "Please set 'ready' to true when you are ready.\n";
 		return 0;
 	}
-	std::filesystem::path asset_directory(Global::get_json()["assetDirectory"].get<std::string>());
+
+	int image_count(Global::get_json()["image_count"].get<int>());
+	int character_count(Global::get_json()["character_count"].get<int>());
+	std::filesystem::path asset_directory(Global::get_json()["asset_directory"].get<std::string>());
+	std::filesystem::path output_directory(Global::get_json()["output_directory"].get<std::string>());
+	bool debug(Global::get_json()["debug"].get<bool>());
+	if (debug) {
+		spdlog::set_level(spdlog::level::debug);
+	}
+
+	auto& random = Random::get_instance();
+
 	auto& entity_data_indexer = EntityDataIndexer::getInstance();
 	auto knight = entity_data_indexer.getEntityData("Knight");
 
-	auto arena_result = Arena::try_create(ArenaType::Goblin_Stadium, TowerSkin::Default, TowerSkin::Default);
-	if (arena_result.has_value()) {
+	spdlog::info("Starting to generate images and annotations!\n");
+	for (int image_id = 0; image_id < image_count; image_id++) {
+		spdlog::info("Generating image {}!\n", image_id);
+		auto arena_result = Arena::try_create(ArenaType::Goblin_Stadium, TowerSkin::Default, TowerSkin::Default);
+		if (!arena_result.has_value()) {
+			spdlog::error("An error has occurred: {}\n", arena_result.error());
+			return 0;
+		}
 		Arena arena = arena_result.value();
-		for (int i = 0; i < 1; i++) {
+		for (int character_id = 0; character_id < character_count; character_id++) {
 			int add_attempts = 0;
 			while (add_attempts < 100)
 			{
+				auto directory = random.try_get_random_directory_from_directory(asset_directory / "sprites" / "characters").value();
+				auto image = random.try_get_random_file_from_directory(directory).value();
 				if (!arena.try_add_character(std::make_shared<Character>(Character::create(
 					knight,
-					asset_directory / "sprites" / "characters" / "chr_knight.sc" / "Knight_idle1_1_001.png",
-					Random::get_instance().random_int_from_interval(58, 609),
-					Random::get_instance().random_int_from_interval(126, 831),
+					image,
+					Random::get_instance().random_int_from_interval(64, 664),
+					Random::get_instance().random_int_from_interval(128, 954),
 					false
 				).value()))) {
 					add_attempts++;
@@ -78,17 +102,14 @@ int main() {
 		}
 		arena.draw();
 		{
-			auto result = arena.try_save("./testArena.png");
+			auto result = arena.try_save(output_directory / fmt::format("{}.png", image_id));
 			if (!result.has_value()) {
-				std::cerr << "An error has occurred while trying to save the arena: " << result.error() << '\n';
+				spdlog::error("An error has occurred while trying to save the arena: {}\n", result.error());
 				return 0;
 			}
 		}
-		std::cout << "Successful in creating 'testArena.png'!" << '\n';
+		spdlog::info("Completed generating image {}!\n", image_id);
 	}
-	else {
-		std::cerr << "An error has occurred: " << arena_result.error() << '\n';
-		return 0;
-	}
+	spdlog::info("Completed generating all images and annotations!");
 	return 0;
 }

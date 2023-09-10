@@ -2,12 +2,12 @@
 using namespace CSV::Logic;
 
 namespace arena {
-	Character::Character(std::shared_ptr<EntityData> entity_data, std::filesystem::path file_path, int x, int y, bool is_air) : Entity(entity_data, file_path, x, y, is_air)
+	Character::Character(pEntityData entity_data, std::filesystem::path file_path, int x, int y, bool is_air) : Entity(entity_data, file_path, x, y, is_air)
 	{
 
 	}
 
-	tl::expected<Character, std::string> Character::create(std::shared_ptr<EntityData> entity_data, std::filesystem::path file_path, int x, int y, bool is_air)
+	tl::expected<Character, std::string> Character::create(pEntityData entity_data, std::filesystem::path file_path, int x, int y, bool is_air)
 	{
 		ImageLoader& image_loader = ImageLoader::get_instance();
 		auto image_result = image_loader.try_load_image(file_path);
