@@ -18,8 +18,8 @@ public:
     template<class Iterator>
     void shuffle(Iterator iterator);
     int random_int_from_interval(int min, int max);
-    tl::expected<std::string, std::string> Random::try_get_random_file_from_directory(std::filesystem::path directory_path);
-    tl::expected<std::string, std::string> try_get_random_directory_from_directory(std::filesystem::path directory_path);
+    tl::expected<std::filesystem::path, std::string> Random::try_get_random_file_from_directory(std::filesystem::path directory_path);
+    tl::expected<std::filesystem::path, std::string> try_get_random_directory_from_directory(std::filesystem::path directory_path);
     static Random& get_instance() {
         static Random instance;
         return instance;

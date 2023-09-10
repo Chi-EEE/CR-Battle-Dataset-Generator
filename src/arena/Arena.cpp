@@ -9,8 +9,8 @@ namespace arena {
 	{
 		auto& entity_data_indexer = EntityDataIndexer::getInstance();
 
-		auto princess_tower = entity_data_indexer.getEntityData("PrincessTower");
-		auto king_tower = entity_data_indexer.getEntityData("KingTower");
+		auto princess_tower = entity_data_indexer.getEntityDataByName("PrincessTower");
+		auto king_tower = entity_data_indexer.getEntityDataByName("KingTower");
 
 		add_arena_tower(princess_tower,  "princess", "blue", this->blue_side_tower_skin, 171, 788, false);
 		add_arena_tower(princess_tower, "princess", "blue", this->blue_side_tower_skin, 548, 788, false);
@@ -56,7 +56,7 @@ namespace arena {
 		if (!arena_file_path_result.has_value()) {
 			return tl::make_unexpected(arena_file_path_result.error());
 		}
-		std::string arena_file_path = arena_file_path_result.value();
+		std::filesystem::path arena_file_path = arena_file_path_result.value();
 
 		auto image_result = image_loader.try_load_image(arena_file_path);
 		if (!image_result.has_value()) {
@@ -89,8 +89,8 @@ namespace arena {
 				return entity_1->y < entity_2->y;
 			}
 			else if (entity_1->is_air)
-				return true;
-			else /*e2->is_air*/ return false;
+				return false;
+			else /*e2->is_air*/ return true;
 		});
 		for (auto& entity : this->entities) {
 			entity->draw(this->canvas);

@@ -26,9 +26,11 @@ namespace arena_files
             return instance;
         }
         ~EntityDataIndexer();
-        pEntityData getEntityData(std::string name);
+        pEntityData getEntityDataByFileName(std::string fileName);
+        pEntityData getEntityDataByName(std::string name);
     private:
-        std::unordered_map<std::string, pEntityData> entity_data_map;
+        std::unordered_map<std::string, pEntityData> entity_data_file_name_map;
+        std::unordered_map<std::string, pEntityData> entity_data_name_map;
     };
 }
 

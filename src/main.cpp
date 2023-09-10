@@ -69,7 +69,6 @@ int main() {
 	auto& random = Random::get_instance();
 
 	auto& entity_data_indexer = EntityDataIndexer::getInstance();
-	auto knight = entity_data_indexer.getEntityData("Knight");
 
 	spdlog::info("Starting to generate images and annotations!\n");
 	for (int image_id = 0; image_id < image_count; image_id++) {
@@ -85,9 +84,13 @@ int main() {
 			while (add_attempts < 100)
 			{
 				auto directory = random.try_get_random_directory_from_directory(asset_directory / "sprites" / "characters").value();
+				auto character = entity_data_indexer.getEntityDataByFileName(directory.filename().string());
+				if (character == nullptr) {
+					continue;
+				}
 				auto image = random.try_get_random_file_from_directory(directory).value();
 				if (!arena.try_add_character(std::make_shared<Character>(Character::create(
-					knight,
+					character,
 					image,
 					Random::get_instance().random_int_from_interval(64, 664),
 					Random::get_instance().random_int_from_interval(128, 954),
