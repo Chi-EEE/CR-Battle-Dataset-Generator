@@ -5,7 +5,6 @@
 
 #include <filesystem>
 
-#include <random>
 #include <optional>
 
 #include "../utils/Random.h"
@@ -33,7 +32,7 @@ namespace arena {
 	{
 	public:
 		static tl::expected<Arena, std::string> try_create(ArenaType arena_type, TowerSkin blue_side, TowerSkin red_side);
-		void try_add_character(std::shared_ptr<Character> character);
+		bool try_add_character(std::shared_ptr<Character> character);
 		void draw();
 		~Arena();
 		Arena clone();

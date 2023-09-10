@@ -2,12 +2,8 @@
 #include <fstream>
 
 #include <filesystem>
-#include <optional>
-
-#include <unordered_map>
 
 #include "utils/Global.hpp"
-#include "files/CSV.h"
 #include "arena_files/EntityDataIndexer.h"
 
 #include "nlohmann/json.hpp"
@@ -62,14 +58,23 @@ int main() {
 	auto arena_result = Arena::try_create(ArenaType::Goblin_Stadium, TowerSkin::Default, TowerSkin::Default);
 	if (arena_result.has_value()) {
 		Arena arena = arena_result.value();
-		for (int i = 0; i < 30; i++) {
-			arena.try_add_character(std::make_shared<Character>(Character::create(
-				knight,
-				asset_directory / "sprites" / "characters" / "chr_knight.sc" / "Knight_idle1_1_001.png",
-				Random::get_instance().random_int_from_interval(58, 609),
-				Random::get_instance().random_int_from_interval(126, 831),
-				false
-			).value()));
+		for (int i = 0; i < 1; i++) {
+			int add_attempts = 0;
+			while (add_attempts < 100)
+			{
+				if (!arena.try_add_character(std::make_shared<Character>(Character::create(
+					knight,
+					asset_directory / "sprites" / "characters" / "chr_knight.sc" / "Knight_idle1_1_001.png",
+					Random::get_instance().random_int_from_interval(58, 609),
+					Random::get_instance().random_int_from_interval(126, 831),
+					false
+				).value()))) {
+					add_attempts++;
+				}
+				else {
+					break;
+				}
+			}
 		}
 		arena.draw();
 		{

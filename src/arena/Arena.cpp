@@ -46,12 +46,12 @@ namespace arena {
 		ImageLoader& image_loader = ImageLoader::get_instance();
 		std::string arena_type_name = arena_type.to_string();
 		std::transform(arena_type_name.begin(), arena_type_name.end(), arena_type_name.begin(), ::tolower);
-		std::filesystem::path assetDirectory(Global::get_json()["assetDirectory"].get<std::string>());
+		std::filesystem::path asset_directory(Global::get_json()["assetDirectory"].get<std::string>());
 
 		std::string time = "default";
 		if (random.random_int_from_interval(0, 1)) time = "overtime";
 
-		auto arena_file_path_result = random.try_get_random_file_from_directory(assetDirectory / "arenas" / arena_type_name / time);
+		auto arena_file_path_result = random.try_get_random_file_from_directory(asset_directory / "arenas" / arena_type_name / time);
 		if (!arena_file_path_result.has_value()) {
 			return tl::make_unexpected(arena_file_path_result.error());
 		}
@@ -67,14 +67,15 @@ namespace arena {
 		return Arena(arena_type, blue_side, red_side, canvas);
 	}
 
-	void Arena::try_add_character(std::shared_ptr<Character> character)
+	bool Arena::try_add_character(std::shared_ptr<Character> character)
 	{
 		for (auto entity : this->entities) {
 			double distance = sqrt(pow(entity->x - character->x, 2) + pow(entity->y - character->y, 2));
 			if (distance + entity->entity_data->getCollisionRadius() <= character->entity_data->getCollisionRadius())
-				return;
+				return false;
 		}
 		this->entities.push_back(character);
+		return true;
 	}
 
 	void Arena::draw()
