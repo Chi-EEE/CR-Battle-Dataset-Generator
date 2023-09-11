@@ -21,11 +21,23 @@ AbstractTable* FileManager::getTable(File fileType)
 	}
 }
 
-void FileManager::addFile(File fileType, std::string fileName)
+void FileManager::addCSVFile(File fileType, std::string fileName)
 {
 	if (contains(fileType))
 	{
-		this->tables[fileType]->insert(fileName);
+		this->tables[fileType]->insertCSV(fileName);
+	}
+	else
+	{
+		std::cerr << "Unable to find the File Enum for " << fileType;
+	}
+}
+
+void FileManager::addTomlFile(File fileType, std::string fileName)
+{
+	if (contains(fileType))
+	{
+		this->tables[fileType]->insertToml(fileName);
 	}
 	else
 	{
@@ -36,5 +48,5 @@ void FileManager::addFile(File fileType, std::string fileName)
 template<typename T>
 inline void FileManager::createTable(File fileType, Table<T> table)
 {
-	this->tables.insert(std::make_pair(fileType, table));
+	this->tables.insertCSV(std::make_pair(fileType, table));
 }

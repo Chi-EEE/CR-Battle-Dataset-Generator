@@ -6,10 +6,19 @@
 #include <string_view>
 #include <charconv>
 
+#include "toml++/toml.h"
+
+#include "../../files/csv/CSVRow.h"
+
+using namespace csv;
+
 namespace data
 {
     class Data
     {
+    public:
+        Data(CSVRow row) {};
+        Data(std::string name, toml::table tomlTable) {};
     protected:
         static int to_int(const std::string_view& input)
         {

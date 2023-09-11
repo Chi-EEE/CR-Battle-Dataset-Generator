@@ -33,7 +33,9 @@ public:
 	template<typename T>
 	void createTable(File csvFileType, Table<T> table);
 
-	void addFile(File csvFileType, std::string fileName);
+	void addCSVFile(File csvFileType, std::string fileName);
+
+	void addTomlFile(File fileType, std::string fileName);
 	
 	AbstractTable* getTable(File fileType);
 private:
