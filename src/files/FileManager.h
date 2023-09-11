@@ -30,8 +30,7 @@ public:
         return instance;
     }
 
-	template<typename T>
-	void createTable(File csvFileType, Table<T> table);
+	void createTable(File csvFileType, AbstractTable* table);
 
 	void addCSVFile(File csvFileType, std::string fileName);
 

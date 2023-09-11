@@ -6,6 +6,7 @@ namespace arena::data
 	{
 		std::filesystem::path asset_directory(Global::get_json()["asset_directory"].get<std::string>());
 		auto& file_manager_instance = FileManager::FileManager::getInstance();
+		file_manager_instance.createTable(File::Entity, new Table<EntityData>{});
 		file_manager_instance.addCSVFile(File::Entity, (asset_directory / "files" / "buildings.csv").string());
 		file_manager_instance.addCSVFile(File::Entity, (asset_directory / "files" / "characters.csv").string());
 		file_manager_instance.addTomlFile(File::Entity, (asset_directory / "files" / "characters_evo.toml").string());

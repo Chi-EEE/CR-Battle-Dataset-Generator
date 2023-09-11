@@ -45,8 +45,7 @@ void FileManager::addTomlFile(File fileType, std::string fileName)
 	}
 }
 
-template<typename T>
-inline void FileManager::createTable(File fileType, Table<T> table)
+void FileManager::createTable(File fileType, AbstractTable* table)
 {
-	this->tables.insertCSV(std::make_pair(fileType, table));
+	this->tables.insert(std::make_pair(fileType, table));
 }
