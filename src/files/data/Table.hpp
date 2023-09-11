@@ -9,16 +9,16 @@
 
 #include "AbstractTable.h"
 #include "File.h"
-#include "CSVReader/CSVIterator.h"
-#include "CSVLogic/Data.h"
+#include "../csv/CSVIterator.h"
+#include "../data/Data.h"
 
-namespace CSV
+namespace data
 {
     template<typename T>
     class Table : public AbstractTable
     {
     public:
-		static_assert(std::is_base_of<Logic::Data, T>::value, "T must be derived from Data");
+		static_assert(std::is_base_of<Data, T>::value, "T must be derived from Data");
 		Table() {};
 
         void insert(std::string fileName)

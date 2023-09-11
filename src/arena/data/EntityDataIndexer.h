@@ -6,14 +6,16 @@
 #include <string>
 #include <unordered_map>
 
-#include "../utils/Global.hpp"
+#include "../../utils/Global.hpp"
 
-#include "../files/CSV.h"
-#include "../files/CSVLogic/EntityData.h"
+#include "../../files/FileManager.h"
+#include "../../files/data/AbstractTable.h"
+#include "../../files/data/File.h"
+#include "../data/EntityData.h"
 
-using namespace CSV::Logic;
+using namespace csv;
 
-namespace arena_files
+namespace arena::data
 {
     class EntityDataIndexer
     {

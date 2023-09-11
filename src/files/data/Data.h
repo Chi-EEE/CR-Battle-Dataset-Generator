@@ -6,7 +6,7 @@
 #include <string_view>
 #include <charconv>
 
-namespace CSV::Logic
+namespace data
 {
     class Data
     {

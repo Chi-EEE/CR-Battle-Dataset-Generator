@@ -5,7 +5,7 @@
 
 #include "CSVRow.h"
 
-namespace CSV::Reader
+namespace csv
 {
     // https://stackoverflow.com/a/1120224
     class CSVIterator

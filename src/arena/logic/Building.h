@@ -4,7 +4,7 @@
 #pragma once
 
 #include "Entity.h"
-#include "../canvas/Image.h"
+#include "../../canvas/Image.h"
 
 using namespace canvas;
 

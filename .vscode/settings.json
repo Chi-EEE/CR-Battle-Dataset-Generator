@@ -5,6 +5,7 @@
         "xstring": "cpp",
         "chrono": "cpp",
         "system_error": "cpp",
-        "xlocale": "cpp"
+        "xlocale": "cpp",
+        "vector": "cpp"
     }
 }

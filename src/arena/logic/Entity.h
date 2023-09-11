@@ -4,13 +4,14 @@
 #pragma once
 
 #include <filesystem>
-#include "../canvas/ImageLoader.h"
-#include "../canvas/Drawable.h"
-#include "../canvas/Canvas.h"
+#include "../../canvas/ImageLoader.h"
+#include "../../canvas/Drawable.h"
+#include "../../canvas/Canvas.h"
 
-#include "../files/CSVLogic/EntityData.h"
+#include "../data/EntityData.h"
 
-using namespace CSV::Logic;
+using namespace arena::data;
+using namespace csv;
 
 namespace arena {
 	class Entity : public canvas::Drawable

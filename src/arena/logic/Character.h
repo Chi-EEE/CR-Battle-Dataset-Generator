@@ -7,13 +7,13 @@
 #include "fmt/format.h"
 
 #include "Entity.h"
-#include "../canvas/Canvas.h"
+#include "../../canvas/Canvas.h"
 
-#include "../files/CSV.h"
-#include "../files/Table.hpp"
-#include "../files/CSVLogic/EntityData.h"
+#include "../../files/data/Table.hpp"
+#include "../data/EntityData.h"
 
 using namespace canvas;
+using namespace csv;
 
 namespace arena {
     class Character : public Entity

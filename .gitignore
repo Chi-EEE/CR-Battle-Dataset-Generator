@@ -7,10 +7,11 @@ build/
 
 vsxmake2022
 
-/assets
-out
 __pycache__
 .vscode/compile_commands.json
-scripts/csv/*.csv
+
+scripts/csv/*
 scripts/out/*
+
+!scripts/csv/.gitkeep
 !scripts/out/.gitkeep

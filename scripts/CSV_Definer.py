@@ -2,22 +2,6 @@ import csv
 import os
 
 
-csv_class_cpp = r"""#include "{class_name}.h"
-using namespace CSV::Reader;
-
-namespace CSV::Logic {{
-    {class_name}::{class_name}(CSVRow row) : {member_initalization_list}
-    {{
-
-    }}
-
-    {class_name}::~{class_name}()
-    {{
-
-    }}
-}}"""
-
-
 csv_class_h = r"""#ifndef {class_name}_H
 #define {class_name}_H
 
@@ -26,26 +10,73 @@ csv_class_h = r"""#ifndef {class_name}_H
 #include <string>
 #include <vector>
 #include <charconv>
+#include <unordered_map>
+
+#include "toml++/toml.h"
 
 #include "Data.h"
-#include "../CSVReader/CSVRow.h"
-using namespace CSV::Reader;
+#include "../csv/reader/CSVRow.h"
 
-namespace CSV::Logic
+using namespace csv::reader;
+
+namespace data
 {{
     class {class_name} : public Data
     {{
     public:
         {class_name}(CSVRow row);
+        {class_name}(std::string name, toml::table tomlTable);
         ~{class_name}();
         
 {get_methods}
     private:
-    {header_variables}
+{header_variables}
     }};
+    typedef std::shared_ptr<{class_name}> p{class_name};
 }}
 
 #endif"""
+
+
+csv_class_cpp = r"""#include "{class_name}.h"
+using namespace csv::reader;
+
+namespace data {{
+    {class_name}::{class_name}(CSVRow row) : {member_initalization_list}
+    {{
+
+    }}
+
+    {class_name}::{class_name}(std::string name, toml::table tomlTable)
+    {{
+        this->Name = name;
+        std::unordered_map<std::string, void*> variableMap = {{
+{variable_map}
+        }};
+        for (const auto& pair : tomlTable) {{
+            const toml::key& key = pair.first;
+            const toml::node& value = pair.second;
+			std::string keyValue(key.str());
+			if (value.is<int64_t>()) {{
+				*static_cast<int*>(variableMap[keyValue]) = value.value<int64_t>().value();
+			}}
+			else if (value.is<toml::value<std::string>>()) {{
+				*static_cast<std::string*>(variableMap[keyValue]) = value.value<std::string>().value();
+            }}
+            else if (value.is_array()) {{
+                const toml::array* arrayValue = value.as_array();
+				*static_cast<int*>(variableMap[keyValue]) = arrayValue[arrayValue->size() - 1].value<int>().value();
+            }} else {{
+                std::cout << "Key: " << key << ", Value (unknown type)" << std::endl;
+            }}
+        }}
+    }}
+
+    {class_name}::~{class_name}()
+    {{
+
+    }}
+}}"""
 
 
 def generate_member_initalization_list(headers, datatypes):
@@ -63,7 +94,7 @@ def generate_member_initalization_list(headers, datatypes):
 def generate_header_variables(headers, datatypes):
     result = ""
     for header, datatype in zip(headers, datatypes):
-        result += f"\t{datatype} {header};\n"
+        result += f"\t\t{datatype} {header};\n"
     return result
 
 
@@ -71,6 +102,13 @@ def generate_get_methods(headers, datatypes):
     result = ""
     for header, datatype in zip(headers, datatypes):
         result += f"\t\tconst {datatype}& get{header}() const {{\n\t\t\treturn this->{header};\n\t\t}}\n"
+    return result
+
+
+def generate_variable_map(headers):
+    result = ""
+    for header in headers:
+        result += f"\t\t\t{{\"{header}\", &this->{header}}},\n"
     return result
 
 
@@ -83,6 +121,7 @@ def make_cpp_file(class_name, headers, datatypes):
         csv_class_cpp.format(
             class_name=class_name,
             member_initalization_list= generate_member_initalization_list(headers, datatypes),
+            variable_map = generate_variable_map(headers),
         )
     )
 
@@ -91,15 +130,13 @@ def make_h_file(class_name, headers, datatypes):
     new_file_h = f"scripts/out/{class_name}.h"
     if os.path.exists(new_file_h):
         os.remove(new_file_h)
-    header_variables = generate_header_variables(headers, datatypes)
-    get_methods = generate_get_methods(headers, datatypes)
     f = open(new_file_h, "a")
     f.write(
         csv_class_h.format(
             class_name=class_name,
             class_name_upper=class_name.upper(),
-            get_methods = get_methods,
-            header_variables=header_variables,
+            get_methods = generate_get_methods(headers, datatypes),
+            header_variables = generate_header_variables(headers, datatypes),
         )
     )
 

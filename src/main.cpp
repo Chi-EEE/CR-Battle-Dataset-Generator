@@ -4,19 +4,20 @@
 #include <filesystem>
 
 #include "utils/Global.hpp"
-#include "arena_files/EntityDataIndexer.h"
+#include "arena/data/EntityDataIndexer.h"
 
 #include "nlohmann/json.hpp"
 #include "tl/expected.hpp"
 #include "spdlog/spdlog.h"
 
 #include "canvas/Canvas.h"
-#include "arena/Arena.h"
-#include "arena/Character.h"
+#include "arena/logic/Arena.h"
+#include "arena/logic/Character.h"
 
 using namespace canvas;
 using namespace arena;
-using namespace arena_files;
+using namespace arena::data;
+
 using json = nlohmann::json;
 
 tl::expected<bool, std::string> try_read_settings_json() {

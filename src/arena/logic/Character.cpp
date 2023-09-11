@@ -1,5 +1,4 @@
 #include "Character.h"
-using namespace CSV::Logic;
 
 namespace arena {
 	Character::Character(pEntityData entity_data, std::filesystem::path file_path, int x, int y, bool is_air) : Entity(entity_data, file_path, x, y, is_air)

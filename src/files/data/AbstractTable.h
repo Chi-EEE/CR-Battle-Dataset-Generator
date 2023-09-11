@@ -4,7 +4,7 @@
 #pragma once
 
 
-namespace CSV
+namespace data
 {
 	class AbstractTable
 	{

@@ -1,8 +1,8 @@
 #include "Arena.h"
 #include "Character.h"
 
-using namespace arena_files;
-using namespace CSV::Logic;
+using namespace arena::data;
+using namespace csv;
 
 namespace arena {
 	Arena::Arena(ArenaType arena_type, TowerSkin blue_side, TowerSkin red_side, Canvas canvas) : arena_type(arena_type), blue_side_tower_skin(blue_side), red_side_tower_skin(red_side), canvas(canvas)

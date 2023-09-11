@@ -3,7 +3,7 @@
 
 #pragma once
 
-namespace CSV
+namespace data
 {
     enum File
     {

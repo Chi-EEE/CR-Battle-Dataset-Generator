@@ -7,24 +7,24 @@
 #include <optional>
 
 
-#include "../utils/Random.h"
-#include "../utils/Global.hpp"
+#include "../../utils/Random.h"
+#include "../../utils/Global.hpp"
 
 #include "fmt/format.h"
 #include "tl/expected.hpp"
 #include "spdlog/spdlog.h"
 
 #include "ArenaType.h"
-#include "../canvas/Canvas.h"
-#include "../canvas/ImageLoader.h"
+#include "../../canvas/Canvas.h"
+#include "../../canvas/ImageLoader.h"
 #include "TowerSkin.h"
 
 #include "Entity.h"
 #include "Building.h"
 #include "Character.h"
 
-#include "../arena_files/EntityDataIndexer.h"
-#include "../files/CSVLogic/EntityData.h"
+#include "../data/EntityDataIndexer.h"
+#include "../data/EntityData.h"
 
 using namespace canvas;
 
