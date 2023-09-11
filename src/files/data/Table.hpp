@@ -39,9 +39,9 @@ namespace data
 		{
 			toml::table tbl = toml::parse_file(filePath);
 			for (auto pair : tbl) {
-				toml::key name = pair.first;
+				std::string name(pair.first.str());
 				toml::table* table = pair.second.as_table();
-				this->entries.push_back(std::make_shared<T>(T(*name, table)));
+				this->entries.push_back(std::make_shared<T>(T(name, table)));
 			}
 		};
 

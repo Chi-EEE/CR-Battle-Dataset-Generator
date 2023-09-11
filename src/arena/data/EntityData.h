@@ -22,7 +22,7 @@ namespace arena::data
     {
     public:
         EntityData(CSVRow row);
-        EntityData(std::string name, toml::table tomlTable);
+        EntityData(std::string name, toml::table *tomlTable);
         ~EntityData();
         
 		const std::string& getName() const {

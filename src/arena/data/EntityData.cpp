@@ -7,7 +7,7 @@ namespace arena::data{
 
     }
 
-    EntityData::EntityData(std::string name, toml::table tomlTable) : Data(name, tomlTable)
+    EntityData::EntityData(std::string name, toml::table* tomlTable) : Data(name, tomlTable)
     {
         this->Name = name;
         std::unordered_map<std::string, void*> variableMap = {
@@ -348,7 +348,7 @@ namespace arena::data{
 			{"ClonedVersion", &this->ClonedVersion},
 
         };
-        for (const auto& pair : tomlTable) {
+        for (const auto& pair : *tomlTable) {
             const toml::key& key = pair.first;
             const toml::node& value = pair.second;
 			std::string keyValue(key.str());
