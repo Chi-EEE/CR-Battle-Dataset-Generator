@@ -89,7 +89,10 @@ int main() {
 				if (character == nullptr) {
 					continue;
 				}
-				auto image = random.try_get_random_file_from_directory(directory).value();
+				std::filesystem::path image;
+				do {
+					image = random.try_get_random_file_from_directory(directory).value();
+				} while (image.filename().extension() != ".png");
 				if (!arena.try_add_character(std::make_shared<Character>(Character::create(
 					character,
 					image,
