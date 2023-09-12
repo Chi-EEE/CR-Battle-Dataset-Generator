@@ -21,8 +21,8 @@ namespace arena {
 	{
 		Image image = ImageLoader::get_instance().try_load_image(this->file_path).value();
 
-		double entity_width = image.get_width() * (entity_data->getScale() / 100.0) * 1.161616;
-		double entity_height = image.get_height() * (entity_data->getScale() / 100.0) * 1.161616;
+		double entity_width = (image.get_width() * (entity_data->getScale() / 100.0)) * 1.161616;
+		double entity_height = (image.get_height() * (entity_data->getScale() / 100.0)) * 1.161616;
 
 		SkRect entity_rect = SkRect::MakeXYWH(this->x - (entity_width / 2), this->y - (entity_height / 2), entity_width, entity_height);
 #ifdef ENABLE_SHADOWS // Code is broken and I'll fix when working on shadows
