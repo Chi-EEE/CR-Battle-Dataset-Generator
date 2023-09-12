@@ -1,11 +1,12 @@
 #include "ImageLoader.h"
-
+#include <iostream>
 namespace canvas {
 	ImageLoader::ImageLoader()
 	{
 
 	}
 
+	// There is not a memory leak here since the images are being loaded here!
 	tl::expected<Image, std::string> canvas::ImageLoader::try_load_image(std::filesystem::path file_path)
 	{
 		auto it = this->images.find(file_path);
