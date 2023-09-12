@@ -12,7 +12,6 @@ namespace data
 		virtual ~AbstractTable() {}
 
 		virtual void insertCSV(std::string fileName) = 0;
-		virtual void insertToml(std::string filePath) = 0;
 	private:
 
 	};

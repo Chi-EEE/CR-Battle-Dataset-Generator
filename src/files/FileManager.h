@@ -10,6 +10,7 @@
 #include "data/AbstractTable.h"
 #include "data/Table.hpp"
 #include "data/File.h"
+#include "../arena/data/EntityData.h"
 
 using namespace data;
 
@@ -34,8 +35,6 @@ public:
 
 	void addCSVFile(File csvFileType, std::string fileName);
 
-	void addTomlFile(File fileType, std::string fileName);
-	
 	AbstractTable* getTable(File fileType);
 private:
 	inline bool contains(File fileType) {

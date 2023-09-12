@@ -33,18 +33,6 @@ void FileManager::addCSVFile(File fileType, std::string fileName)
 	}
 }
 
-void FileManager::addTomlFile(File fileType, std::string fileName)
-{
-	if (contains(fileType))
-	{
-		this->tables[fileType]->insertToml(fileName);
-	}
-	else
-	{
-		std::cerr << "Unable to find the File Enum for " << fileType;
-	}
-}
-
 void FileManager::createTable(File fileType, AbstractTable* table)
 {
 	this->tables.insert(std::make_pair(fileType, table));

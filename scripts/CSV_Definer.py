@@ -14,18 +14,18 @@ csv_class_h = r"""#ifndef {class_name}_H
 
 #include "toml++/toml.h"
 
-#include "Data.h"
-#include "../csv/reader/CSVRow.h"
+#include "../../files/data/Data.h"
+#include "../../files/csv/CSVRow.h"
 
-using namespace csv::reader;
+using namespace csv;
+using namespace data;
 
-namespace data
+namespace arena::data
 {{
     class {class_name} : public Data
     {{
     public:
         {class_name}(CSVRow row);
-        {class_name}(std::string name, toml::table tomlTable);
         ~{class_name}();
         
 {get_methods}
@@ -39,37 +39,11 @@ namespace data
 
 
 csv_class_cpp = r"""#include "{class_name}.h"
-using namespace csv::reader;
 
-namespace data {{
-    {class_name}::{class_name}(CSVRow row) : {member_initalization_list}
+namespace arena::data {{
+    {class_name}::{class_name}(CSVRow row) : {member_initalization_list}, Data(name)
     {{
 
-    }}
-
-    {class_name}::{class_name}(std::string name, toml::table tomlTable)
-    {{
-        this->Name = name;
-        std::unordered_map<std::string, void*> variableMap = {{
-{variable_map}
-        }};
-        for (const auto& pair : tomlTable) {{
-            const toml::key& key = pair.first;
-            const toml::node& value = pair.second;
-			std::string keyValue(key.str());
-			if (value.is<int64_t>()) {{
-				*static_cast<int*>(variableMap[keyValue]) = value.value<int64_t>().value();
-			}}
-			else if (value.is<toml::value<std::string>>()) {{
-				*static_cast<std::string*>(variableMap[keyValue]) = value.value<std::string>().value();
-            }}
-            else if (value.is_array()) {{
-                const toml::array* arrayValue = value.as_array();
-				*static_cast<int*>(variableMap[keyValue]) = arrayValue[arrayValue->size() - 1].value<int>().value();
-            }} else {{
-                std::cout << "Key: " << key << ", Value (unknown type)" << std::endl;
-            }}
-        }}
     }}
 
     {class_name}::~{class_name}()

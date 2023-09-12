@@ -13,6 +13,8 @@
 #include "../../files/data/File.h"
 #include "../data/EntityData.h"
 
+#include "EntityDataTable.hpp"
+
 using namespace csv;
 
 namespace arena::data
@@ -28,6 +30,7 @@ namespace arena::data
             return instance;
         }
         ~EntityDataIndexer();
+        void insertEvolutionToml(std::filesystem::path filePath);
         pEntityData getEntityDataByFileName(std::string fileName);
         pEntityData getEntityDataByName(std::string name);
     private:

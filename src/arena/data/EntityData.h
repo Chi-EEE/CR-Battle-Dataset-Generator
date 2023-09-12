@@ -20,9 +20,9 @@ namespace arena::data
 {
     class EntityData : public Data
     {
-    public:
+	public:
         EntityData(CSVRow row);
-        EntityData(std::string name, toml::table *tomlTable);
+        EntityData(std::string name, toml::table* table, EntityData *entity_data);
         ~EntityData();
         
 		const std::string& getName() const {
@@ -1369,7 +1369,7 @@ namespace arena::data
 		std::string ClonedVersion;
 
     };
-    typedef std::shared_ptr<EntityData> pEntityData;
+	typedef std::shared_ptr<EntityData> pEntityData;
 }
 
 #endif

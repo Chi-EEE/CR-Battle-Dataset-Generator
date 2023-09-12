@@ -7,8 +7,6 @@
 #include <string>
 #include <vector>
 
-#include "toml++/toml.h"
-
 #include "AbstractTable.h"
 #include "File.h"
 #include "../csv/CSVIterator.h"
@@ -35,20 +33,10 @@ namespace data
 			}
 		};
 
-		void insertToml(std::string filePath)
-		{
-			toml::table tbl = toml::parse_file(filePath);
-			for (auto pair : tbl) {
-				std::string name(pair.first.str());
-				toml::table* table = pair.second.as_table();
-				this->entries.push_back(std::make_shared<T>(T(name, table)));
-			}
-		};
-
 		const std::vector<std::shared_ptr<T>>& getEntries() const {
 			return this->entries;
 		}
-    private:
+    protected:
 		std::vector<std::shared_ptr<T>> entries;
     };
 }

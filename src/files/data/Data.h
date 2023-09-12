@@ -17,8 +17,7 @@ namespace data
     class Data
     {
     public:
-        Data(CSVRow row) {};
-        Data(std::string name, toml::table* tomlTable) {};
+        Data() {};
     protected:
         static int to_int(const std::string_view& input)
         {
