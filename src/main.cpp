@@ -20,6 +20,108 @@ using namespace arena::data;
 
 using json = nlohmann::json;
 
+std::vector<std::string> allowed_characters = {
+	"Knight",
+	"Archer",
+	"Goblin",
+	"Giant",
+	"Pekka",
+	"Minion",
+	"Balloon",
+	"Witch",
+	"Skeleton",
+	"Barbarian",
+	"Golem",
+	"Golemite",
+	"Valkyrie",
+	"Bomber",
+	"Musketeer",
+	"BabyDragon",
+	"MiniPekka",
+	"Wizard",
+	"Prince",
+	"SpearGoblin",
+	"GiantSkeleton",
+	"HogRider",
+	// "TowerPrincess",
+	"IceWizard",
+	"RoyalGiant",
+	"Princess",
+	"DarkPrince",
+	"SkeletonWarrior",
+	"LavaHound",
+	"LavaPups",
+	"RageBarbarian",
+	"IceSpirits",
+	"FireSpirits",
+	"Miner",
+	"ZapMachine",
+	"Bowler",
+	"IceGolemite",
+	"MegaMinion",
+	"InfernoDragon",
+	"BattleRam",
+	"BlowdartGoblin",
+	"ElectroWizard",
+	"AngryBarbarian",
+	"AxeMan",
+	"Assassin",
+	// "GhostOverlay",
+	"Ghost",
+	"MiniZapMachine",
+	"Hunter",
+	"DarkWitch",
+	"Bat",
+	"Recruit",
+	"RascalBoy",
+	"MovingCannon",
+	"MegaKnight",
+	"RascalGirl",
+	"SkeletonBalloon",
+	"DartBarrell",
+	"Wallbreaker",
+	"RoyalHog",
+	"GoblinBrawler",
+	"GoblinGiant",
+	"EliteArcher",
+	"SpearGoblinGiant",
+	"Ram",
+	"RamRider",
+	"ThreeMusketeer",
+	"ElectroDragon",
+	"Fisherman",
+	"ElixirGolem1",
+	"ElixirGolem2",
+	"ElixirGolem4",
+	"HealSpirit",
+	// "YetAnotherSkeleton",
+	"Firecracker",
+	"BattleHealer",
+	"DeliveryRecruit",
+	"MightyMiner",
+	// "SuperWitch",
+	// "GoblinDrillDig",
+	"WitchMother",
+	"VoodooHog",
+	"SkeletonDragon",
+	"ElectroGiant",
+	"ElectroSpirit",
+	// "SuperLavaHound",
+	"SkeletonKing",
+	// "SuperLavaHound2",
+	//"SuperEliteArcher",
+	//"SkeletonKingSkeleton",
+	// "SuperHogRider",
+	// "SuperIceGolemite",
+	"GoldenKnight",
+	"ArcherQueen",
+	// "GoblinParty",
+	// "SpearGoblinParty",
+	// "GoblinBrawlerParty",
+	// "GoblinDummy",
+	"Monk",
+};
+
 tl::expected<bool, std::string> try_read_settings_json() {
 	if (!std::filesystem::is_directory("config") || !std::filesystem::exists("config")) {
 		std::filesystem::create_directory("config");
@@ -84,14 +186,33 @@ int main() {
 			int add_attempts = 0;
 			while (add_attempts < 100)
 			{
-				auto directory = random.try_get_random_directory_from_directory(asset_directory / "sprites" / "characters").value();
-				auto character = entity_data_indexer.getEntityDataByFileName(directory.filename().string());
+				auto character = entity_data_indexer.getEntityDataByName(allowed_characters[random.random_int_from_interval(0, allowed_characters.size() - 1)]);
 				if (character == nullptr) {
 					continue;
 				}
+				std::string file_name = character->getFileName();
+				file_name.erase(0, 3); // Remove "/sc"
+
+				auto character_directory = asset_directory / "sprites" / "characters" / file_name;
+
+				bool is_blue = random.random_int_from_interval(0, 1);
+
+				std::vector<std::string> actions{
+					"idle1",
+					"run1",
+					"attack1",
+				};
+				auto action = actions[random.random_int_from_interval(0, actions.size() - 1)];
+
 				std::filesystem::path image;
 				do {
-					image = random.try_get_random_file_from_directory(directory).value();
+					std::filesystem::path directory_path = character_directory / fmt::format("{export_name}_{action}_{rotation}", fmt::arg("export_name", is_blue ? character->getBlueExportName() : character->getRedExportName()), fmt::arg("action", action), fmt::arg("rotation", std::to_string(random.random_int_from_interval(1, 9))));
+					auto maybeImage = random.try_get_random_file_from_directory(directory_path);
+					if (!maybeImage.has_value()) {
+						spdlog::error("Unable to get an image from the directory: {} | {}", directory_path.string(), maybeImage.error());
+						continue;
+					}
+					image = maybeImage.value();
 				} while (image.filename().extension() != ".png");
 				if (!arena.try_add_character(std::make_shared<Character>(Character::create(
 					character,
