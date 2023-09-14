@@ -2,6 +2,7 @@
 #include <fstream>
 
 #include <filesystem>
+#include <unordered_set>
 
 #include "utils/Global.hpp"
 #include "arena/data/EntityDataIndexer.h"
@@ -149,6 +150,8 @@ tl::expected<bool, std::string> try_read_settings_json() {
 	}
 }
 
+std::unordered_set<pEntityData> characters_with_one_orientation;
+
 int main() {
 	auto read_setting_json_result = try_read_settings_json();
 	if (!read_setting_json_result.has_value()) {
@@ -203,10 +206,17 @@ int main() {
 					"attack1",
 				};
 				auto action = actions[random.random_int_from_interval(0, actions.size() - 1)];
+				std::filesystem::path directory_path = character_directory / fmt::format("{export_name}_{action}_1", fmt::arg("export_name", is_blue ? character->getBlueExportName() : character->getRedExportName()), fmt::arg("action", action));
+				if (characters_with_one_orientation.find(character) != characters_with_one_orientation.end()) {
+					directory_path = character_directory / fmt::format("{export_name}_{action}_{orientation}", fmt::arg("export_name", is_blue ? character->getBlueExportName() : character->getRedExportName()), fmt::arg("action", action), fmt::arg("orientation", std::to_string(random.random_int_from_interval(1, 9))));
+					if (!std::filesystem::exists(directory_path)) {
+						characters_with_one_orientation.insert(character);
+						directory_path = character_directory / fmt::format("{export_name}_{action}_1", fmt::arg("export_name", is_blue ? character->getBlueExportName() : character->getRedExportName()), fmt::arg("action", action));
+					}
+				}
 
 				std::filesystem::path image;
 				do {
-					std::filesystem::path directory_path = character_directory / fmt::format("{export_name}_{action}_{rotation}", fmt::arg("export_name", is_blue ? character->getBlueExportName() : character->getRedExportName()), fmt::arg("action", action), fmt::arg("rotation", std::to_string(random.random_int_from_interval(1, 9))));
 					auto maybeImage = random.try_get_random_file_from_directory(directory_path);
 					if (!maybeImage.has_value()) {
 						spdlog::error("Unable to get an image from the directory: {} | {}", directory_path.string(), maybeImage.error());
