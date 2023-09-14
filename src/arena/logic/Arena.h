@@ -6,7 +6,6 @@
 #include <filesystem>
 #include <optional>
 
-
 #include "../../utils/Random.h"
 #include "../../utils/Global.hpp"
 
@@ -42,8 +41,10 @@ namespace arena {
 		Arena(ArenaType arena_type, TowerSkin blue_side, TowerSkin red_side, Canvas canvas);
 		void add_arena_tower(pEntityData entity_data, std::string character, std::string team_side, TowerSkin tower_skin, int x, int y);
 		tl::expected<std::filesystem::path, std::string> try_get_arena_tower_path(std::string character, std::string team_side, TowerSkin tower_skin);
+		void draw_entity(pEntity entity);
 
-		std::vector<pEntity> entities;
+		std::vector<pEntity> air_entities;
+		std::vector<pEntity> ground_entities;
 
 		ArenaType arena_type;
 		TowerSkin blue_side_tower_skin;

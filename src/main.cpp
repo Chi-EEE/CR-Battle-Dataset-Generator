@@ -85,7 +85,7 @@ std::vector<std::string> allowed_characters = {
 	"GoblinBrawler",
 	"GoblinGiant",
 	"EliteArcher",
-	"SpearGoblinGiant",
+	//"SpearGoblinGiant",
 	"Ram",
 	//"RamRider",
 	"ThreeMusketeer",
