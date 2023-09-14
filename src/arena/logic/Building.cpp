@@ -19,12 +19,7 @@ namespace arena {
 	void Building::draw(Canvas& canvas)
 	{
 		Image image = ImageLoader::get_instance().try_load_image(this->file_path).value();
-
-		double entity_width = image.get_width() * 1.161616;
-		double entity_height = image.get_height() * 1.161616;
-
-		SkRect entity_rect = SkRect::MakeXYWH(this->x - (entity_width / 2), this->y - (entity_height / 2), entity_width, entity_height);
-
+		SkRect entity_rect = SkRect::MakeXYWH(this->x - (size.x / 2), this->y - (size.y / 2), size.x, size.y);
 #ifdef ENABLE_SHADOWS
 		Canvas entity_shadow_canvas = Canvas(entity_width, entity_height);
 		entity_shadow_canvas.draw_image(image, SkRect::MakeXYWH(0, 0, entity_width, entity_height));
