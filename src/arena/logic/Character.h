@@ -19,13 +19,12 @@ namespace arena {
     class Character : public Entity
     {
     public:
-        static tl::expected<Character, std::string> create(pEntityData entity_data, std::filesystem::path file_path, int x, int y, bool is_air);
+        static tl::expected<Character, std::string> create(pEntityData entity_data, std::filesystem::path file_path);
         void draw(Canvas& canvas);
         ~Character();
 
     private:
-        Character(pEntityData entity_data, std::filesystem::path file_path, int x, int y, bool is_air);
-
+        Character(pEntityData entity_data, std::filesystem::path file_path);
     };
     typedef std::shared_ptr<Character> pCharacter;
 }

@@ -40,7 +40,7 @@ namespace arena {
 		tl::expected<nullptr_t, std::string> try_save(std::filesystem::path file_path);
 	private:
 		Arena(ArenaType arena_type, TowerSkin blue_side, TowerSkin red_side, Canvas canvas);
-		void add_arena_tower(pEntityData entity_data, std::string character, std::string team_side, TowerSkin tower_skin, int x, int y, bool is_air);
+		void add_arena_tower(pEntityData entity_data, std::string character, std::string team_side, TowerSkin tower_skin, int x, int y);
 		tl::expected<std::filesystem::path, std::string> try_get_arena_tower_path(std::string character, std::string team_side, TowerSkin tower_skin);
 
 		std::vector<pEntity> entities;

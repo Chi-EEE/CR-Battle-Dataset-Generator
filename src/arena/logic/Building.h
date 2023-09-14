@@ -12,11 +12,12 @@ namespace arena {
     class Building : public Entity
     {
     public:
-        static tl::expected<Building, std::string> create(pEntityData entity_data, std::filesystem::path file_path, int x, int y, bool is_air);
+        static tl::expected<Building, std::string> create(pEntityData entity_data, std::filesystem::path file_path);
         void draw(Canvas& canvas) override;
         ~Building();
     private:
-        Building(pEntityData entity_data, std::filesystem::path file_path, int x, int y, bool is_air);
+        Building(pEntityData entity_data, std::filesystem::path file_path);
     };
+    typedef std::shared_ptr<Building> pBuilding;
 }
 #endif

@@ -17,6 +17,8 @@ namespace arena {
 	class Entity : public canvas::Drawable
 	{
 	public:
+		void addSpawnCharacter(std::shared_ptr<Entity> spawn_character);
+		void setPosition(int x, int y);
 		virtual void draw(canvas::Canvas& canvas) = 0;
 		~Entity();
 
@@ -24,9 +26,9 @@ namespace arena {
 		std::filesystem::path file_path;
 		int x;
 		int y;
-		bool is_air;
+		std::shared_ptr<Entity> spawn_character = nullptr;
 	protected:
-		Entity(pEntityData entity_data, std::filesystem::path file_path, int x, int y, bool is_air);
+		Entity(pEntityData entity_data, std::filesystem::path file_path);
 	};
 	typedef std::shared_ptr<Entity> pEntity;
 }

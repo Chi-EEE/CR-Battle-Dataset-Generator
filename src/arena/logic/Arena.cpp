@@ -12,22 +12,24 @@ namespace arena {
 		auto princess_tower = entity_data_indexer.getEntityDataByName("PrincessTower");
 		auto king_tower = entity_data_indexer.getEntityDataByName("KingTower");
 
-		add_arena_tower(princess_tower,  "princess", "blue", this->blue_side_tower_skin, 171, 788, false);
-		add_arena_tower(princess_tower, "princess", "blue", this->blue_side_tower_skin, 548, 788, false);
-		add_arena_tower(king_tower, "king", "blue", this->blue_side_tower_skin, 360, 875, false);
+		add_arena_tower(princess_tower,  "princess", "blue", this->blue_side_tower_skin, 171, 788);
+		add_arena_tower(princess_tower, "princess", "blue", this->blue_side_tower_skin, 548, 788);
+		add_arena_tower(king_tower, "king", "blue", this->blue_side_tower_skin, 360, 875);
 
-		add_arena_tower(princess_tower, "princess", "red", this->red_side_tower_skin, 171, 262, false);
-		add_arena_tower(princess_tower, "princess", "red", this->red_side_tower_skin, 548, 262, false);
-		add_arena_tower(king_tower, "king", "red", this->red_side_tower_skin, 360, 167, false);
+		add_arena_tower(princess_tower, "princess", "red", this->red_side_tower_skin, 171, 262);
+		add_arena_tower(princess_tower, "princess", "red", this->red_side_tower_skin, 548, 262);
+		add_arena_tower(king_tower, "king", "red", this->red_side_tower_skin, 360, 167);
 	}
 
-	void Arena::add_arena_tower(pEntityData entity_data, std::string character, std::string team_side, TowerSkin tower_skin, int x, int y, bool is_air)
+	void Arena::add_arena_tower(pEntityData entity_data, std::string character, std::string team_side, TowerSkin tower_skin, int x, int y)
 	{
 		auto result = try_get_arena_tower_path(character, team_side, tower_skin);
 		if (!result.has_value()) throw std::exception(result.error().c_str());
-		auto building_instance_result = Building::create(entity_data, result.value(), x, y, is_air);
+		auto building_instance_result = Building::create(entity_data, result.value());
 		if (!building_instance_result.has_value()) throw std::exception(building_instance_result.error().c_str());
-		this->entities.push_back(std::make_shared<Building>(building_instance_result.value()));
+		pBuilding building = std::make_shared<Building>(building_instance_result.value());
+		building->setPosition(x, y);
+		this->entities.push_back(building);
 	}
 
 	tl::expected<std::filesystem::path, std::string> Arena::try_get_arena_tower_path(std::string character, std::string team_side, TowerSkin tower_skin)
@@ -84,16 +86,35 @@ namespace arena {
 	void Arena::draw()
 	{
 		std::sort(this->entities.begin(), this->entities.end(), [](const pEntity& entity_1, const pEntity& entity_2) -> bool {
-			if (~(entity_1->is_air & entity_2->is_air))
+			if (~(entity_1->entity_data->getFlyingHeight() & entity_2->entity_data->getFlyingHeight()))
 			{
 				return entity_1->y < entity_2->y;
 			}
-			else if (entity_1->is_air)
+			else if (entity_1->entity_data->getFlyingHeight())
 				return false;
-			else /*e2->is_air*/ return true;
+			else /*entity_2->entity_data->getFlyingHeight()*/ return true;
 		});
 		for (auto& entity : this->entities) {
 			entity->draw(this->canvas);
+			if (entity->spawn_character != nullptr) {
+				Image entity_image = ImageLoader::get_instance().try_load_image(entity->spawn_character->file_path).value();
+				Image parent_entity_image = ImageLoader::get_instance().try_load_image(entity->file_path).value();
+
+				int entity_scale = entity->entity_data->getScale();
+				int parent_entity_scale = entity->spawn_character->entity_data->getScale();
+
+				double entity_image_width = (entity_image.get_width() * (entity_scale / 100.0)) * 1.161616;
+				double entity_image_height = (entity_image.get_height() * (entity_scale / 100.0)) * 1.161616;
+
+				double parent_entity_image_width = (parent_entity_image.get_width() * (parent_entity_scale / 100.0)) * 1.161616;
+				double parent_entity_image_height = (parent_entity_image.get_height() * (parent_entity_scale / 100.0)) * 1.161616;
+
+				Random& random = Random::get_instance();
+				for (int i = 0; i < entity->entity_data->getSpawnNumber(); i++) {
+					SkRect entity_rect = SkRect::MakeXYWH(random.random_int_from_interval(entity->x - (parent_entity_image_width / 2), entity->x + (parent_entity_image_width / 2)), random.random_int_from_interval(entity->y - (parent_entity_image_height / 2), entity->y + (parent_entity_image_height / 2)), entity_image_width, entity_image_height);
+					canvas.draw_image(entity_image, entity_rect);
+				}
+			}
 		}
 	}
 
