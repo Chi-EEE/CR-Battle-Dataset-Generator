@@ -6,6 +6,8 @@
 #include <string>
 #include <unordered_map>
 
+#include "spdlog/spdlog.h"
+
 #include "../../utils/Global.hpp"
 
 #include "../../files/FileManager.h"

@@ -46,7 +46,7 @@ namespace canvas {
 					}
 				}
 			}
-			return { totalR / visiblePixelCount * 1.0f, totalG / visiblePixelCount * 1.0f, totalB / visiblePixelCount * 1.0f };
+			return SkV3{ totalR / visiblePixelCount * 1.0f, totalG / visiblePixelCount * 1.0f, totalB / visiblePixelCount * 1.0f };
 		}
 		int get_width() {
 			return this->image->width();

@@ -13,6 +13,8 @@
 
 #include "../data/EntityData.h"
 
+#include "../../utils/Global.hpp"
+
 using namespace arena::data;
 using namespace csv;
 using namespace canvas;
@@ -23,8 +25,8 @@ namespace arena {
 	public:
 		void addSpawnCharacter(std::shared_ptr<Entity> spawn_character);
 		void setPosition(int x, int y);
-		void draw_bounding_box(Canvas& canvas, SkColor& color, SkRect& entity_rect);
-		virtual void draw(Canvas& canvas) = 0;
+		void draw(Canvas& canvas);
+		void draw_bounding_box(Canvas& canvas, SkRect& entity_rect, Image& image);
 		~Entity();
 
 		pEntityData entity_data;

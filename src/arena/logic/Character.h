@@ -22,7 +22,6 @@ namespace arena {
     {
     public:
         static tl::expected<Character, std::string> create(pEntityData entity_data, std::filesystem::path file_path);
-        void draw(Canvas& canvas);
         ~Character();
 
     private:

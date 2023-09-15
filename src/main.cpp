@@ -135,6 +135,7 @@ tl::expected<bool, std::string> try_read_settings_json() {
 			{"character_count", 0},
 			{"asset_directory", ""},
 			{"output_directory", ""},
+			{"display_bounding_boxes", false},
 			{"ready", false},
 			{"debug", false},
 		};

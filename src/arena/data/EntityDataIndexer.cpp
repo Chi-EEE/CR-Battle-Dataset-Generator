@@ -41,11 +41,19 @@ namespace arena::data
 
 	pEntityData EntityDataIndexer::getEntityDataByFileName(std::string file_name)
 	{
-		return this->entity_data_file_name_map["sc/" + file_name];
+		auto entity_data = this->entity_data_file_name_map["sc/" + file_name];
+		if (entity_data == nullptr) {
+			spdlog::error("Unable to get EntityData from sc/{}", file_name);
+		}
+		return entity_data;
 	}
 
 	pEntityData EntityDataIndexer::getEntityDataByName(std::string name)
 	{
-		return this->entity_data_name_map[name];
+		auto entity_data = this->entity_data_name_map[name];
+		if (entity_data == nullptr) {
+			spdlog::error("Unable to get EntityData from {}", name);
+		}
+		return entity_data;
 	}
 }

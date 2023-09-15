@@ -13,7 +13,6 @@ namespace arena {
     {
     public:
         static tl::expected<Building, std::string> create(pEntityData entity_data, std::filesystem::path file_path);
-        void draw(Canvas& canvas) override;
         ~Building();
     private:
         Building(pEntityData entity_data, std::filesystem::path file_path);
