@@ -12,6 +12,8 @@
 #include "../../files/data/Table.hpp"
 #include "../data/EntityData.h"
 
+#include "../../utils/Global.hpp"
+
 using namespace canvas;
 using namespace csv;
 

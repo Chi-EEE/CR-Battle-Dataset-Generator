@@ -33,6 +33,7 @@ namespace canvas {
 		}
 		void draw_canvas(Canvas canvas, SkRect dstRect);
 		void draw_image(Image image, SkRect dstRect);
+		void draw_rect(SkRect dst, SkPaint box);
 		Canvas crop(const SkRect& cropRect);
 		Canvas stretch(const SkPoint& stretchVector);
 		Canvas vertical_flip();

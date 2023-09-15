@@ -29,6 +29,11 @@ namespace canvas {
 		surface->getCanvas()->drawImageRect(image.get_image(), dstRect, SkSamplingOptions());
 	}
 
+	void Canvas::draw_rect(SkRect dstRect, SkPaint paint)
+	{
+		this->surface->getCanvas()->drawRect(dstRect, paint);
+	}
+
 	Canvas Canvas::crop(const SkRect& cropRect)
 	{
 		Canvas croppedCanvas = Canvas(cropRect.fRight - cropRect.fLeft, cropRect.fTop - cropRect.fBottom);

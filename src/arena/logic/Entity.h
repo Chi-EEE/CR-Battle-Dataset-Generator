@@ -4,6 +4,9 @@
 #pragma once
 
 #include <filesystem>
+
+#include "../data/EntityColorManager.hpp"
+
 #include "../../canvas/ImageLoader.h"
 #include "../../canvas/Drawable.h"
 #include "../../canvas/Canvas.h"

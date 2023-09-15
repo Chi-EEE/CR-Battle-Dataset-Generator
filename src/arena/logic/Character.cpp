@@ -21,6 +21,16 @@ namespace arena {
 	{
 		Image image = ImageLoader::get_instance().try_load_image(this->file_path).value();
 		SkRect entity_rect = SkRect::MakeXYWH(this->x - (size.x / 2), this->y - (size.y / 2), size.x, size.y);
+
+		if (Global::get_json()["display_bounding_boxes"].get<bool>()) {
+			SkV3 average_color = EntityColorManager::getInstance().get_average_color(this->entity_data, image);
+			SkPaint box;
+			box.setColor(SkColorSetARGB(255, average_color.x, average_color.y, average_color.z));
+			box.setStyle(SkPaint::Style::kStroke_Style);
+			box.setStrokeWidth(1.0f);
+			canvas.draw_rect(SkRect::MakeXYWH(this->x, this->, this->size.x, this->size.y), box);
+		}
+
 #ifdef ENABLE_SHADOWS // Code is broken and I'll fix when working on shadows
 		Canvas entity_shadow_canvas = Canvas(entity_width, entity_height);
 		entity_shadow_canvas.draw_image(image, SkRect::MakeXYWH(0, 0, entity_width, entity_height));
