@@ -35,4 +35,6 @@ Earthquake
 Size variance
 Zap
 
+Prestige / Make Character have gold patches
+
 Use Skew for shadows
