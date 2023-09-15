@@ -14,6 +14,8 @@ using json = nlohmann::json;
 
 class Global {
 public:
+	static double scale;
+
 	static json& get_json() {
 		static json instance;
 		return instance;
@@ -37,5 +39,6 @@ public:
 		}
 	}
 };
+double Global::scale = Global::scale;
 
 #endif

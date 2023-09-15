@@ -3,8 +3,9 @@
 namespace arena {
 	Entity::Entity(pEntityData entity_data, std::filesystem::path file_path) : entity_data(entity_data), file_path(file_path), texture(ImageLoader::get_instance().try_load_image(file_path).value())
 	{
-		float entity_width = this->texture.get_width() * 1.161616;
-		float entity_height = this->texture.get_height() * 1.161616;
+		float scale = (this->entity_data->getScale() / 100.0f);
+		float entity_width = (this->texture.get_width() * scale) * Global::scale;
+		float entity_height = (this->texture.get_height() * scale) * Global::scale;
 
 		this->size = { entity_width, entity_height };
 

@@ -49,12 +49,22 @@ namespace arena {
 
 			int entity_scale = entity->entity_data->getScale();
 
-			double entity_image_width = (entity_image.get_width() * (entity_scale / 100.0)) * 1.161616;
-			double entity_image_height = (entity_image.get_height() * (entity_scale / 100.0)) * 1.161616;
+			double entity_image_width = (entity_image.get_width() * (entity_scale / 100.0)) * Global::scale;
+			double entity_image_height = (entity_image.get_height() * (entity_scale / 100.0)) * Global::scale;
 
 			Random& random = Random::get_instance();
 			for (int i = 0; i < entity->entity_data->getSpawnNumber(); i++) {
-				SkRect rect = SkRect::MakeXYWH(random.random_int_from_interval(entity->rect.fLeft, entity->rect.fRight), random.random_int_from_interval(entity->rect.fTop, entity->rect.fBottom), entity_image_width, entity_image_height);
+				SkRect rect = SkRect::MakeXYWH(
+					random.random_int_from_interval(
+						entity->rect.fLeft - (entity_image_width / 2),
+						entity->rect.fRight - (entity_image_width / 2)
+					),
+					random.random_int_from_interval(
+						entity->rect.fTop - (entity_image_height / 2),
+						entity->rect.fBottom - (entity_image_height / 2)
+					), 
+					entity_image_width, entity_image_height
+				);
 				this->canvas.draw_image(entity_image, rect);
 			}
 		}
@@ -92,14 +102,14 @@ namespace arena {
 	{
 		for (auto entity : this->ground_entities) {
 			double distance = sqrt(pow(entity->x - character->x, 2) + pow(entity->y - character->y, 2)) * 32;
-			bool inside_bounds = distance <= entity->entity_data->getCollisionRadius() + character->entity_data->getCollisionRadius();
+			bool inside_bounds = distance <= (entity->entity_data->getCollisionRadius() * Global::scale) + (character->entity_data->getCollisionRadius() * Global::scale);
 			spdlog::debug("CurrentName:{}|Name:{}|Distance:{}|Inside_Bounds:{}", character->entity_data->getName(), entity->entity_data->getName(), distance, inside_bounds);
 			if (inside_bounds)
 				return false;
 		}
 		for (auto entity : this->air_entities) {
 			double distance = sqrt(pow(entity->x - character->x, 2) + pow(entity->y - character->y, 2)) * 32;
-			bool inside_bounds = distance <= (entity->entity_data->getCollisionRadius() * 4) + character->entity_data->getCollisionRadius();
+			bool inside_bounds = distance <= (entity->entity_data->getCollisionRadius() * 4 * Global::scale) + (character->entity_data->getCollisionRadius() * Global::scale);
 			spdlog::debug("CurrentName:{}|Name:{}|Distance:{}|Inside_Bounds:{}", character->entity_data->getName(), entity->entity_data->getName(), distance, inside_bounds);
 			if (inside_bounds)
 				return false;
