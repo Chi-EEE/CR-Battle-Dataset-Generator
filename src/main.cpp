@@ -131,7 +131,8 @@ tl::expected<bool, std::string> try_read_settings_json() {
 	if (!std::filesystem::is_regular_file("config/settings.json") || !std::filesystem::exists("config/settings.json")) {
 		json j = {
 			{"image_count", 0},
-			{"character_count", 0},
+			{"character_min_count", 0},
+			{"character_max_count", 0},
 			{"asset_directory", ""},
 			{"output_directory", ""},
 			{"display_bounding_boxes", false},
@@ -303,7 +304,9 @@ int main() {
 	}
 
 	int image_count(Global::get_json()["image_count"].get<int>());
-	int character_count(Global::get_json()["character_count"].get<int>());
+	int character_min_count(Global::get_json()["character_min_count"].get<int>());
+	int character_max_count(Global::get_json()["character_max_count"].get<int>());
+	(Global::get_json()["character_max_count"].get<int>());
 	std::filesystem::path asset_directory(Global::get_json()["asset_directory"].get<std::string>());
 	std::filesystem::path output_directory(Global::get_json()["output_directory"].get<std::string>());
 	bool debug(Global::get_json()["debug"].get<bool>());
@@ -322,7 +325,8 @@ int main() {
 	spdlog::info("Starting to generate images and annotations!\n");
 	long total_character_count = 1;
 	for (int image_id = 1; image_id < image_count + 1; image_id++) {
-		auto result = generate_battle(image_id, character_count, total_character_count, asset_directory, output_image_directory);
+		int character_count = Random::get_instance().random_int_from_interval(character_min_count, character_max_count);
+		auto result = generate_battle(image_id, , total_character_count, asset_directory, output_image_directory);
 		std::vector<json> character_coco_objects = result.first;
 		json image_coco_object = result.second;
 
