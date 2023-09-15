@@ -59,8 +59,8 @@ namespace arena {
 
 			Random& random = Random::get_instance();
 			for (int i = 0; i < entity->entity_data->getSpawnNumber(); i++) {
-				SkRect entity_rect = SkRect::MakeXYWH(random.random_int_from_interval(entity->x - (parent_entity_image_width / 2), entity->x + (parent_entity_image_width / 2)), random.random_int_from_interval(entity->y - (parent_entity_image_height / 2), entity->y + (parent_entity_image_height / 2)), entity_image_width, entity_image_height);
-				this->canvas.draw_image(entity_image, entity_rect);
+				SkRect rect = SkRect::MakeXYWH(random.random_int_from_interval(entity->x - (parent_entity_image_width / 2), entity->x + (parent_entity_image_width / 2)), random.random_int_from_interval(entity->y - (parent_entity_image_height / 2), entity->y + (parent_entity_image_height / 2)), entity_image_width, entity_image_height);
+				this->canvas.draw_image(entity_image, rect);
 			}
 		}
 	}
@@ -104,7 +104,7 @@ namespace arena {
 		}
 		for (auto entity : this->air_entities) {
 			double distance = sqrt(pow(entity->x - character->x, 2) + pow(entity->y - character->y, 2)) * 32;
-			bool inside_bounds = distance <= (entity->entity_data->getCollisionRadius() * 3) + character->entity_data->getCollisionRadius();
+			bool inside_bounds = distance <= (entity->entity_data->getCollisionRadius() * 4) + character->entity_data->getCollisionRadius();
 			spdlog::debug("CurrentName:{}|Name:{}|Distance:{}|Inside_Bounds:{}", character->entity_data->getName(), entity->entity_data->getName(), distance, inside_bounds);
 			if (inside_bounds)
 				return false;
@@ -135,6 +135,14 @@ namespace arena {
 		}
 		for (auto& entity : this->air_entities) {
 			this->draw_entity(entity);
+		}
+		if (Global::get_json()["display_bounding_boxes"].get<bool>()) {
+			for (auto& entity : this->ground_entities) {
+				entity->draw_annotation_box(this->canvas);
+			}
+			for (auto& entity : this->air_entities) {
+				entity->draw_annotation_box(this->canvas);
+			}
 		}
 	}
 

@@ -17,6 +17,8 @@
 #include "core/SkStream.h"
 #include "core/SkSurface.h"
 #include "core/SkTypes.h"
+#include "core/SkTypeface.h"
+#include "core/SkFont.h"
 
 namespace canvas {
 	class Canvas
@@ -32,7 +34,8 @@ namespace canvas {
 			return this->surface->height();
 		}
 		void draw_canvas(Canvas canvas, SkRect dstRect);
-		void draw_image(Image image, SkRect dstRect);
+		void draw_image(Image& image, SkRect dstRect);
+		void draw_text(std::string string, int x, int y);
 		void draw_rect(SkRect dst, SkPaint box);
 		Canvas crop(const SkRect& cropRect);
 		Canvas stretch(const SkPoint& stretchVector);

@@ -11,7 +11,8 @@ namespace canvas {
 		int width = this->get_width();
 		int height = this->get_height();
 		Canvas canvas = Canvas(width, width);
-		canvas.draw_image(this->snapshot(), SkRect::MakeLTRB(0, 0, width, height));
+		Image snapshot = this->snapshot();
+		canvas.draw_image(snapshot, SkRect::MakeLTRB(0, 0, width, height));
 		return canvas;
 	}
 
@@ -24,27 +25,34 @@ namespace canvas {
 		surface->getCanvas()->drawImageRect(canvas.surface->makeImageSnapshot(), dstRect, SkSamplingOptions());
 	}
 
-	void Canvas::draw_image(Image image, SkRect dstRect)
+	void Canvas::draw_image(Image &image, SkRect dstRect)
 	{
 		surface->getCanvas()->drawImageRect(image.get_image(), dstRect, SkSamplingOptions());
 	}
 
-	void Canvas::draw_rect(SkRect dstRect, SkPaint paint)
+	void Canvas::draw_text(std::string string, int x, int y)
 	{
+		SkFont defaultFont = SkFont(SkTypeface::MakeDefault());
+		this->surface->getCanvas()->drawString(string.c_str(), x, y, defaultFont, SkPaint::SkPaint(SkColor4f::FromColor(SK_ColorBLACK)));
+	}
+
+	void Canvas::draw_rect(SkRect dstRect, SkPaint paint) {
 		this->surface->getCanvas()->drawRect(dstRect, paint);
 	}
 
 	Canvas Canvas::crop(const SkRect& cropRect)
 	{
 		Canvas croppedCanvas = Canvas(cropRect.fRight - cropRect.fLeft, cropRect.fTop - cropRect.fBottom);
-		croppedCanvas.draw_image(this->surface->makeImageSnapshot(), cropRect);
+		Image snapshot = this->snapshot();
+		croppedCanvas.draw_image(snapshot, cropRect);
 		return croppedCanvas;
 	}
 
 	Canvas Canvas::stretch(const SkPoint& stretchVector)
 	{
 		Canvas stretchedCanvas = Canvas(stretchVector.fX, stretchVector.fY);
-		stretchedCanvas.draw_image(this->surface->makeImageSnapshot(), SkRect::MakeXYWH(0, 0, stretchVector.fX, stretchVector.fY));
+		Image snapshot = this->snapshot();
+		stretchedCanvas.draw_image(snapshot, SkRect::MakeXYWH(0, 0, stretchVector.fX, stretchVector.fY));
 		return stretchedCanvas;
 	}
 
@@ -57,7 +65,8 @@ namespace canvas {
 
 		flippedCanvas->translate(0, height);
 		flippedCanvas->scale(1, -1);
-		verticalFlippedCanvas.draw_image(this->surface->makeImageSnapshot(), SkRect::MakeXYWH(0, 0, width, height));
+		Image snapshot = this->snapshot();
+		verticalFlippedCanvas.draw_image(snapshot, SkRect::MakeXYWH(0, 0, width, height));
 
 		return verticalFlippedCanvas;
 	}
@@ -71,7 +80,8 @@ namespace canvas {
 
 		flipped_sk_canvas->translate(width, 0);
 		flipped_sk_canvas->scale(-1, 1);
-		vertical_flipped_canvas.draw_image(this->surface->makeImageSnapshot(), SkRect::MakeXYWH(0, 0, width, height));
+		Image snapshot = this->snapshot();
+		vertical_flipped_canvas.draw_image(snapshot, SkRect::MakeXYWH(0, 0, width, height));
 
 		return vertical_flipped_canvas;
 	}
@@ -83,7 +93,8 @@ namespace canvas {
 		Canvas skewed_canvas = Canvas(width, height);
 		SkCanvas* skewed_sk_canvas = skewed_canvas.surface->getCanvas();
 		skewed_sk_canvas->skew(sx, sy);
-		skewed_canvas.draw_image(this->surface->makeImageSnapshot(), SkRect::MakeXYWH(width * ((sx / 3) * -1), 0, width, height));
+		Image snapshot = this->snapshot();
+		skewed_canvas.draw_image(snapshot, SkRect::MakeXYWH(width * ((sx / 3) * -1), 0, width, height));
 
 		return skewed_canvas;
 	}

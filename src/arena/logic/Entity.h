@@ -26,14 +26,20 @@ namespace arena {
 		void addSpawnCharacter(std::shared_ptr<Entity> spawn_character);
 		void setPosition(int x, int y);
 		void draw(Canvas& canvas);
-		void draw_bounding_box(Canvas& canvas, SkRect& entity_rect, Image& image);
+		void draw_annotation_box(Canvas& canvas);
+		void draw_shadow(Canvas& canvas);
 		~Entity();
 
 		pEntityData entity_data;
 		std::filesystem::path file_path;
 		int x;
 		int y;
+		
 		SkV2 size;
+		SkRect rect;
+
+		Image texture;
+
 		std::shared_ptr<Entity> spawn_character = nullptr;
 	protected:
 		Entity(pEntityData entity_data, std::filesystem::path file_path);
