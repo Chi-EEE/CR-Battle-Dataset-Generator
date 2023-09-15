@@ -46,20 +46,15 @@ namespace arena {
 		entity->draw(this->canvas);
 		if (entity->spawn_character != nullptr) {
 			Image entity_image = ImageLoader::get_instance().try_load_image(entity->spawn_character->file_path).value();
-			Image parent_entity_image = ImageLoader::get_instance().try_load_image(entity->file_path).value();
 
 			int entity_scale = entity->entity_data->getScale();
-			int parent_entity_scale = entity->spawn_character->entity_data->getScale();
 
 			double entity_image_width = (entity_image.get_width() * (entity_scale / 100.0)) * 1.161616;
 			double entity_image_height = (entity_image.get_height() * (entity_scale / 100.0)) * 1.161616;
 
-			double parent_entity_image_width = (parent_entity_image.get_width() * (parent_entity_scale / 100.0)) * 1.161616;
-			double parent_entity_image_height = (parent_entity_image.get_height() * (parent_entity_scale / 100.0)) * 1.161616;
-
 			Random& random = Random::get_instance();
 			for (int i = 0; i < entity->entity_data->getSpawnNumber(); i++) {
-				SkRect rect = SkRect::MakeXYWH(random.random_int_from_interval(entity->x - (parent_entity_image_width / 2), entity->x + (parent_entity_image_width / 2)), random.random_int_from_interval(entity->y - (parent_entity_image_height / 2), entity->y + (parent_entity_image_height / 2)), entity_image_width, entity_image_height);
+				SkRect rect = SkRect::MakeXYWH(random.random_int_from_interval(entity->rect.fLeft, entity->rect.fRight), random.random_int_from_interval(entity->rect.fTop, entity->rect.fBottom), entity_image_width, entity_image_height);
 				this->canvas.draw_image(entity_image, rect);
 			}
 		}
