@@ -27,5 +27,12 @@ Troop: Health & Level & If evolution
 Troop Spawn: Clock / Timer for deploy
 Troop death: Drop elixir
 
+Effects:
+Poison
+Snowball Slow
+Heal
+Earthquake
+Size variance
+Zap
 
 Use Skew for shadows
