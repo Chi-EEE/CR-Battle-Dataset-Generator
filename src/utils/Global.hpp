@@ -39,6 +39,5 @@ public:
 		}
 	}
 };
-double Global::scale = Global::scale;
 
 #endif

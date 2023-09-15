@@ -56,8 +56,8 @@ namespace arena {
 			for (int i = 0; i < entity->entity_data->getSpawnNumber(); i++) {
 				SkRect rect = SkRect::MakeXYWH(
 					random.random_int_from_interval(
-						entity->rect.fLeft - (entity_image_width / 2),
-						entity->rect.fRight - (entity_image_width / 2)
+						entity->rect.fLeft + (entity_image_width / 2),
+						entity->rect.fRight + (entity_image_width / 2)
 					),
 					random.random_int_from_interval(
 						entity->rect.fTop - (entity_image_height / 2),
