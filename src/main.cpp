@@ -196,7 +196,7 @@ std::pair<std::vector<json>, json> generate_battle(int image_id, int character_c
 
 	auto& entity_data_indexer = EntityDataIndexer::getInstance();
 
-	spdlog::info("Generating image {}!\n", image_id);
+	spdlog::info("Generating image {} with {} characters!\n", image_id, character_count);
 	auto arena_result = Arena::try_create(ArenaType::Goblin_Stadium, TowerSkin::Default, TowerSkin::Default);
 	if (!arena_result.has_value()) {
 		spdlog::error("An error has occurred: {}\n", arena_result.error());
@@ -293,6 +293,12 @@ json get_categories() {
 }
 
 int main() {
+	auto start = std::chrono::system_clock::now();
+	{
+		std::time_t start_time = std::chrono::system_clock::to_time_t(start);
+		std::cout << "Started computation at " << std::ctime(&start_time) << '\n';
+	}
+
 	auto read_setting_json_result = try_read_settings_json();
 	if (!read_setting_json_result.has_value()) {
 		std::cerr << read_setting_json_result.error() << '\n';
@@ -306,7 +312,12 @@ int main() {
 	int image_count(Global::get_json()["image_count"].get<int>());
 	int character_min_count(Global::get_json()["character_min_count"].get<int>());
 	int character_max_count(Global::get_json()["character_max_count"].get<int>());
-	(Global::get_json()["character_max_count"].get<int>());
+
+	if (character_min_count > character_max_count) {
+		spdlog::error("character_min_count ({}) is greater than character_max_count ({})", character_min_count, character_max_count);
+		return 0;
+	}
+
 	std::filesystem::path asset_directory(Global::get_json()["asset_directory"].get<std::string>());
 	std::filesystem::path output_directory(Global::get_json()["output_directory"].get<std::string>());
 	bool debug(Global::get_json()["debug"].get<bool>());
@@ -326,7 +337,7 @@ int main() {
 	long total_character_count = 1;
 	for (int image_id = 1; image_id < image_count + 1; image_id++) {
 		int character_count = Random::get_instance().random_int_from_interval(character_min_count, character_max_count);
-		auto result = generate_battle(image_id, , total_character_count, asset_directory, output_image_directory);
+		auto result = generate_battle(image_id, character_count, total_character_count, asset_directory, output_image_directory);
 		std::vector<json> character_coco_objects = result.first;
 		json image_coco_object = result.second;
 
@@ -346,6 +357,14 @@ int main() {
 	outfile.close();
 
 	spdlog::info("Completed generating all images and annotations!");
-EXIT:
+
+	auto end = std::chrono::system_clock::now();
+
+	std::chrono::duration<double> elapsed_seconds = end - start;
+	std::time_t end_time = std::chrono::system_clock::to_time_t(end);
+
+	std::cout << "finished computation at " << std::ctime(&end_time)
+		<< "elapsed time: " << elapsed_seconds.count() << "s"
+		<< std::endl;
 	return 0;
 }
