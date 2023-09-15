@@ -37,6 +37,8 @@ namespace arena {
 		~Arena();
 		Arena clone();
 		tl::expected<nullptr_t, std::string> try_save(std::filesystem::path file_path);
+		int get_width() { return this->canvas.get_width(); }
+		int get_height() { return this->canvas.get_height(); }
 	private:
 		Arena(ArenaType arena_type, TowerSkin blue_side, TowerSkin red_side, Canvas canvas);
 		void add_arena_tower(pEntityData entity_data, std::string character, std::string team_side, TowerSkin tower_skin, int x, int y);
