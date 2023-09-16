@@ -19,3 +19,4 @@ Royal_Crypt
 Silent_Sanctuary
 Dragon_Spa
 Legendary_Arena
+Chess_Arena

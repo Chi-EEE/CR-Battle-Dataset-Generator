@@ -124,6 +124,21 @@ std::vector<std::string> allowed_characters = {
 };
 
 
+std::vector<ArenaType> allowed_arenas = {
+	ArenaType::Goblin_Stadium,
+	ArenaType::Bone_Pit,
+	ArenaType::Barbarian_Bowl,
+	ArenaType::Spell_Valley,
+	ArenaType::Builders_Workshop,
+	ArenaType::PEKKAs_Playhouse,
+	ArenaType::Royal_Arena,
+	ArenaType::Frozen_Peak,
+	ArenaType::Jungle_Arena,
+	ArenaType::Hog_Mountain,
+	ArenaType::Chess_Arena,
+};
+
+
 tl::expected<bool, std::string> try_read_settings_json() {
 	if (!std::filesystem::is_directory("config") || !std::filesystem::exists("config")) {
 		std::filesystem::create_directory("config");
@@ -197,7 +212,7 @@ std::pair<std::vector<json>, json> generate_battle(int image_id, int character_c
 	auto& entity_data_indexer = EntityDataIndexer::getInstance();
 
 	spdlog::info("Generating image {} with {} characters!\n", image_id, character_count);
-	auto arena_result = Arena::try_create(ArenaType::Goblin_Stadium, TowerSkin::Default, TowerSkin::Default);
+	auto arena_result = Arena::try_create(allowed_arenas[random.random_int_from_interval(0, allowed_arenas.size() - 1)], TowerSkin::Default, TowerSkin::Default);
 	if (!arena_result.has_value()) {
 		spdlog::error("An error has occurred: {}\n", arena_result.error());
 		throw std::exception();
