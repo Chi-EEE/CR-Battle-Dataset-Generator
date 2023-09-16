@@ -31,7 +31,10 @@ public:
     Royal_Crypt,
     Silent_Sanctuary,
     Dragon_Spa,
+    Boot_Camp,
+    Clash_Fest,
     Legendary_Arena,
+    Touchdown,
     Chess_Arena,
   };
 
@@ -67,7 +70,10 @@ public:
       case ArenaType::Royal_Crypt: return "Royal_Crypt";
       case ArenaType::Silent_Sanctuary: return "Silent_Sanctuary";
       case ArenaType::Dragon_Spa: return "Dragon_Spa";
+      case ArenaType::Boot_Camp: return "Boot_Camp";
+      case ArenaType::Clash_Fest: return "Clash_Fest";
       case ArenaType::Legendary_Arena: return "Legendary_Arena";
+      case ArenaType::Touchdown: return "Touchdown";
       case ArenaType::Chess_Arena: return "Chess_Arena";
       default: return "Unknown";
     }
@@ -96,7 +102,10 @@ public:
         { "Royal_Crypt", ArenaType::Royal_Crypt },
         { "Silent_Sanctuary", ArenaType::Silent_Sanctuary },
         { "Dragon_Spa", ArenaType::Dragon_Spa },
+        { "Boot_Camp", ArenaType::Boot_Camp },
+        { "Clash_Fest", ArenaType::Clash_Fest },
         { "Legendary_Arena", ArenaType::Legendary_Arena },
+        { "Touchdown", ArenaType::Touchdown },
         { "Chess_Arena", ArenaType::Chess_Arena },
     };
 

@@ -136,6 +136,18 @@ std::vector<ArenaType> allowed_arenas = {
 	ArenaType::Jungle_Arena,
 	ArenaType::Hog_Mountain,
 	ArenaType::Chess_Arena,
+	ArenaType::Electro_Valley,
+	ArenaType::Spooky_Town,
+	ArenaType::Rascals_Hideout,
+	ArenaType::Serenity_Peak,
+	ArenaType::Miners_Mine,
+	ArenaType::Executioners_Kitchen,
+	ArenaType::Royal_Crypt,
+	ArenaType::Silent_Sanctuary,
+	ArenaType::Dragon_Spa,
+	ArenaType::Boot_Camp,
+	ArenaType::Clash_Fest,
+	ArenaType::Touchdown,
 };
 
 
