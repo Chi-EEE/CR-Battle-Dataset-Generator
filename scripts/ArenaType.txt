@@ -18,4 +18,8 @@ Executioners_Kitchen
 Royal_Crypt
 Silent_Sanctuary
 Dragon_Spa
+Boot_Camp
+Clash_Fest
 Legendary_Arena
+Touchdown
+Chess_Arena
