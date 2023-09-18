@@ -11,7 +11,7 @@ namespace canvas {
 		int width = this->get_width();
 		int height = this->get_height();
 		Canvas canvas = Canvas(width, width);
-		Image snapshot = this->snapshot();
+		Texture snapshot = this->snapshot();
 		canvas.draw_image(snapshot, SkRect::MakeLTRB(0, 0, width, height));
 		return canvas;
 	}
@@ -25,7 +25,7 @@ namespace canvas {
 		surface->getCanvas()->drawImageRect(canvas.surface->makeImageSnapshot(), dstRect, SkSamplingOptions());
 	}
 
-	void Canvas::draw_image(Image &image, SkRect dstRect)
+	void Canvas::draw_image(Texture& image, SkRect dstRect)
 	{
 		surface->getCanvas()->drawImageRect(image.get_image(), dstRect, SkSamplingOptions());
 	}
@@ -40,10 +40,10 @@ namespace canvas {
 		this->surface->getCanvas()->drawRect(dstRect, paint);
 	}
 
-	Canvas Canvas::crop(const SkRect& cropRect)
+	/*Canvas Canvas::crop(const SkRect& cropRect)
 	{
 		Canvas croppedCanvas = Canvas(cropRect.fRight - cropRect.fLeft, cropRect.fTop - cropRect.fBottom);
-		Image snapshot = this->snapshot();
+		Texture snapshot = this->snapshot();
 		croppedCanvas.draw_image(snapshot, cropRect);
 		return croppedCanvas;
 	}
@@ -51,12 +51,12 @@ namespace canvas {
 	Canvas Canvas::stretch(const SkPoint& stretchVector)
 	{
 		Canvas stretchedCanvas = Canvas(stretchVector.fX, stretchVector.fY);
-		Image snapshot = this->snapshot();
+		Texture snapshot = this->snapshot();
 		stretchedCanvas.draw_image(snapshot, SkRect::MakeXYWH(0, 0, stretchVector.fX, stretchVector.fY));
 		return stretchedCanvas;
-	}
+	}*/
 
-	Canvas Canvas::vertical_flip()
+	/*Canvas Canvas::vertical_flip()
 	{
 		int width = this->get_width();
 		int height = this->get_height();
@@ -65,7 +65,7 @@ namespace canvas {
 
 		flippedCanvas->translate(0, height);
 		flippedCanvas->scale(1, -1);
-		Image snapshot = this->snapshot();
+		Texture snapshot = this->snapshot();
 		verticalFlippedCanvas.draw_image(snapshot, SkRect::MakeXYWH(0, 0, width, height));
 
 		return verticalFlippedCanvas;
@@ -80,77 +80,67 @@ namespace canvas {
 
 		flipped_sk_canvas->translate(width, 0);
 		flipped_sk_canvas->scale(-1, 1);
-		Image snapshot = this->snapshot();
+		Texture snapshot = this->snapshot();
 		vertical_flipped_canvas.draw_image(snapshot, SkRect::MakeXYWH(0, 0, width, height));
 
 		return vertical_flipped_canvas;
-	}
+	}*/
 
-	Canvas Canvas::skew(SkScalar sx, SkScalar sy)
+	/*Canvas Canvas::skew(SkScalar sx, SkScalar sy)
 	{
 		int width = this->get_width();
 		int height = this->get_height();
 		Canvas skewed_canvas = Canvas(width, height);
 		SkCanvas* skewed_sk_canvas = skewed_canvas.surface->getCanvas();
 		skewed_sk_canvas->skew(sx, sy);
-		Image snapshot = this->snapshot();
+		Texture snapshot = this->snapshot();
 		skewed_canvas.draw_image(snapshot, SkRect::MakeXYWH(width * ((sx / 3) * -1), 0, width, height));
 
 		return skewed_canvas;
-	}
+	}*/
 
-	Image Canvas::replace_pixels_to() {
-		auto image = this->surface->makeImageSnapshot();
-		SkBitmap bitmap;
-		SkImageInfo info = SkImageInfo::MakeN32Premul(image->width(), image->height());
-		bitmap.allocPixels(info);
+	Texture Canvas::replace_pixels_to() {
+		sf::Texture texture = this->snapshot();
+		sf::Image image = texture.copyToImage();
 
-		SkCanvas canvas(bitmap);
-		canvas.drawImage(image, 0, 0);
+		sf::Vector2u size = texture.getSize();
+
+		auto width = size.x;
+		auto height = size.y;
 
 		// Modify the pixel values in the bitmap
-		for (int y = 0; y < info.height(); y++) {
-			for (int x = 0; x < info.width(); x++) {
-				SkPMColor* pixel = bitmap.getAddr32(x, y);
-				uint8_t alpha = SkColorGetA(*pixel);
-
-				if (alpha > 0) {
-					uint8_t newAlpha = std::max(alpha - 150, 0);
-					*pixel = SkColorSetARGB(newAlpha, 0, 0, 0);  // Set to semi-transparent black
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; x++) {
+				sf::Color pixel_color = image.getPixel(x, y);
+				if (pixel_color.a > 0) {
+					image.setPixel(x, y, sf::Color{ 0,0,0,std::max(pixel_color.a - 150, 0) });
 				}
 			}
 		}
-
-		return SkImage::MakeFromBitmap(bitmap);
+		texture.update(image);
+		return texture;
 	}
 
-	sk_sp<SkImage> Canvas::snapshot()
+	sf::Texture Canvas::snapshot()
 	{
-		return this->surface->makeImageSnapshot();
+		sf::Texture texture;
+		texture.create(this->window.getSize().x, this->window.getSize().y);
+		texture.update(this->window);
+		return texture;
 	}
 
 	void Canvas::clear()
 	{
-		surface->getCanvas()->clear(SK_ColorTRANSPARENT);
+		this->window.clear();
 	}
 
 	tl::expected<nullptr_t, std::string> Canvas::try_save(std::filesystem::path file_path)
 	{
-		sk_sp<SkImage> imageFromSurface(surface->makeImageSnapshot());
-		if (!imageFromSurface) {
-			return tl::make_unexpected("Failed to create image snapshot!");
-		}
-
-		sk_sp<SkData> imageEncoded = imageFromSurface->encodeToData();
-		if (!imageEncoded) {
-			return tl::make_unexpected("Failed to encode image to PNG!");
-		}
-
-		SkFILEWStream fileStream(file_path.string().c_str());
-		if (!fileStream.isValid()) {
+		sf::Texture texture = this->snapshot();
+		if (!texture.copyToImage().saveToFile(file_path.string()))
+		{
 			return tl::make_unexpected("Failed to create output file!");
 		}
-		fileStream.write(imageEncoded->data(), imageEncoded->size());
 		return nullptr;
 	}
 }

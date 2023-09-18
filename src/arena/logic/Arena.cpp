@@ -50,7 +50,7 @@ namespace arena {
 	}
 
 	void Arena::draw_spawn_entity(pEntity entity) {
-		Image entity_image = ImageLoader::get_instance().try_load_image(entity->spawn_character->file_path).value();
+		Texture entity_image = ImageLoader::get_instance().try_load_image(entity->spawn_character->file_path).value();
 
 		int entity_scale = entity->entity_data->getScale();
 
@@ -59,17 +59,17 @@ namespace arena {
 
 		Random& random = Random::get_instance();
 		for (int i = 0; i < entity->entity_data->getSpawnNumber(); i++) {
-			SkRect rect = SkRect::MakeXYWH(
+			sf::Rect<float> rect = sf::Rect<float>{
 				random.random_int_from_interval(
 					entity->rect.fLeft + (entity_image_width / 2),
 					entity->rect.fRight - (entity_image_width / 2)
 				),
 				random.random_int_from_interval(
-					entity->rect.fTop + (entity_image_height / 2),
-					entity->rect.fBottom - (entity_image_height / 2)
+					entity->rect.top + (entity_image_height / 2),
+					entity->rect.top + entity->rect.height - (entity_image_height / 2)
 				),
 				entity_image_width, entity_image_height
-			);
+			};
 			this->canvas.draw_image(entity_image, rect);
 		}
 	}

@@ -4,32 +4,30 @@
 #pragma once
 
 #include "tl/expected.hpp"
-#include "core/SkData.h"
-#include "core/SkImage.h"
 #include "fmt/format.h"
+
+#include "SFML/Graphics/Texture.hpp"
+#include "SFML/System/Vector3.hpp"
 
 #include <filesystem>
 #include <string>
 
 namespace canvas {
-	class Image
+	class Texture
 	{
 	public:
-		static tl::expected<Image, std::string> try_from_file(std::filesystem::path file_path);
-		Image(sk_sp<SkImage> image);
-		~Image();
-		sk_sp<SkImage> get_image() {
-			return image;
+		static tl::expected<Texture, std::string> try_from_file(std::filesystem::path file_path);
+		Texture(sf::Texture texture);
+		~Texture();
+		sf::Texture get_texture() {
+			return texture;
 		}
-		tl::expected<SkV3, std::string> get_average_color();
-		int get_width() {
-			return this->image->width();
-		}
-		int get_height() {
-			return this->image->height();
+		tl::expected<sf::Vector3<float>, std::string> get_average_color();
+		sf::Vector2u get_size() {
+			return this->texture.getSize();
 		}
 	private:
-		sk_sp<SkImage> image;
+		sf::Texture texture;
 	};
 }
 

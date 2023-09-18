@@ -4,12 +4,15 @@ namespace arena {
 	Entity::Entity(pEntityData entity_data, std::filesystem::path file_path) : entity_data(entity_data), file_path(file_path), texture(ImageLoader::get_instance().try_load_image(file_path).value())
 	{
 		float scale = (this->entity_data->getScale() / 100.0f);
-		float entity_width = (this->texture.get_width() * scale) * Global::scale;
-		float entity_height = (this->texture.get_height() * scale) * Global::scale;
+
+		sf::Vector2u size = this->texture.get_size();
+
+		float entity_width = (size.x * scale) * Global::scale;
+		float entity_height = (size.y * scale) * Global::scale;
 
 		this->size = { entity_width, entity_height };
 
-		this->rect = SkRect::MakeXYWH(0, 0, this->size.x, this->size.y);
+		this->rect = sf::Rect<float>{ 0.0f, 0.0f, this->size.x, this->size.y };
 	}
 
 	void Entity::addSpawnCharacter(std::shared_ptr<Entity> spawn_character)
@@ -21,7 +24,7 @@ namespace arena {
 	{
 		this->x = x;
 		this->y = y;
-		this->rect = SkRect::MakeXYWH(this->x - (this->size.x / 2), this->y - (this->size.y / 2), this->size.x, this->size.y);
+		this->rect = sf::Rect<float>{ this->x - (this->size.x / 2), this->y - (this->size.y / 2), this->size.x, this->size.y };
 	}
 
 	void Entity::draw(Canvas& canvas)
@@ -32,7 +35,7 @@ namespace arena {
 	// If the annotation box is not visible, then you would need to run a script to get rid of transparent area around the entity
 	void Entity::draw_annotation_box(Canvas& canvas)
 	{
-		SkV3 average_color = EntityColorManager::getInstance().get_average_color(this->entity_data, this->texture);
+		sf::Color average_color = EntityColorManager::getInstance().get_average_color(this->entity_data, this->texture);
 		SkPaint box;
 		box.setColor(SkColorSetARGB(255, average_color.x, average_color.y, average_color.z));
 		box.setStyle(SkPaint::Style::kStroke_Style);

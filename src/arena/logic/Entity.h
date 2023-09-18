@@ -35,10 +35,10 @@ namespace arena {
 		int x;
 		int y;
 		
-		SkV2 size;
-		SkRect rect;
+		sf::Vector2f size;
+		sf::Rect<float> rect;
 
-		Image texture;
+		Texture texture;
 
 		std::shared_ptr<Entity> spawn_character = nullptr;
 	protected:

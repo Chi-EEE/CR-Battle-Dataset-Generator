@@ -18,14 +18,14 @@ namespace canvas {
 		ImageLoader(ImageLoader const&) = delete;
 		ImageLoader& operator=(ImageLoader const&) = delete;
 
-		tl::expected<Image, std::string> try_load_image(std::filesystem::path file_path);
+		tl::expected<Texture, std::string> try_load_image(std::filesystem::path file_path);
 
 		static ImageLoader& get_instance() {
 			static ImageLoader instance;
 			return instance;
 		}
 	private:
-		std::unordered_map<std::filesystem::path, Image> images;
+		std::unordered_map<std::filesystem::path, Texture> images;
 	};
 }
 

@@ -26,7 +26,7 @@ namespace arena::data
 			return instance;
 		}
 		~EntityColorManager() {}
-		SkV3 get_average_color(pEntityData entity_data, Image& image) {
+		SkV3 get_average_color(pEntityData entity_data, Texture& image) {
 			auto it = this->color_map.find(entity_data->getName());
 			if (it != this->color_map.end())
 				return it->second;

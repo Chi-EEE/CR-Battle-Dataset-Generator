@@ -9,16 +9,7 @@
 
 #include "tl/expected.hpp"
 
-#include "core/SkBitmap.h"
-#include "core/SkCanvas.h"
-#include "core/SkData.h"
-#include "core/SkImage.h"
-#include "core/SkRect.h"
-#include "core/SkStream.h"
-#include "core/SkSurface.h"
-#include "core/SkTypes.h"
-#include "core/SkTypeface.h"
-#include "core/SkFont.h"
+#include "SFML/Graphics/RenderWindow.hpp"
 
 namespace canvas {
 	class Canvas
@@ -34,7 +25,7 @@ namespace canvas {
 			return this->surface->height();
 		}
 		void draw_canvas(Canvas canvas, SkRect dstRect);
-		void draw_image(Image& image, SkRect dstRect);
+		void draw_image(Texture& image, SkRect dstRect);
 		void draw_text(std::string string, int x, int y);
 		void draw_rect(SkRect dst, SkPaint box);
 		Canvas crop(const SkRect& cropRect);
@@ -42,13 +33,13 @@ namespace canvas {
 		Canvas vertical_flip();
 		Canvas horizonal_flip();
 		Canvas skew(SkScalar sx, SkScalar sy);
-		Image replace_pixels_to();
-		sk_sp<SkImage> snapshot();
+		Texture replace_pixels_to();
+		sf::Texture snapshot();
 		tl::expected<nullptr_t, std::string> try_save(std::filesystem::path file_path);
 		void clear();
 
 	private:
-		sk_sp<SkSurface> surface;
+		sf::RenderWindow window;
 	};
 }
 

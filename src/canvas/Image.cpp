@@ -1,37 +1,32 @@
 #include "Image.h"
 #include <iostream>
 namespace canvas {
-	tl::expected<Image, std::string> Image::try_from_file(std::filesystem::path file_path)
+	tl::expected<Texture, std::string> Texture::try_from_file(std::filesystem::path file_path)
 	{
-		std::string file_string = file_path.string();
-		sk_sp<SkData> image_data = SkData::MakeFromFileName(file_string.c_str());
-		if (!image_data) {
-			return tl::make_unexpected(fmt::format("Failed to read image file! [{}]", file_string));
+		std::string file_string = file_path.string(); 
+		sf::Texture texture;
+		if (!texture.loadFromFile(file_string)) {
+			return tl::make_unexpected(fmt::format("Failed to load image file! [{}]", file_string));
 		}
-		sk_sp<SkImage> image = SkImage::MakeFromEncoded(image_data);
-		if (!image) {
-			return tl::make_unexpected(fmt::format("Failed to create SkImage from encoded data! [{}]", file_string));
-		}
-		return Image(image);
+		return Texture(texture);
 	}
 
-	Image::Image(sk_sp<SkImage> image) : image(image)
+	Texture::Texture(sf::Texture texture) : texture(texture)
 	{
 	}
 
-	Image::~Image()
+	Texture::~Texture()
 	{
 
 	}
-	tl::expected<SkV3, std::string> Image::get_average_color()
+	tl::expected<sf::Vector3<float>, std::string> Texture::get_average_color()
 	{
-		SkBitmap bitmap;
-		if (!image->asLegacyBitmap(&bitmap)) {
-			return tl::make_unexpected("Unable to convert image to bitmap");
-		}
+		sf::Image image = this->texture.copyToImage();
 
-		int width = bitmap.width();
-		int height = bitmap.height();
+		sf::Vector2 size = this->texture.getSize();
+
+		int width = size.x;
+		int height = size.y;
 
 		int totalR = 0;
 		int totalG = 0;
@@ -40,15 +35,15 @@ namespace canvas {
 		int visiblePixelCount = 0;
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
-				SkColor pixelColor = bitmap.getColor(x, y);
-				if (SkColorGetA(pixelColor) > 0) {
-					totalR += SkColorGetR(pixelColor);
-					totalG += SkColorGetG(pixelColor);
-					totalB += SkColorGetB(pixelColor);
+				sf::Color pixel_color = image.getPixel(x, y);
+				if (pixel_color.a > 0) {
+					totalR += pixel_color.r;
+					totalG += pixel_color.g;
+					totalB += pixel_color.b;
 					++visiblePixelCount;
 				}
 			}
 		}
-		return SkV3{ totalR / visiblePixelCount * 1.0f, totalG / visiblePixelCount * 1.0f, totalB / visiblePixelCount * 1.0f };
+		return sf::Vector3<float>{ totalR / visiblePixelCount * 1.0f, totalG / visiblePixelCount * 1.0f, totalB / visiblePixelCount * 1.0f };
 	}
 }

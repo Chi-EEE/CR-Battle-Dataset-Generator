@@ -11,7 +11,8 @@
 #include "tl/expected.hpp"
 #include "spdlog/spdlog.h"
 
-#include "canvas/Canvas.h"
+#include "game/Game.h"
+
 #include "arena/logic/Arena.h"
 #include "arena/logic/Character.h"
 
