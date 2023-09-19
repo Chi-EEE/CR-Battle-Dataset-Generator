@@ -28,7 +28,7 @@ namespace arena::logic {
 				if (!maybe_spawn_entity.has_value()) {
 					return tl::make_unexpected(maybe_spawn_entity.error());
 				}
-				spawn_entities.push_back(std::make_shared<Entity>(maybe_spawn_entity));
+				spawn_entities.push_back(std::make_shared<Entity>(maybe_spawn_entity.value()));
 			}
 		}
 		return Entity(entity_data, entity_texture, spawn_entities);

@@ -103,8 +103,7 @@ namespace arena::logic {
 	{
 		return Arena(this->arena_type, this->blue_side_tower_skin, this->red_side_tower_skin, this->texture);
 	}
-	void Arena::draw(sf::RenderTarget& target, sf::RenderStates states) const
-	{
+	void Arena::before_draw() {
 		std::sort(this->ground_entities.begin(), this->ground_entities.end(), [](const pEntity& entity_1, const pEntity& entity_2) -> bool
 			{
 				return entity_1->y < entity_2->y;
@@ -115,6 +114,9 @@ namespace arena::logic {
 				return entity_1->y < entity_2->y;
 			}
 		);
+	}
+	void Arena::draw(sf::RenderTarget& target, sf::RenderStates states) const
+	{
 		for (auto& entity : this->ground_entities) {
 			target.draw(*entity, states);
 		}

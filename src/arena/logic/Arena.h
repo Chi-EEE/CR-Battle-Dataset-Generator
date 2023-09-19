@@ -35,6 +35,7 @@ namespace arena::logic {
 		bool try_add_entity(pEntity character);
 		~Arena();
 		Arena clone();
+		void before_draw();
 		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 		sf::Vector2u get_size() { return this->texture.getSize(); }
 

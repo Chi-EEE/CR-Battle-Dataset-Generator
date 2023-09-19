@@ -246,6 +246,7 @@ std::pair<std::vector<json>, json> generate_battle(int image_id, int character_c
 			}
 		}
 	}
+	arena.before_draw();
 	game.draw(arena);
 	std::filesystem::path output_destination = output_image_directory / fmt::format("{:07}.png", image_id);
 	{
