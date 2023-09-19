@@ -25,7 +25,7 @@ namespace arena::logic {
 	class Entity : public sf::Drawable
 	{
 	public:
-		static tl::expected<Entity, std::string> create(pEntityData entity_data, Texture texture);
+		static tl::expected<Entity, std::string> create(pEntityData entity_data, Texture entity_texture);
 		void setPosition(int x, int y);
 		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 		//void draw_annotation_box(Canvas& canvas);
