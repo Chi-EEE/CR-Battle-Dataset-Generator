@@ -3,6 +3,7 @@
 namespace game {
 	Game::Game(Arena arena) : arena(arena), window(sf::VideoMode(arena.get_size().x, arena.get_size().y), "")
 	{
+		window.setActive(false);
 		window.setVisible(false);
 	}
 
