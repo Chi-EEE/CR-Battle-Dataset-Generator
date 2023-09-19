@@ -10,7 +10,7 @@ set_languages("cxx17")
 target("CR-Battle-Dataset-Generator")
     set_kind("binary")
 
-    add_packages("skia 93", "opencv")
+    add_packages("skia", "opencv")
     add_packages("cpptrace", "fmt", "tl_expected", "spdlog")
     add_packages("nlohmann_json", "toml++")
    
