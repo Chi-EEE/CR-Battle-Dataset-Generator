@@ -25,9 +25,13 @@ namespace canvas {
 		surface->getCanvas()->drawImageRect(canvas.surface->makeImageSnapshot(), dstRect, SkSamplingOptions());
 	}
 
-	void Canvas::draw_image(Image &image, SkRect dstRect)
+	void Canvas::draw_image(Image& image, SkRect dstRect)
 	{
-		surface->getCanvas()->drawImageRect(image.get_image(), dstRect, SkSamplingOptions());
+		SkPaint paint;
+		paint.setBlendMode(SkBlendMode::kDstATop);
+		SkColor4f red{ 1.0f, 0.0f, 0.0f, 1.0f };
+		paint.setColor4f(red);
+		surface->getCanvas()->drawImageRect(image.get_image(), dstRect, SkSamplingOptions(), &paint);
 	}
 
 	void Canvas::draw_text(std::string string, int x, int y)

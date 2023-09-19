@@ -1,7 +1,6 @@
 add_rules("mode.debug", "mode.release")
 
-add_repositories("repo repository")
-add_requires("skia 93", "opencv")
+add_requires("skia", "opencv")
 add_requires("cpptrace", "fmt", "tl_expected", "spdlog")
 add_requires("nlohmann_json", "toml++")
 
