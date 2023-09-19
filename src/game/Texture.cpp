@@ -1,12 +1,12 @@
-#include "Image.h"
+#include "Texture.h"
 #include <iostream>
-namespace canvas {
+namespace game {
 	tl::expected<Texture, std::string> Texture::try_from_file(std::filesystem::path file_path)
 	{
-		std::string file_string = file_path.string(); 
+		std::string file_string = file_path.string();
 		sf::Texture texture;
 		if (!texture.loadFromFile(file_string)) {
-			return tl::make_unexpected(fmt::format("Failed to load image file! [{}]", file_string));
+			return tl::make_unexpected(fmt::format("Failed to load texture file! [{}]", file_string));
 		}
 		return Texture(texture);
 	}
@@ -19,7 +19,7 @@ namespace canvas {
 	{
 
 	}
-	tl::expected<sf::Vector3<float>, std::string> Texture::get_average_color()
+	sf::Color Texture::getAverageColor() const
 	{
 		sf::Image image = this->texture.copyToImage();
 
@@ -35,15 +35,19 @@ namespace canvas {
 		int visiblePixelCount = 0;
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; x++) {
-				sf::Color pixel_color = image.getPixel(x, y);
-				if (pixel_color.a > 0) {
-					totalR += pixel_color.r;
-					totalG += pixel_color.g;
-					totalB += pixel_color.b;
+				sf::Color pixelColor = image.getPixel(x, y);
+				if (pixelColor.a > 0) {
+					totalR += pixelColor.r;
+					totalG += pixelColor.g;
+					totalB += pixelColor.b;
 					++visiblePixelCount;
 				}
 			}
 		}
-		return sf::Vector3<float>{ totalR / visiblePixelCount * 1.0f, totalG / visiblePixelCount * 1.0f, totalB / visiblePixelCount * 1.0f };
+		return sf::Color{
+			static_cast<sf::Uint8>(totalR / visiblePixelCount),
+			static_cast<sf::Uint8>(totalG / visiblePixelCount),
+			static_cast<sf::Uint8>(totalB / visiblePixelCount)
+		};
 	}
 }

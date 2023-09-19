@@ -1,14 +1,16 @@
-#ifndef ENTITY_DATA_INDEXER_H
-#define ENTITY_DATA_INDEXER_H
+#ifndef ENTITY_DATA_MANAGER_H
+#define ENTITY_DATA_MANAGER_H
 
 #pragma once
 
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 
 #include "spdlog/spdlog.h"
 
 #include "../../utils/Global.hpp"
+#include "../../utils/Random.h"
 
 #include "../../files/FileManager.h"
 #include "../../files/data/AbstractTable.h"
@@ -16,28 +18,36 @@
 #include "../data/EntityData.h"
 
 #include "EntityDataTable.hpp"
+#include "../../game/Texture.h"
+#include "../../game/TextureLoader.h"
 
 using namespace csv;
+using namespace game;
 
 namespace arena::data
 {
-    class EntityDataIndexer
+    class EntityDataManager
     {
     public:
-        EntityDataIndexer();
-        EntityDataIndexer(EntityDataIndexer const&) = delete;
-        EntityDataIndexer& operator=(EntityDataIndexer const&) = delete;
-        static EntityDataIndexer& getInstance() {
-            static EntityDataIndexer instance;
+        EntityDataManager();
+        EntityDataManager(EntityDataManager const&) = delete;
+        EntityDataManager& operator=(EntityDataManager const&) = delete;
+        static EntityDataManager& getInstance() {
+            static EntityDataManager instance;
             return instance;
         }
-        ~EntityDataIndexer();
+        ~EntityDataManager();
         void insertEvolutionToml(std::filesystem::path filePath);
+
+        tl::expected<Texture, std::string> getRandomEntityTexture(pEntityData entity_data);
+
         pEntityData getEntityDataByFileName(std::string fileName);
         pEntityData getEntityDataByName(std::string name);
     private:
         std::unordered_map<std::string, pEntityData> entity_data_file_name_map;
         std::unordered_map<std::string, pEntityData> entity_data_name_map;
+
+        std::unordered_set<std::string> characters_with_one_orientation;
     };
 }
 

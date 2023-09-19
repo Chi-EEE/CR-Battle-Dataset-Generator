@@ -5,29 +5,32 @@
 
 #include <filesystem>
 
+#include "SFML/Graphics.hpp"
+
+#include "../data/EntityDataManager.h"
 #include "../data/EntityColorManager.hpp"
 
-#include "../../canvas/ImageLoader.h"
-#include "../../canvas/Drawable.h"
-#include "../../canvas/Canvas.h"
+#include "../../game/TextureLoader.h"
 
 #include "../data/EntityData.h"
 
 #include "../../utils/Global.hpp"
+#include "../../utils/Random.h"
 
 using namespace arena::data;
 using namespace csv;
-using namespace canvas;
+using namespace game;
 
-namespace arena {
-	class Entity : public Drawable
+namespace arena::logic {
+	class Entity : public sf::Drawable
 	{
 	public:
-		void addSpawnCharacter(std::shared_ptr<Entity> spawn_character);
+		static tl::expected<Entity, std::string> create(pEntityData entity_data, Texture texture);
 		void setPosition(int x, int y);
-		void draw(Canvas& canvas);
-		void draw_annotation_box(Canvas& canvas);
-		void draw_shadow(Canvas& canvas);
+		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
+		//void draw_annotation_box(Canvas& canvas);
+		//void draw_shadow(Canvas& canvas);
+
 		~Entity();
 
 		pEntityData entity_data;
@@ -36,13 +39,13 @@ namespace arena {
 		int y;
 		
 		sf::Vector2f size;
-		sf::Rect<float> rect;
+		sf::FloatRect rect;
 
 		Texture texture;
 
-		std::shared_ptr<Entity> spawn_character = nullptr;
+		std::vector<std::shared_ptr<Entity>> spawn_entities;
 	protected:
-		Entity(pEntityData entity_data, std::filesystem::path file_path);
+		Entity(pEntityData entity_data, Texture texture, std::vector<std::shared_ptr<Entity>> spawn_entities);
 	};
 	typedef std::shared_ptr<Entity> pEntity;
 }

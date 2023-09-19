@@ -13,38 +13,35 @@
 #include "tl/expected.hpp"
 #include "spdlog/spdlog.h"
 
+#include "SFML/Graphics.hpp"
+
 #include "ArenaType.h"
-#include "../../canvas/Canvas.h"
-#include "../../canvas/ImageLoader.h"
+
+#include "../../game/TextureLoader.h"
+#include "../../game/AnnotationBox.h"
+
 #include "TowerSkin.h"
 
 #include "Entity.h"
-#include "Building.h"
-#include "Character.h"
 
-#include "../data/EntityDataIndexer.h"
+#include "../data/EntityDataManager.h"
 #include "../data/EntityData.h"
 
-using namespace canvas;
-
-namespace arena {
-	class Arena
+namespace arena::logic {
+	class Arena : public sf::Drawable
 	{
 	public:
 		static tl::expected<Arena, std::string> try_create(ArenaType arena_type, TowerSkin blue_side, TowerSkin red_side);
-		bool try_add_character(pCharacter character);
-		void draw();
+		bool try_add_entity(pEntity character);
 		~Arena();
 		Arena clone();
-		tl::expected<nullptr_t, std::string> try_save(std::filesystem::path file_path);
-		int get_width() { return this->canvas.get_width(); }
-		int get_height() { return this->canvas.get_height(); }
+		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
+		sf::Vector2u get_size() { return this->texture.getSize(); }
+
 	private:
-		Arena(ArenaType arena_type, TowerSkin blue_side, TowerSkin red_side, Canvas canvas);
+		Arena(ArenaType arena_type, TowerSkin blue_side, TowerSkin red_side, Texture texture);
 		void add_arena_tower(pEntityData entity_data, std::string character, std::string team_side, TowerSkin tower_skin, int x, int y);
-		tl::expected<std::filesystem::path, std::string> try_get_arena_tower_path(std::string character, std::string team_side, TowerSkin tower_skin);
-		void draw_entity(pEntity entity);
-		void draw_spawn_entity(pEntity entity);
+		tl::expected<Texture, std::string> try_get_arena_tower_texture(std::string character, std::string team_side, TowerSkin tower_skin);
 
 		std::vector<pEntity> air_entities;
 		std::vector<pEntity> ground_entities;
@@ -53,7 +50,7 @@ namespace arena {
 		TowerSkin blue_side_tower_skin;
 		TowerSkin red_side_tower_skin;
 
-		Canvas canvas;
+		Texture texture;
 	};
 }
 

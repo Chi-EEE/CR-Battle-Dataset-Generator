@@ -6,12 +6,14 @@
 #include <unordered_map>
 #include <string>
 
-#include <core/SkM44.h>
+#include "SFML/Graphics.hpp"
+
 #include "spdlog/spdlog.h"
 
 #include "EntityData.h"
-#include "../../canvas/Image.h"
-using namespace canvas;
+#include "../../game/Texture.h"
+
+using namespace game;
 
 namespace arena::data
 {
@@ -26,21 +28,16 @@ namespace arena::data
 			return instance;
 		}
 		~EntityColorManager() {}
-		SkV3 get_average_color(pEntityData entity_data, Texture& image) {
+		sf::Color getAverageColor(pEntityData entity_data, Texture& image) {
 			auto it = this->color_map.find(entity_data->getName());
 			if (it != this->color_map.end())
 				return it->second;
-			auto maybeColor = image.get_average_color();
-			if (!maybeColor.has_value()) {
-				spdlog::error("Unable to get color from {}'s image", entity_data->getName());
-				return { 0.0f,0.0f,0.0f };
-			}
-			SkV3 color = maybeColor.value();
+			sf::Color color = image.getAverageColor();
 			this->color_map.insert(std::make_pair(entity_data->getName(), color));
 			return color;
 		}
 	private:
-		std::unordered_map<std::string, SkV3> color_map;
+		std::unordered_map<std::string, sf::Color> color_map;
 	};
 }
 

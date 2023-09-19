@@ -1,29 +1,28 @@
-#ifndef IMAGE_H
-#define IMAGE_H
+#ifndef TEXTURE_H
+#define TEXTURE_H
 
 #pragma once
 
-#include "tl/expected.hpp"
 #include "fmt/format.h"
+#include "tl/expected.hpp";
 
-#include "SFML/Graphics/Texture.hpp"
-#include "SFML/System/Vector3.hpp"
+#include "SFML/Graphics.hpp"
 
 #include <filesystem>
 #include <string>
 
-namespace canvas {
+namespace game {
 	class Texture
 	{
 	public:
 		static tl::expected<Texture, std::string> try_from_file(std::filesystem::path file_path);
 		Texture(sf::Texture texture);
 		~Texture();
-		sf::Texture get_texture() {
+		sf::Texture getTexture() const {
 			return texture;
 		}
-		tl::expected<sf::Vector3<float>, std::string> get_average_color();
-		sf::Vector2u get_size() {
+		sf::Color getAverageColor() const;
+		sf::Vector2u getSize() const {
 			return this->texture.getSize();
 		}
 	private:

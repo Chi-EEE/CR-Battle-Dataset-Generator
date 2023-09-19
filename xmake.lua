@@ -1,6 +1,6 @@
 add_rules("mode.debug", "mode.release")
 
-add_requires("sfml", "opencv")
+add_requires("sfml 2.6.0", "opencv")
 add_requires("cpptrace", "fmt", "tl_expected", "spdlog")
 add_requires("nlohmann_json", "toml++")
 

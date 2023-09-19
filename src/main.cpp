@@ -5,7 +5,7 @@
 #include <unordered_set>
 
 #include "utils/Global.hpp"
-#include "arena/data/EntityDataIndexer.h"
+#include "arena/data/EntityDataManager.h"
 
 #include "nlohmann/json.hpp"
 #include "tl/expected.hpp"
@@ -14,9 +14,7 @@
 #include "game/Game.h"
 
 #include "arena/logic/Arena.h"
-#include "arena/logic/Character.h"
 
-using namespace canvas;
 using namespace arena;
 using namespace arena::data;
 
@@ -181,48 +179,12 @@ tl::expected<bool, std::string> try_read_settings_json() {
 	}
 }
 
-std::unordered_set<pEntityData> characters_with_one_orientation;
-
-std::filesystem::path getImage(Random& random, std::filesystem::path& asset_directory, pEntityData entity_data) {
-	std::string file_name = entity_data->getFileName();
-	file_name.erase(0, 3); // Remove "/sc"
-
-	auto character_directory = asset_directory / "sprites" / "characters" / file_name;
-
-	bool is_blue = random.random_int_from_interval(0, 1);
-
-	std::vector<std::string> actions{
-		"idle1",
-		"run1",
-		"attack1",
-	};
-	auto action = actions[random.random_int_from_interval(0, actions.size() - 1)];
-	std::filesystem::path directory_path = character_directory / fmt::format("{export_name}_{action}_1", fmt::arg("export_name", is_blue ? entity_data->getBlueExportName() : entity_data->getRedExportName()), fmt::arg("action", action));
-	if (characters_with_one_orientation.find(entity_data) == characters_with_one_orientation.end()) {
-		directory_path = character_directory / fmt::format("{export_name}_{action}_{orientation}", fmt::arg("export_name", is_blue ? entity_data->getBlueExportName() : entity_data->getRedExportName()), fmt::arg("action", action), fmt::arg("orientation", std::to_string(random.random_int_from_interval(1, 9))));
-		if (!std::filesystem::exists(directory_path)) {
-			characters_with_one_orientation.insert(entity_data);
-			directory_path = character_directory / fmt::format("{export_name}_{action}_1", fmt::arg("export_name", is_blue ? entity_data->getBlueExportName() : entity_data->getRedExportName()), fmt::arg("action", action));
-		}
-	}
-
-	std::filesystem::path image;
-	do {
-		auto maybeImage = random.try_get_random_file_from_directory(directory_path);
-		if (!maybeImage.has_value()) {
-			spdlog::error("Unable to get an image from the directory: {} | {}", directory_path.string(), maybeImage.error());
-			continue;
-		}
-		image = maybeImage.value();
-	} while (image.filename().extension() != ".png");
-
-	return image;
-}
-
 std::pair<std::vector<json>, json> generate_battle(int image_id, int character_count, long total_character_count, std::filesystem::path& asset_directory, std::filesystem::path& output_image_directory) {
 	auto& random = Random::get_instance();
 
-	auto& entity_data_indexer = EntityDataIndexer::getInstance();
+	auto& entity_data_manager = EntityDataManager::getInstance();
+
+	Game game;
 
 	spdlog::info("Generating image {} with {} characters!\n", image_id, character_count);
 	auto arena_result = Arena::try_create(allowed_arenas[random.random_int_from_interval(0, allowed_arenas.size() - 1)], TowerSkin::Default, TowerSkin::Default);
@@ -239,28 +201,24 @@ std::pair<std::vector<json>, json> generate_battle(int image_id, int character_c
 		while (add_attempts < 100)
 		{
 			int character_type_id = random.random_int_from_interval(0, allowed_characters.size() - 1);
-			auto entity_data = entity_data_indexer.getEntityDataByName(allowed_characters[character_type_id]);
+			auto entity_data = entity_data_manager.getEntityDataByName(allowed_characters[character_type_id]);
 			if (entity_data == nullptr) {
 				continue;
 			}
 
-			auto maybeCharacter = Character::create(
+			auto maybe_texture = entity_data_manager.getRandomEntityTexture(entity_data);
+
+			auto maybe_character = Entity::create(
 				entity_data,
-				getImage(random, asset_directory, entity_data)
+				maybe_texture.value()
 			);
-			if (maybeCharacter.has_value()) {
-				auto character = std::make_shared<Character>(maybeCharacter.value());
+			if (maybe_character.has_value()) {
+				pEntity character = std::make_shared<arena::logic::Entity>(maybe_character.value());
 				character->setPosition(
 					Random::get_instance().random_int_from_interval(64, 664),
 					Random::get_instance().random_int_from_interval(128, 954)
 				);
-				if (arena.try_add_character(character)) {
-					pCharacter spawn_character = nullptr;
-					if (!entity_data->getSpawnCharacter().empty() && !entity_data->getSpawnPauseTime()) {
-						auto spawn_entity_data = entity_data_indexer.getEntityDataByName(entity_data->getSpawnCharacter());
-						spawn_character = std::make_shared<Character>(Character::create(spawn_entity_data, getImage(random, asset_directory, spawn_entity_data)).value());
-						character->addSpawnCharacter(spawn_character);
-					}
+				if (arena.try_add_entity(character)) {
 					json character_coco_object = {
 						{"id", total_character_count + character_id},
 						{"image_id", image_id},
@@ -268,8 +226,8 @@ std::pair<std::vector<json>, json> generate_battle(int image_id, int character_c
 						{"segmentation", json::array()},
 						{"area", character->size.x * character->size.y},
 						{"bbox", json::array({
-							character->rect.fLeft,
-							character->rect.fTop,
+							character->rect.left,
+							character->rect.top,
 							character->size.x,
 							character->size.y,
 						})},
@@ -283,25 +241,31 @@ std::pair<std::vector<json>, json> generate_battle(int image_id, int character_c
 				}
 			}
 			else {
-				spdlog::error("Unable to create character, Got error: {}", maybeCharacter.error());
+				spdlog::error("Unable to create character, Got error: {}", maybe_character.error());
 				add_attempts++;
 			}
 		}
 	}
-	arena.draw();
+	game.draw(arena);
 	std::filesystem::path output_destination = output_image_directory / fmt::format("{:07}.png", image_id);
 	{
-		auto result = arena.try_save(output_destination);
+		auto result = game.try_save(output_destination);
 		if (!result.has_value()) {
 			spdlog::error("An error has occurred while trying to save the arena: {}\n", result.error());
 			throw std::exception();
 		}
 	}
 	spdlog::info("Completed generating image {}!\n", image_id);
+
+	sf::Vector2u size = arena.get_size();
+
+	auto width = size.x;
+	auto height = size.y;
+
 	json image_coco_object = {
 		{"id", image_id},
-		{"width", arena.get_width()},
-		{"height", arena.get_height()},
+		{"width", width},
+		{"height", height},
 		{"file_name", output_destination},
 	};
 	return std::make_pair(character_coco_objects, image_coco_object);
