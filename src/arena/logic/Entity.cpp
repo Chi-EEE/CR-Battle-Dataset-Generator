@@ -26,7 +26,14 @@ namespace arena {
 
 	void Entity::draw(Canvas& canvas)
 	{
-		canvas.draw_image(this->texture, rect);
+		SkPaint normal, blender;
+		
+		normal.setBlendMode(SkBlendMode::kSrcOver);
+		normal.setColor(0xFF0000);
+		canvas.draw_rect(rect, normal);
+
+		blender.setBlendMode(SkBlendMode::kPlus);
+		canvas.draw_image(this->texture, rect, &blender);
 	}
 
 	// If the annotation box is not visible, then you would need to run a script to get rid of transparent area around the entity
@@ -44,7 +51,7 @@ namespace arena {
 	void Entity::draw_shadow(Canvas& canvas)
 	{
 		Canvas entity_shadow_canvas = Canvas(this->size.x, this->size.y);
-		entity_shadow_canvas.draw_image(this->texture, SkRect::MakeXYWH(0, 0, this->size.x, this->size.y));
+		entity_shadow_canvas.draw_image(this->texture, SkRect::MakeXYWH(0, 0, this->size.x, this->size.y), nullptr);
 
 		double new_height = std::floor(entity_shadow_canvas.get_height() * 0.71751412429378531073446327683616);
 		entity_shadow_canvas = entity_shadow_canvas.stretch(SkPoint::Make(this->size.x, this->size.y));
@@ -57,7 +64,7 @@ namespace arena {
 			entity_shadow_canvas.get_height() + this->entity_data->getShadowY()
 		);
 
-		canvas.draw_image(entity_shadow_canvas.replace_pixels_to(), entity_shadow_rect);
+		canvas.draw_image(entity_shadow_canvas.replace_pixels_to(), entity_shadow_rect, nullptr);
 	}
 
 	Entity::~Entity()

@@ -34,7 +34,7 @@ namespace canvas {
 			return this->surface->height();
 		}
 		void draw_canvas(Canvas canvas, SkRect dstRect);
-		void draw_image(Image& image, SkRect dstRect);
+		void draw_image(Image& image, SkRect dstRect, SkPaint* paint);
 		void draw_text(std::string string, int x, int y);
 		void draw_rect(SkRect dst, SkPaint box);
 		Canvas crop(const SkRect& cropRect);

@@ -12,7 +12,7 @@ namespace canvas {
 		int height = this->get_height();
 		Canvas canvas = Canvas(width, width);
 		Image snapshot = this->snapshot();
-		canvas.draw_image(snapshot, SkRect::MakeLTRB(0, 0, width, height));
+		canvas.draw_image(snapshot, SkRect::MakeLTRB(0, 0, width, height), nullptr);
 		return canvas;
 	}
 
@@ -25,13 +25,9 @@ namespace canvas {
 		surface->getCanvas()->drawImageRect(canvas.surface->makeImageSnapshot(), dstRect, SkSamplingOptions());
 	}
 
-	void Canvas::draw_image(Image& image, SkRect dstRect)
+	void Canvas::draw_image(Image& image, SkRect dstRect, SkPaint* paint = nullptr)
 	{
-		SkPaint paint;
-		paint.setBlendMode(SkBlendMode::kDstATop);
-		SkColor4f red{ 1.0f, 0.0f, 0.0f, 1.0f };
-		paint.setColor4f(red);
-		surface->getCanvas()->drawImageRect(image.get_image(), dstRect, SkSamplingOptions(), &paint);
+		surface->getCanvas()->drawImageRect(image.get_image(), dstRect, SkSamplingOptions(), paint);
 	}
 
 	void Canvas::draw_text(std::string string, int x, int y)

@@ -70,7 +70,7 @@ namespace arena {
 				),
 				entity_image_width, entity_image_height
 			);
-			this->canvas.draw_image(entity_image, rect);
+			this->canvas.draw_image(entity_image, rect, nullptr);
 		}
 	}
 
@@ -98,7 +98,7 @@ namespace arena {
 		}
 		auto image = image_result.value();
 		Canvas canvas = Canvas(image.get_width(), image.get_height());
-		canvas.draw_image(image, SkRect::MakeXYWH(0, 0, image.get_width(), image.get_height()));
+		canvas.draw_image(image, SkRect::MakeXYWH(0, 0, image.get_width(), image.get_height()), nullptr);
 		return Arena(arena_type, blue_side, red_side, canvas);
 	}
 
