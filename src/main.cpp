@@ -184,8 +184,6 @@ std::pair<std::vector<json>, json> generate_battle(int image_id, int character_c
 
 	auto& entity_data_manager = EntityDataManager::getInstance();
 
-	Game game;
-
 	spdlog::info("Generating image {} with {} characters!\n", image_id, character_count);
 	auto arena_result = Arena::try_create(allowed_arenas[random.random_int_from_interval(0, allowed_arenas.size() - 1)], TowerSkin::Default, TowerSkin::Default);
 	if (!arena_result.has_value()) {
@@ -196,6 +194,9 @@ std::pair<std::vector<json>, json> generate_battle(int image_id, int character_c
 	std::vector<json> character_coco_objects;
 
 	Arena arena = arena_result.value();
+	
+	Game game(arena);
+
 	for (int character_id = 0; character_id < character_count; character_id++) {
 		int add_attempts = 0;
 		while (add_attempts < 100)
@@ -247,7 +248,8 @@ std::pair<std::vector<json>, json> generate_battle(int image_id, int character_c
 		}
 	}
 	arena.before_draw();
-	game.draw(arena);
+	game.draw();
+	game.display();
 	std::filesystem::path output_destination = output_image_directory / fmt::format("{:07}.png", image_id);
 	{
 		auto result = game.try_save(output_destination);

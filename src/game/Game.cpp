@@ -1,9 +1,9 @@
 #include "Game.h"
 
 namespace game {
-	Game::Game()
+	Game::Game(Arena arena) : arena(arena), window(sf::VideoMode(arena.get_size().x, arena.get_size().y), "")
 	{
-
+		window.setVisible(false);
 	}
 
 	Game::~Game()
@@ -19,9 +19,14 @@ namespace game {
 		return texture;
 	}
 
-	void Game::draw(Arena& arena)
+	void Game::draw()
 	{
 		this->window.draw(arena);
+	}
+
+	void Game::display()
+	{
+		this->window.display();
 	}
 
 	tl::expected<nullptr_t, std::string> Game::try_save(std::filesystem::path file_path)

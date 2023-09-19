@@ -12,18 +12,20 @@ namespace game {
 	class Game
 	{
 	public:
-		Game();
+		Game(Arena arena);
 		~Game();
 
 		sf::Texture snapshot();
 
-		void draw(Arena& arena);
+		void draw();
+		void display();
 		void clear();
 
 		tl::expected<nullptr_t, std::string> try_save(std::filesystem::path file_path);
 
 	private:
 		sf::RenderWindow window;
+		Arena arena;
 	};
 }
 #endif
