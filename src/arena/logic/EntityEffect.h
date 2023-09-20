@@ -4,6 +4,8 @@
 #pragma once
 
 #include <string>
+#include "core/SkBlendMode.h"
+#include "core/SkColor.h"
 
 namespace arena::logic {
 
@@ -28,17 +30,17 @@ namespace arena::logic {
 		constexpr bool operator==(EntityEffect a) const { return value == a.value; }
 		constexpr bool operator!=(EntityEffect a) const { return value != a.value; }
 
-		std::string add_effect() const
+		std::pair<SkBlendMode, SkColor> get_effect() const
 		{
 			switch (value)
 			{
 			case EntityEffect::Damage:
 			{
-				break;
+				return std::make_pair<SkBlendMode, SkColor>(SkBlendMode::kPlus, SkColorSetARGB(255, 255, 0, 0));
 			}
 			case EntityEffect::Heal:
 			{
-				break; // 0, 85, 255, 38
+				return std::make_pair<SkBlendMode, SkColor>(SkBlendMode::kPlus, SkColorSetARGB(255, 85, 255, 38));
 			}
 			case EntityEffect::Clone:
 			{
@@ -46,17 +48,18 @@ namespace arena::logic {
 			}
 			case EntityEffect::Freeze:
 			{
-				break;
+				return std::make_pair<SkBlendMode, SkColor>(SkBlendMode::kPlus, SkColorSetARGB(255, 0, 90, 255));
 			}
 			case EntityEffect::Rage:
 			{
-				break;
+				return std::make_pair<SkBlendMode, SkColor>(SkBlendMode::kColorDodge, SkColorSetARGB(255, 155, 0, 155));
 			}
 			default:
 			{
 				break;
 			}
 			}
+			return std::make_pair<SkBlendMode, SkColor>(SkBlendMode::kDst, SkColorSetARGB(0, 0, 0, 0));
 		}
 	private:
 		Value value;

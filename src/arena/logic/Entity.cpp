@@ -60,7 +60,12 @@ namespace arena::logic {
 	}
 
 	void Entity::addStackableEffect(EntityEffect effect) {
-		this->stackable_effects.push_back(effect);
+		return this->stackable_effects.push_back(effect);
+	}
+
+	bool Entity::hasMaxStackableEffect()
+	{
+		return this->stackable_effects.size() >= 2;
 	}
 
 	void Entity::addNonStackableEffect(EntityEffect effect) {
@@ -69,22 +74,31 @@ namespace arena::logic {
 
 	void Entity::draw(Canvas& canvas)
 	{
+		SkPaint paint, normal;
 		Canvas entity_canvas(this->size.x, this->size.y);
 		entity_canvas.draw_image(this->image, SkRect{0, 0, this->size.x, this->size.y}, nullptr);
+		for (EntityEffect effect : this->non_stackable_effects)
+		{
+			auto effect_pair = effect.get_effect();
 
-		// Damage
-		/*SkPaint paint;
-		paint.setBlendMode(SkBlendMode::kPlus);
-		paint.setColor(SK_ColorRED);
-		entity_canvas.draw_rect(SkRect{ 0, 0, this->size.x, this->size.y }, paint);*/
+			SkBlendMode blend = effect_pair.first;
+			SkColor color = effect_pair.second;
 
-		// Freeze
-		/*SkPaint paint;
-		paint.setBlendMode(SkBlendMode::kPlus);
-		paint.setColor(SkColorSetARGB(255, 0, 90, 255));
-		entity_canvas.draw_rect(SkRect{ 0, 0, this->size.x, this->size.y }, paint);*/
-		
-		SkPaint normal;
+			paint.setBlendMode(blend);
+			paint.setColor(color);
+			entity_canvas.draw_rect(SkRect{ 0, 0, this->size.x, this->size.y }, paint);
+		}
+		for (EntityEffect effect : this->stackable_effects)
+		{
+			auto effect_pair = effect.get_effect();
+
+			SkBlendMode blend = effect_pair.first;
+			SkColor color = effect_pair.second;
+
+			paint.setBlendMode(blend);
+			paint.setColor(color);
+			entity_canvas.draw_rect(SkRect{ 0, 0, this->size.x, this->size.y }, paint);
+		}
 		normal.setBlendMode(SkBlendMode::kDstIn);
 		entity_canvas.draw_image(this->image, SkRect{0, 0, this->size.x, this->size.y}, & normal);
 

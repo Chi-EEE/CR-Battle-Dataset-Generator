@@ -156,6 +156,16 @@ std::vector<ArenaType> allowed_arenas = {
 	ArenaType::Shipwreck_Arena,
 };
 
+std::vector<EntityEffect> non_stackable_entity_effects = {
+	EntityEffect::Damage,
+	EntityEffect::Freeze,
+};
+
+
+std::vector<EntityEffect> stackable_entity_effects = {
+	EntityEffect::Heal,
+};
+
 
 tl::expected<bool, std::string> try_read_settings_json() {
 	if (!std::filesystem::is_directory("config") || !std::filesystem::exists("config")) {
@@ -221,7 +231,25 @@ std::pair<std::vector<json>, json> generate_battle(int image_id, int character_c
 					static_cast<float>(Random::get_instance().random_int_from_interval(128, 954))
 				};
 				character->setPosition(position);
-				character->addNonStackableEffect(EntityEffect::Damage);
+				if (random.random_int_from_interval(0, 1)) {
+					std::vector<EntityEffect> non_stackable_entity_effects_vector(non_stackable_entity_effects);
+					do {
+						if (non_stackable_entity_effects_vector.empty() || random.random_int_from_interval(0, 1)) {
+							int index = random.random_int_from_interval(0, stackable_entity_effects.size() - 1);
+							EntityEffect effect = stackable_entity_effects[index];
+							character->addStackableEffect(effect);
+							if (character->hasMaxStackableEffect()) {
+								break;
+							}
+						}
+						else {
+							int index = random.random_int_from_interval(0, non_stackable_entity_effects_vector.size() - 1);
+							EntityEffect effect = non_stackable_entity_effects_vector[index];
+							character->addNonStackableEffect(effect);
+							non_stackable_entity_effects_vector.erase(non_stackable_entity_effects_vector.begin() + index);
+						}
+					} while (random.random_int_from_interval(0, 1));
+				}
 				if (arena.try_add_character(character)) {
 					json character_coco_object = {
 						{"id", total_character_count + character_id},
