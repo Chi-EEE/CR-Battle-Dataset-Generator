@@ -38,7 +38,7 @@ namespace arena::logic {
 			}
 			case EntityEffect::Heal:
 			{
-				break; // 0, 6, 191, 0
+				break; // 0, 85, 255, 38
 			}
 			case EntityEffect::Clone:
 			{
