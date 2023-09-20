@@ -31,11 +31,10 @@ namespace arena::logic {
 		this->rect = SkRect::MakeXYWH(0, 0, this->size.x, this->size.y);
 	}
 
-	void Entity::setPosition(int x, int y)
+	void Entity::setPosition(SkV2 position)
 	{
-		this->x = x;
-		this->y = y;
-		this->rect = SkRect::MakeXYWH(this->x - (this->size.x / 2), this->y - (this->size.y / 2), this->size.x, this->size.y);
+		this->position = position;
+		this->rect = SkRect::MakeXYWH(position.x - (this->size.x / 2), position.y - (this->size.y / 2), this->size.x, this->size.y);
 
 		int entity_scale = this->entity_data->getScale();
 
@@ -51,16 +50,21 @@ namespace arena::logic {
 
 		Random& random = Random::get_instance();
 		for (auto& spawn_entity : this->spawn_entities) {
-			spawn_entity->setPosition(
-				random.random_int_from_interval(
-					this->rect.fLeft + (entity_image_width / 2),
-					this->rect.fRight - (entity_image_width / 2)
+			SkV2 spawn_position = SkV2{
+				static_cast<float>(
+					random.random_int_from_interval(
+						this->rect.fLeft + (entity_image_width / 2),
+						this->rect.fRight - (entity_image_width / 2)
+					)
 				),
-				random.random_int_from_interval(
-					this->rect.fTop + (entity_image_height / 2),
-					this->rect.fBottom - (entity_image_height / 2)
+				static_cast<float>(
+					random.random_int_from_interval(
+						this->rect.fTop + (entity_image_height / 2),
+						this->rect.fBottom - (entity_image_height / 2)
+					)
 				)
-			);
+			};
+			spawn_entity->setPosition(spawn_position);
 		}
 	}
 
@@ -79,7 +83,7 @@ namespace arena::logic {
 		entity_canvas.draw_image(this->image, SkRect{0, 0, this->size.x, this->size.y}, & normal);
 
 		canvas.draw_canvas(entity_canvas, this->rect);
-		
+
 		for (auto& spawn_entity : this->spawn_entities) {
 			canvas.draw(*spawn_entity);
 		}

@@ -23,16 +23,15 @@ namespace arena::logic {
 	{
 	public:
         static tl::expected<Entity, std::string> create(pEntityData entity_data, Image image);
-		void setPosition(int x, int y);
+		void setPosition(SkV2 position);
 		void draw(Canvas& canvas);
 		void draw_shadow(Canvas& canvas);
 		~Entity();
 
 		pEntityData entity_data;
-		int x;
-		int y;
-		
+		SkV2 position;
 		SkV2 size;
+
 		SkRect rect;
 
 		Image image;

@@ -216,10 +216,11 @@ std::pair<std::vector<json>, json> generate_battle(int image_id, int character_c
 			);
 			if (maybeCharacter.has_value()) {
 				auto character = std::make_shared<arena::logic::Entity>(maybeCharacter.value());
-				character->setPosition(
-					Random::get_instance().random_int_from_interval(64, 664),
-					Random::get_instance().random_int_from_interval(128, 954)
-				);
+				SkV2 position = SkV2{
+					static_cast<float>(Random::get_instance().random_int_from_interval(64, 664)),
+					static_cast<float>(Random::get_instance().random_int_from_interval(128, 954))
+				};
+				character->setPosition(position);
 				if (arena.try_add_character(character)) {
 					json character_coco_object = {
 						{"id", total_character_count + character_id},

@@ -11,23 +11,23 @@ namespace arena::logic {
 		auto princess_tower = entity_data_manager.getEntityDataByName("PrincessTower");
 		auto king_tower = entity_data_manager.getEntityDataByName("KingTower");
 
-		add_arena_tower(princess_tower, "princess", "blue", this->blue_side_tower_skin, 171, 788);
-		add_arena_tower(princess_tower, "princess", "blue", this->blue_side_tower_skin, 548, 788);
-		add_arena_tower(king_tower, "king", "blue", this->blue_side_tower_skin, 360, 875);
+		add_arena_tower(princess_tower, "princess", "blue", this->blue_side_tower_skin, SkV2{171, 788});
+		add_arena_tower(princess_tower, "princess", "blue", this->blue_side_tower_skin, SkV2{548, 788});
+		add_arena_tower(king_tower, "king", "blue", this->blue_side_tower_skin, SkV2{360, 875});
 
-		add_arena_tower(princess_tower, "princess", "red", this->red_side_tower_skin, 171, 262);
-		add_arena_tower(princess_tower, "princess", "red", this->red_side_tower_skin, 548, 262);
-		add_arena_tower(king_tower, "king", "red", this->red_side_tower_skin, 360, 167);
+		add_arena_tower(princess_tower, "princess", "red", this->red_side_tower_skin, SkV2{171, 262});
+		add_arena_tower(princess_tower, "princess", "red", this->red_side_tower_skin, SkV2{548, 262});
+		add_arena_tower(king_tower, "king", "red", this->red_side_tower_skin, SkV2{360, 167});
 	}
 
-	void Arena::add_arena_tower(pEntityData entity_data, std::string character, std::string team_side, TowerSkin tower_skin, int x, int y)
+	void Arena::add_arena_tower(pEntityData entity_data, std::string character, std::string team_side, TowerSkin tower_skin, SkV2 position)
 	{
 		auto result = try_get_arena_tower_path(character, team_side, tower_skin);
 		if (!result.has_value()) throw std::exception(result.error().c_str());
 		auto building_instance_result = Entity::create(entity_data, result.value());
 		if (!building_instance_result.has_value()) throw std::exception(building_instance_result.error().c_str());
 		pEntity building = std::make_shared<Entity>(building_instance_result.value());
-		building->setPosition(x, y);
+		building->setPosition(position);
 		this->ground_entities.push_back(building);
 	}
 
@@ -71,15 +71,18 @@ namespace arena::logic {
 
 	bool Arena::try_add_character(pEntity character)
 	{
+		SkV2 character_position = character->position;
 		for (auto entity : this->ground_entities) {
-			double distance = sqrt(pow(entity->x - character->x, 2) + pow(entity->y - character->y, 2)) * 32;
+			SkV2 entity_position = entity->position;
+			double distance = sqrt(pow(entity_position.x - character_position.x, 2) + pow(entity_position.y - character_position.y, 2)) * 32;
 			bool inside_bounds = distance <= (entity->entity_data->getCollisionRadius() * Global::scale) + (character->entity_data->getCollisionRadius() * Global::scale);
 			spdlog::debug("CurrentName:{}|Name:{}|Distance:{}|Inside_Bounds:{}", character->entity_data->getName(), entity->entity_data->getName(), distance, inside_bounds);
 			if (inside_bounds)
 				return false;
 		}
 		for (auto entity : this->air_entities) {
-			double distance = sqrt(pow(entity->x - character->x, 2) + pow(entity->y - character->y, 2)) * 32;
+			SkV2 entity_position = entity->position;
+			double distance = sqrt(pow(entity_position.x - character_position.x, 2) + pow(entity_position.y - character_position.y, 2)) * 32;
 			bool inside_bounds = distance <= (entity->entity_data->getCollisionRadius() * 4 * Global::scale) + (character->entity_data->getCollisionRadius() * Global::scale);
 			spdlog::debug("CurrentName:{}|Name:{}|Distance:{}|Inside_Bounds:{}", character->entity_data->getName(), entity->entity_data->getName(), distance, inside_bounds);
 			if (inside_bounds)
@@ -98,12 +101,12 @@ namespace arena::logic {
 	{
 		std::sort(this->ground_entities.begin(), this->ground_entities.end(), [](const pEntity& entity_1, const pEntity& entity_2) -> bool
 			{
-				return entity_1->y < entity_2->y;
+				return entity_1->position.y < entity_2->position.y;
 			}
 		);
 		std::sort(this->air_entities.begin(), this->air_entities.end(), [](const pEntity& entity_1, const pEntity& entity_2) -> bool
 			{
-				return entity_1->y < entity_2->y;
+				return entity_1->position.y < entity_2->position.y;
 			}
 		);
 		for (auto& entity : this->ground_entities) {
