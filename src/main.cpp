@@ -146,7 +146,14 @@ std::vector<ArenaType> allowed_arenas = {
 	ArenaType::Dragon_Spa,
 	ArenaType::Boot_Camp,
 	ArenaType::Clash_Fest,
-	ArenaType::Touchdown,
+	ArenaType::Touchdown_Arena,
+	ArenaType::Boat_Arena,
+	ArenaType::Rock_Evolution_Arena,
+	ArenaType::Cake_Arena,
+	ArenaType::ClanBoat_Arena,
+	ArenaType::Dream_Arena,
+	ArenaType::Flood_Arena,
+	ArenaType::Shipwreck_Arena,
 };
 
 

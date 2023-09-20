@@ -49,7 +49,7 @@ namespace arena::logic {
 	}
 
 	void Arena::draw_spawn_entity(pEntity entity) {
-		Image entity_image = ImageLoader::get_instance().try_load_image(entity->spawn_character->file_path).value();
+		Image entity_image = entity->spawn_character->image;
 
 		int entity_scale = entity->entity_data->getScale();
 

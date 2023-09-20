@@ -34,8 +34,15 @@ public:
     Boot_Camp,
     Clash_Fest,
     Legendary_Arena,
-    Touchdown,
+    Touchdown_Arena,
     Chess_Arena,
+    Boat_Arena,
+    Rock_Evolution_Arena,
+    Cake_Arena,
+    ClanBoat_Arena,
+    Dream_Arena,
+    Flood_Arena,
+    Shipwreck_Arena,
   };
 
   ArenaType() = default;
@@ -73,8 +80,15 @@ public:
       case ArenaType::Boot_Camp: return "Boot_Camp";
       case ArenaType::Clash_Fest: return "Clash_Fest";
       case ArenaType::Legendary_Arena: return "Legendary_Arena";
-      case ArenaType::Touchdown: return "Touchdown";
+      case ArenaType::Touchdown_Arena: return "Touchdown_Arena";
       case ArenaType::Chess_Arena: return "Chess_Arena";
+      case ArenaType::Boat_Arena: return "Boat_Arena";
+      case ArenaType::Rock_Evolution_Arena: return "Rock_Evolution_Arena";
+      case ArenaType::Cake_Arena: return "Cake_Arena";
+      case ArenaType::ClanBoat_Arena: return "ClanBoat_Arena";
+      case ArenaType::Dream_Arena: return "Dream_Arena";
+      case ArenaType::Flood_Arena: return "Flood_Arena";
+      case ArenaType::Shipwreck_Arena: return "Shipwreck_Arena";
       default: return "Unknown";
     }
   }
@@ -105,8 +119,15 @@ public:
         { "Boot_Camp", ArenaType::Boot_Camp },
         { "Clash_Fest", ArenaType::Clash_Fest },
         { "Legendary_Arena", ArenaType::Legendary_Arena },
-        { "Touchdown", ArenaType::Touchdown },
+        { "Touchdown_Arena", ArenaType::Touchdown_Arena },
         { "Chess_Arena", ArenaType::Chess_Arena },
+        { "Boat_Arena", ArenaType::Boat_Arena },
+        { "Rock_Evolution_Arena", ArenaType::Rock_Evolution_Arena },
+        { "Cake_Arena", ArenaType::Cake_Arena },
+        { "ClanBoat_Arena", ArenaType::ClanBoat_Arena },
+        { "Dream_Arena", ArenaType::Dream_Arena },
+        { "Flood_Arena", ArenaType::Flood_Arena },
+        { "Shipwreck_Arena", ArenaType::Shipwreck_Arena },
     };
 
     auto it = value_map.find(name);

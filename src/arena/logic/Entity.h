@@ -29,7 +29,6 @@ namespace arena::logic {
 		~Entity();
 
 		pEntityData entity_data;
-		std::filesystem::path file_path;
 		int x;
 		int y;
 		

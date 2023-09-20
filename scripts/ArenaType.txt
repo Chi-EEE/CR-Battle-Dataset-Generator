@@ -21,5 +21,12 @@ Dragon_Spa
 Boot_Camp
 Clash_Fest
 Legendary_Arena
-Touchdown
+Touchdown_Arena
 Chess_Arena
+Boat_Arena
+Rock_Evolution_Arena
+Cake_Arena
+ClanBoat_Arena
+Dream_Arena
+Flood_Arena
+Shipwreck_Arena
