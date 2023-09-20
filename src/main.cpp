@@ -221,6 +221,7 @@ std::pair<std::vector<json>, json> generate_battle(int image_id, int character_c
 					static_cast<float>(Random::get_instance().random_int_from_interval(128, 954))
 				};
 				character->setPosition(position);
+				character->addNonStackableEffect(EntityEffect::Damage);
 				if (arena.try_add_character(character)) {
 					json character_coco_object = {
 						{"id", total_character_count + character_id},

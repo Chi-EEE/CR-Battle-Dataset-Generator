@@ -27,6 +27,8 @@
 #include "../data/EntityData.h"
 
 using namespace canvas;
+using namespace arena::data;
+using namespace csv;
 
 namespace arena::logic {
 	class Arena

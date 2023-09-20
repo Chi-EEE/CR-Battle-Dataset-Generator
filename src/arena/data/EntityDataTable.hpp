@@ -8,8 +8,10 @@
 #include <vector>
 
 #include "toml++/toml.h"
+
 #include "../../files/data/Data.h"
 #include "../../files/data/Table.hpp"
+
 #include "EntityData.h"
 
 using namespace data;

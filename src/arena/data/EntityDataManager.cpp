@@ -29,7 +29,7 @@ namespace arena::data
 		for (auto pair : tbl) {
 			std::string name(pair.first.str());
 			toml::table* table = pair.second.as_table();
-			std::string base = table->get("Base")->value<std::string>().value();
+			std::string base = table->get("Base")->value<std::string>().value(); // Evo Entity Toml's should have this!
 			pEntityData base_entity_data = this->getEntityDataByName(base);
 			if (base_entity_data == nullptr) {
 				std::cerr << "Unable to get the base_entity_data!\n";

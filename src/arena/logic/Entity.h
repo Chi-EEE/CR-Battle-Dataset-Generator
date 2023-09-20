@@ -31,6 +31,8 @@ namespace arena::logic {
 			Image entity_image
 		); 
 		void setPosition(SkV2 position);
+		void addStackableEffect(EntityEffect effect);
+		void addNonStackableEffect(EntityEffect effect);
 		void draw(Canvas& canvas);
 		void draw_shadow(Canvas& canvas);
 		~Entity();

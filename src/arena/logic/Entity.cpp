@@ -59,6 +59,14 @@ namespace arena::logic {
 		}
 	}
 
+	void Entity::addStackableEffect(EntityEffect effect) {
+		this->stackable_effects.push_back(effect);
+	}
+
+	void Entity::addNonStackableEffect(EntityEffect effect) {
+		this->non_stackable_effects.insert(effect);
+	}
+
 	void Entity::draw(Canvas& canvas)
 	{
 		Canvas entity_canvas(this->size.x, this->size.y);

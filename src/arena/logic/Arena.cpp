@@ -1,8 +1,5 @@
 #include "Arena.h"
 
-using namespace arena::data;
-using namespace csv;
-
 namespace arena::logic {
 	Arena::Arena(ArenaType arena_type, TowerSkin blue_side, TowerSkin red_side, Canvas canvas) : arena_type(arena_type), blue_side_tower_skin(blue_side), red_side_tower_skin(red_side), canvas(canvas)
 	{
@@ -38,7 +35,7 @@ namespace arena::logic {
 		std::filesystem::path asset_directory(Global::get_json()["asset_directory"].get<std::string>());
 		std::filesystem::path arena_tower_file = asset_directory / "essentials" / character / team_side / "tower" / blue_side_name / "01.png";
 		if (!std::filesystem::exists(arena_tower_file)) return tl::make_unexpected(fmt::format("Unable to find the arena tower path containing: {}, {}, {}", character, team_side));
-		return ImageLoader::get_instance().try_load_image(arena_tower_file).value();
+		return ImageLoader::get_instance().try_load_image(arena_tower_file);
 	}
 
 	tl::expected<Arena, std::string> Arena::try_create(ArenaType arena_type, TowerSkin blue_side, TowerSkin red_side)
