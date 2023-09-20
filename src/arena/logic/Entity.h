@@ -4,6 +4,8 @@
 #pragma once
 
 #include <filesystem>
+#include <unordered_set>
+#include <vector>
 
 #include "../../canvas/ImageLoader.h"
 #include "../../canvas/Drawable.h"
@@ -14,6 +16,8 @@
 
 #include "../../utils/Global.hpp"
 
+#include "EntityEffect.h"
+
 using namespace arena::data;
 using namespace csv;
 using namespace canvas;
@@ -22,7 +26,10 @@ namespace arena::logic {
 	class Entity : public Drawable
 	{
 	public:
-        static tl::expected<Entity, std::string> create(pEntityData entity_data, Image image);
+		static tl::expected<Entity, std::string> create(
+			pEntityData entity_data, 
+			Image entity_image
+		); 
 		void setPosition(SkV2 position);
 		void draw(Canvas& canvas);
 		void draw_shadow(Canvas& canvas);
@@ -37,8 +44,15 @@ namespace arena::logic {
 		Image image;
 
 		std::vector<std::shared_ptr<Entity>> spawn_entities;
+
+		std::unordered_set<EntityEffect, EntityEffectHasher> non_stackable_effects;
+		std::vector<EntityEffect> stackable_effects;
 	private:
-		Entity(pEntityData entity_data, Image image, std::vector<std::shared_ptr<Entity>> spawn_entities);
+		Entity(
+			pEntityData entity_data, 
+			Image image, 
+			std::vector<std::shared_ptr<Entity>> spawn_entities
+		);
 	};
 	typedef std::shared_ptr<Entity> pEntity;
 }

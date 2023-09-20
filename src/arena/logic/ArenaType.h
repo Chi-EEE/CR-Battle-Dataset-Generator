@@ -141,7 +141,6 @@ namespace arena::logic {
     private:
         Value value;
     };
-    typedef std::shared_ptr<ArenaType> pArenaType;
 }
 
 #endif

@@ -1,8 +1,10 @@
 #include "Entity.h"
 
 namespace arena::logic {
-	tl::expected<Entity, std::string> Entity::create(pEntityData entity_data, Image entity_image)
-	{
+	tl::expected<Entity, std::string> Entity::create(
+		pEntityData entity_data,
+		Image entity_image
+	) {
 		EntityDataManager& entity_data_manager = EntityDataManager::getInstance();
 		std::vector<std::shared_ptr<Entity>> spawn_entities;
 		bool spawn_entity_immediately = !entity_data->getSpawnCharacter().empty() && !entity_data->getSpawnPauseTime();
@@ -18,17 +20,6 @@ namespace arena::logic {
 			}
 		}
 		return Entity(entity_data, entity_image, spawn_entities);
-	}
-
-	Entity::Entity(pEntityData entity_data, Image image, std::vector<std::shared_ptr<Entity>> spawn_entities) : entity_data(entity_data), image(image), spawn_entities(spawn_entities)
-	{
-		float scale = (this->entity_data->getScale() / 100.0f);
-		float entity_width = (this->image.get_width() * scale) * Global::scale;
-		float entity_height = (this->image.get_height() * scale) * Global::scale;
-
-		this->size = { entity_width, entity_height };
-
-		this->rect = SkRect::MakeXYWH(0, 0, this->size.x, this->size.y);
 	}
 
 	void Entity::setPosition(SkV2 position)
@@ -73,11 +64,18 @@ namespace arena::logic {
 		Canvas entity_canvas(this->size.x, this->size.y);
 		entity_canvas.draw_image(this->image, SkRect{0, 0, this->size.x, this->size.y}, nullptr);
 
-		SkPaint paint;
+		// Damage
+		/*SkPaint paint;
 		paint.setBlendMode(SkBlendMode::kPlus);
 		paint.setColor(SK_ColorRED);
-		entity_canvas.draw_rect(SkRect{ 0, 0, this->size.x, this->size.y }, paint);
+		entity_canvas.draw_rect(SkRect{ 0, 0, this->size.x, this->size.y }, paint);*/
 
+		// Freeze
+		/*SkPaint paint;
+		paint.setBlendMode(SkBlendMode::kPlus);
+		paint.setColor(SkColorSetARGB(255, 0, 90, 255));
+		entity_canvas.draw_rect(SkRect{ 0, 0, this->size.x, this->size.y }, paint);*/
+		
 		SkPaint normal;
 		normal.setBlendMode(SkBlendMode::kDstIn);
 		entity_canvas.draw_image(this->image, SkRect{0, 0, this->size.x, this->size.y}, & normal);
@@ -111,5 +109,14 @@ namespace arena::logic {
 	Entity::~Entity()
 	{
 
+	}
+
+	Entity::Entity(pEntityData entity_data, Image image, std::vector<std::shared_ptr<Entity>> spawn_entities) : entity_data(entity_data), image(image), spawn_entities(spawn_entities)
+	{
+		float scale = (this->entity_data->getScale() / 100.0f);
+		float entity_width = (this->image.get_width() * scale) * Global::scale;
+		float entity_height = (this->image.get_height() * scale) * Global::scale;
+		this->size = { entity_width, entity_height };
+		this->rect = SkRect::MakeXYWH(0, 0, this->size.x, this->size.y);
 	}
 }
