@@ -6,6 +6,8 @@
 #include "Canvas.h"
 
 namespace canvas {
+	class Canvas;
+
 	struct Drawable {
 		virtual void draw(Canvas& canvas) = 0;
 	};

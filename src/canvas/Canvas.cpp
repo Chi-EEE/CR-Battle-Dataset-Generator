@@ -40,6 +40,11 @@ namespace canvas {
 		this->surface->getCanvas()->drawRect(dstRect, paint);
 	}
 
+	void Canvas::draw(Drawable &drawable)
+	{
+		drawable.draw(*this);
+	}
+
 	Canvas Canvas::crop(const SkRect& cropRect)
 	{
 		Canvas croppedCanvas = Canvas(cropRect.fRight - cropRect.fLeft, cropRect.fTop - cropRect.fBottom);

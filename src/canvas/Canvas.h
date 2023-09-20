@@ -5,6 +5,8 @@
 
 #include <iostream>
 
+#include "Drawable.h"
+
 #include "Image.h"
 
 #include "tl/expected.hpp"
@@ -21,6 +23,8 @@
 #include "core/SkFont.h"
 
 namespace canvas {
+	class Drawable;
+
 	class Canvas
 	{
 	public:
@@ -37,6 +41,7 @@ namespace canvas {
 		void draw_image(Image& image, SkRect dstRect, SkPaint* paint);
 		void draw_text(std::string string, int x, int y);
 		void draw_rect(SkRect dst, SkPaint box);
+		void draw(Drawable &drawable);
 		Canvas crop(const SkRect& cropRect);
 		Canvas stretch(const SkPoint& stretchVector);
 		Canvas vertical_flip();

@@ -44,8 +44,6 @@ namespace arena::logic {
 		Arena(ArenaType arena_type, TowerSkin blue_side, TowerSkin red_side, Canvas canvas);
 		void add_arena_tower(pEntityData entity_data, std::string character, std::string team_side, TowerSkin tower_skin, int x, int y);
 		tl::expected<Image, std::string> try_get_arena_tower_path(std::string character, std::string team_side, TowerSkin tower_skin);
-		void draw_entity(pEntity entity);
-		void draw_spawn_entity(pEntity entity);
 
 		std::vector<pEntity> air_entities;
 		std::vector<pEntity> ground_entities;

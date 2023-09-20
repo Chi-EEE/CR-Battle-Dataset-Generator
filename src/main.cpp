@@ -221,12 +221,6 @@ std::pair<std::vector<json>, json> generate_battle(int image_id, int character_c
 					Random::get_instance().random_int_from_interval(128, 954)
 				);
 				if (arena.try_add_character(character)) {
-					pEntity spawn_character = nullptr;
-					if (!entity_data->getSpawnCharacter().empty() && !entity_data->getSpawnPauseTime()) {
-						auto spawn_entity_data = entity_data_manager.getEntityDataByName(entity_data->getSpawnCharacter());
-						spawn_character = std::make_shared<arena::logic::Entity>(Entity::create(spawn_entity_data, entity_data_manager.getRandomEntityImage(spawn_entity_data).value()).value());
-						character->addSpawnCharacter(spawn_character);
-					}
 					json character_coco_object = {
 						{"id", total_character_count + character_id},
 						{"image_id", image_id},

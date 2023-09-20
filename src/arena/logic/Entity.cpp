@@ -1,12 +1,26 @@
 #include "Entity.h"
 
 namespace arena::logic {
-	tl::expected<Entity, std::string> Entity::create(pEntityData entity_data, Image image)
+	tl::expected<Entity, std::string> Entity::create(pEntityData entity_data, Image entity_image)
 	{
-		return Entity(entity_data, image);
+		EntityDataManager& entity_data_manager = EntityDataManager::getInstance();
+		std::vector<std::shared_ptr<Entity>> spawn_entities;
+		bool spawn_entity_immediately = !entity_data->getSpawnCharacter().empty() && !entity_data->getSpawnPauseTime();
+		if (spawn_entity_immediately) {
+			auto spawn_entity_data = entity_data_manager.getEntityDataByName(entity_data->getSpawnCharacter());
+			for (int i = 0; i < entity_data->getSpawnNumber(); i++) {
+				auto maybe_spawn_entity_image = entity_data_manager.getRandomEntityImage(spawn_entity_data);
+				auto maybe_spawn_entity = Entity::create(spawn_entity_data, maybe_spawn_entity_image.value());
+				if (!maybe_spawn_entity.has_value()) {
+					return tl::make_unexpected(maybe_spawn_entity.error());
+				}
+				spawn_entities.push_back(std::make_shared<Entity>(maybe_spawn_entity.value()));
+			}
+		}
+		return Entity(entity_data, entity_image, spawn_entities);
 	}
 
-	Entity::Entity(pEntityData entity_data, Image image) : entity_data(entity_data), image(image)
+	Entity::Entity(pEntityData entity_data, Image image, std::vector<std::shared_ptr<Entity>> spawn_entities) : entity_data(entity_data), image(image), spawn_entities(spawn_entities)
 	{
 		float scale = (this->entity_data->getScale() / 100.0f);
 		float entity_width = (this->image.get_width() * scale) * Global::scale;
@@ -17,16 +31,37 @@ namespace arena::logic {
 		this->rect = SkRect::MakeXYWH(0, 0, this->size.x, this->size.y);
 	}
 
-	void Entity::addSpawnCharacter(std::shared_ptr<Entity> spawn_character)
-	{
-		this->spawn_character = spawn_character;
-	}
-
 	void Entity::setPosition(int x, int y)
 	{
 		this->x = x;
 		this->y = y;
 		this->rect = SkRect::MakeXYWH(this->x - (this->size.x / 2), this->y - (this->size.y / 2), this->size.x, this->size.y);
+
+		int entity_scale = this->entity_data->getScale();
+
+		if (!this->spawn_entities.empty()) {
+			return;
+		}
+
+		auto width = this->size.x;
+		auto height = this->size.y;
+
+		double entity_image_width = (width * (entity_scale / 100.0)) * Global::scale;
+		double entity_image_height = (height * (entity_scale / 100.0)) * Global::scale;
+
+		Random& random = Random::get_instance();
+		for (auto& spawn_entity : this->spawn_entities) {
+			spawn_entity->setPosition(
+				random.random_int_from_interval(
+					this->rect.fLeft + (entity_image_width / 2),
+					this->rect.fRight - (entity_image_width / 2)
+				),
+				random.random_int_from_interval(
+					this->rect.fTop + (entity_image_height / 2),
+					this->rect.fBottom - (entity_image_height / 2)
+				)
+			);
+		}
 	}
 
 	void Entity::draw(Canvas& canvas)
@@ -41,9 +76,13 @@ namespace arena::logic {
 
 		SkPaint normal;
 		normal.setBlendMode(SkBlendMode::kDstIn);
-		entity_canvas.draw_image(this->image, SkRect{0, 0, this->size.x, this->size.y}, &normal);
+		entity_canvas.draw_image(this->image, SkRect{0, 0, this->size.x, this->size.y}, & normal);
 
 		canvas.draw_canvas(entity_canvas, this->rect);
+		
+		for (auto& spawn_entity : this->spawn_entities) {
+			canvas.draw(*spawn_entity);
+		}
 	}
 
 	void Entity::draw_shadow(Canvas& canvas)
