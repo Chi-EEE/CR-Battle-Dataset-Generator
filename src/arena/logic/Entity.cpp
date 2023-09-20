@@ -26,14 +26,19 @@ namespace arena {
 
 	void Entity::draw(Canvas& canvas)
 	{
-		SkPaint normal, blender;
-		
-		normal.setBlendMode(SkBlendMode::kSrcOver);
-		normal.setColor(0xFF0000);
-		canvas.draw_rect(rect, normal);
+		Canvas entity_canvas(this->size.x, this->size.y);
+		entity_canvas.draw_image(this->texture, SkRect{0, 0, this->size.x, this->size.y}, nullptr);
 
-		blender.setBlendMode(SkBlendMode::kPlus);
-		canvas.draw_image(this->texture, rect, &blender);
+		SkPaint paint;
+		paint.setBlendMode(SkBlendMode::kPlus);
+		paint.setColor(SK_ColorRED);
+		entity_canvas.draw_rect(SkRect{ 0, 0, this->size.x, this->size.y }, paint);
+
+		SkPaint normal;
+		normal.setBlendMode(SkBlendMode::kDstIn);
+		entity_canvas.draw_image(this->texture, SkRect{0, 0, this->size.x, this->size.y}, &normal);
+
+		canvas.draw_canvas(entity_canvas, this->rect);
 	}
 
 	// If the annotation box is not visible, then you would need to run a script to get rid of transparent area around the entity
