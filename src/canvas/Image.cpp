@@ -23,7 +23,7 @@ namespace canvas {
 	{
 
 	}
-	tl::expected<SkV3, std::string> Image::get_average_color()
+	tl::expected<SkColor, std::string> Image::get_average_color()
 	{
 		SkBitmap bitmap;
 		if (!image->asLegacyBitmap(&bitmap)) {
@@ -49,6 +49,6 @@ namespace canvas {
 				}
 			}
 		}
-		return SkV3{ totalR / visiblePixelCount * 1.0f, totalG / visiblePixelCount * 1.0f, totalB / visiblePixelCount * 1.0f };
+		return SkColorSetARGB(255, totalR / visiblePixelCount, totalG / visiblePixelCount, totalB / visiblePixelCount);
 	}
 }

@@ -23,6 +23,7 @@ namespace arena {
 	class Entity : public Drawable
 	{
 	public:
+        static tl::expected<Entity, std::string> create(pEntityData entity_data, Image image);
 		void addSpawnCharacter(std::shared_ptr<Entity> spawn_character);
 		void setPosition(int x, int y);
 		void draw(Canvas& canvas);
@@ -38,11 +39,11 @@ namespace arena {
 		SkV2 size;
 		SkRect rect;
 
-		Image texture;
+		Image image;
 
 		std::shared_ptr<Entity> spawn_character = nullptr;
-	protected:
-		Entity(pEntityData entity_data, std::filesystem::path file_path);
+	private:
+		Entity(pEntityData entity_data, Image image);
 	};
 	typedef std::shared_ptr<Entity> pEntity;
 }

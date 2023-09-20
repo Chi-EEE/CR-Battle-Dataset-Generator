@@ -14,15 +14,18 @@
 #include "spdlog/spdlog.h"
 
 #include "ArenaType.h"
+
 #include "../../canvas/Canvas.h"
 #include "../../canvas/ImageLoader.h"
+#include "../../canvas/AnnotationBox.h"
+
 #include "TowerSkin.h"
 
 #include "Entity.h"
 #include "Building.h"
 #include "Character.h"
 
-#include "../data/EntityDataIndexer.h"
+#include "../data/EntityDataManager.h"
 #include "../data/EntityData.h"
 
 using namespace canvas;

@@ -26,21 +26,21 @@ namespace arena::data
 			return instance;
 		}
 		~EntityColorManager() {}
-		SkV3 get_average_color(pEntityData entity_data, Image& image) {
+		SkColor get_average_color(pEntityData entity_data, Image& image) {
 			auto it = this->color_map.find(entity_data->getName());
 			if (it != this->color_map.end())
 				return it->second;
 			auto maybeColor = image.get_average_color();
 			if (!maybeColor.has_value()) {
 				spdlog::error("Unable to get color from {}'s image", entity_data->getName());
-				return { 0.0f,0.0f,0.0f };
+				return SkColorSetARGB(255, 255, 255, 255);
 			}
-			SkV3 color = maybeColor.value();
+			SkColor color = maybeColor.value();
 			this->color_map.insert(std::make_pair(entity_data->getName(), color));
 			return color;
 		}
 	private:
-		std::unordered_map<std::string, SkV3> color_map;
+		std::unordered_map<std::string, SkColor> color_map;
 	};
 }
 

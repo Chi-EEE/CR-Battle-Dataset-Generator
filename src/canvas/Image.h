@@ -21,7 +21,7 @@ namespace canvas {
 		sk_sp<SkImage> get_image() {
 			return image;
 		}
-		tl::expected<SkV3, std::string> get_average_color();
+		tl::expected<SkColor, std::string> get_average_color();
 		int get_width() {
 			return this->image->width();
 		}

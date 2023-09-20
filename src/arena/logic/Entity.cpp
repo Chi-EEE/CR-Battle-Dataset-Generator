@@ -1,11 +1,16 @@
 #include "Entity.h"
 
 namespace arena {
-	Entity::Entity(pEntityData entity_data, std::filesystem::path file_path) : entity_data(entity_data), file_path(file_path), texture(ImageLoader::get_instance().try_load_image(file_path).value())
+	tl::expected<Entity, std::string> Entity::create(pEntityData entity_data, Image image)
+	{
+		return Entity(entity_data, image);
+	}
+
+	Entity::Entity(pEntityData entity_data, Image image) : entity_data(entity_data), image(image)
 	{
 		float scale = (this->entity_data->getScale() / 100.0f);
-		float entity_width = (this->texture.get_width() * scale) * Global::scale;
-		float entity_height = (this->texture.get_height() * scale) * Global::scale;
+		float entity_width = (this->image.get_width() * scale) * Global::scale;
+		float entity_height = (this->image.get_height() * scale) * Global::scale;
 
 		this->size = { entity_width, entity_height };
 
@@ -27,7 +32,7 @@ namespace arena {
 	void Entity::draw(Canvas& canvas)
 	{
 		Canvas entity_canvas(this->size.x, this->size.y);
-		entity_canvas.draw_image(this->texture, SkRect{0, 0, this->size.x, this->size.y}, nullptr);
+		entity_canvas.draw_image(this->image, SkRect{0, 0, this->size.x, this->size.y}, nullptr);
 
 		SkPaint paint;
 		paint.setBlendMode(SkBlendMode::kPlus);
@@ -36,7 +41,7 @@ namespace arena {
 
 		SkPaint normal;
 		normal.setBlendMode(SkBlendMode::kDstIn);
-		entity_canvas.draw_image(this->texture, SkRect{0, 0, this->size.x, this->size.y}, &normal);
+		entity_canvas.draw_image(this->image, SkRect{0, 0, this->size.x, this->size.y}, &normal);
 
 		canvas.draw_canvas(entity_canvas, this->rect);
 	}
@@ -44,7 +49,6 @@ namespace arena {
 	// If the annotation box is not visible, then you would need to run a script to get rid of transparent area around the entity
 	void Entity::draw_annotation_box(Canvas& canvas)
 	{
-		SkV3 average_color = EntityColorManager::getInstance().get_average_color(this->entity_data, this->texture);
 		SkPaint box;
 		box.setColor(SkColorSetARGB(255, average_color.x, average_color.y, average_color.z));
 		box.setStyle(SkPaint::Style::kStroke_Style);
@@ -56,7 +60,7 @@ namespace arena {
 	void Entity::draw_shadow(Canvas& canvas)
 	{
 		Canvas entity_shadow_canvas = Canvas(this->size.x, this->size.y);
-		entity_shadow_canvas.draw_image(this->texture, SkRect::MakeXYWH(0, 0, this->size.x, this->size.y), nullptr);
+		entity_shadow_canvas.draw_image(this->image, SkRect::MakeXYWH(0, 0, this->size.x, this->size.y), nullptr);
 
 		double new_height = std::floor(entity_shadow_canvas.get_height() * 0.71751412429378531073446327683616);
 		entity_shadow_canvas = entity_shadow_canvas.stretch(SkPoint::Make(this->size.x, this->size.y));

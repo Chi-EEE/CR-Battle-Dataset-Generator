@@ -146,7 +146,10 @@ namespace arena {
 			this->draw_entity(entity);
 		}
 		if (Global::get_json()["display_bounding_boxes"].get<bool>()) {
+			EntityColorManager& entity_color_manager = EntityColorManager::getInstance();
 			for (auto& entity : this->ground_entities) {
+				SkColor average_color = entity_color_manager.get_average_color(entity->entity_data, entity->image);
+				AnnotationBox annotation_box{entity->entity_data->getName(), entity->rect, average_color };
 				entity->draw_annotation_box(this->canvas);
 			}
 			for (auto& entity : this->air_entities) {
