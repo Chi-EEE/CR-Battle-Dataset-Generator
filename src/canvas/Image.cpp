@@ -23,7 +23,7 @@ namespace canvas {
 	{
 
 	}
-	tl::expected<SkColor, std::string> Image::get_average_color()
+	tl::expected<SkColor, std::string> Image::getAverageColor()
 	{
 		SkBitmap bitmap;
 		if (!image->asLegacyBitmap(&bitmap)) {

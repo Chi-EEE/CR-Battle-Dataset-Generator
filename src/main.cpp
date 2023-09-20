@@ -203,13 +203,12 @@ std::pair<std::vector<json>, json> generate_battle(int image_id, int character_c
 			if (entity_data == nullptr) {
 				continue;
 			}
-
 			auto maybeCharacter = Entity::create(
 				entity_data,
 				entity_data_manager.getRandomEntityImage(entity_data).value()
 			);
 			if (maybeCharacter.has_value()) {
-				auto character = std::make_shared<Entity>(maybeCharacter.value());
+				auto character = std::make_shared<arena::logic::Entity>(maybeCharacter.value());
 				character->setPosition(
 					Random::get_instance().random_int_from_interval(64, 664),
 					Random::get_instance().random_int_from_interval(128, 954)
@@ -218,7 +217,7 @@ std::pair<std::vector<json>, json> generate_battle(int image_id, int character_c
 					pEntity spawn_character = nullptr;
 					if (!entity_data->getSpawnCharacter().empty() && !entity_data->getSpawnPauseTime()) {
 						auto spawn_entity_data = entity_data_manager.getEntityDataByName(entity_data->getSpawnCharacter());
-						spawn_character = std::make_shared<Entity>(Entity::create(spawn_entity_data, getImage(random, asset_directory, spawn_entity_data)).value());
+						spawn_character = std::make_shared<arena::logic::Entity>(Entity::create(spawn_entity_data, entity_data_manager.getRandomEntityImage(spawn_entity_data).value()).value());
 						character->addSpawnCharacter(spawn_character);
 					}
 					json character_coco_object = {

@@ -1,6 +1,6 @@
 #include "Entity.h"
 
-namespace arena {
+namespace arena::logic {
 	tl::expected<Entity, std::string> Entity::create(pEntityData entity_data, Image image)
 	{
 		return Entity(entity_data, image);
@@ -44,17 +44,6 @@ namespace arena {
 		entity_canvas.draw_image(this->image, SkRect{0, 0, this->size.x, this->size.y}, &normal);
 
 		canvas.draw_canvas(entity_canvas, this->rect);
-	}
-
-	// If the annotation box is not visible, then you would need to run a script to get rid of transparent area around the entity
-	void Entity::draw_annotation_box(Canvas& canvas)
-	{
-		SkPaint box;
-		box.setColor(SkColorSetARGB(255, average_color.x, average_color.y, average_color.z));
-		box.setStyle(SkPaint::Style::kStroke_Style);
-		box.setStrokeWidth(1.0f);
-		canvas.draw_rect(this->rect, box);
-		canvas.draw_text(this->entity_data->getName(), this->rect.fLeft, this->rect.fBottom);
 	}
 
 	void Entity::draw_shadow(Canvas& canvas)

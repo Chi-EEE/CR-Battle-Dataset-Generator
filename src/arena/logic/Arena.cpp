@@ -1,16 +1,15 @@
 #include "Arena.h"
-#include "Character.h"
 
 using namespace arena::data;
 using namespace csv;
 
-namespace arena {
+namespace arena::logic {
 	Arena::Arena(ArenaType arena_type, TowerSkin blue_side, TowerSkin red_side, Canvas canvas) : arena_type(arena_type), blue_side_tower_skin(blue_side), red_side_tower_skin(red_side), canvas(canvas)
 	{
-		auto& entity_data_indexer = EntityDataIndexer::getInstance();
+		auto& entity_data_manager = EntityDataManager::getInstance();
 
-		auto princess_tower = entity_data_indexer.getEntityDataByName("PrincessTower");
-		auto king_tower = entity_data_indexer.getEntityDataByName("KingTower");
+		auto princess_tower = entity_data_manager.getEntityDataByName("PrincessTower");
+		auto king_tower = entity_data_manager.getEntityDataByName("KingTower");
 
 		add_arena_tower(princess_tower, "princess", "blue", this->blue_side_tower_skin, 171, 788);
 		add_arena_tower(princess_tower, "princess", "blue", this->blue_side_tower_skin, 548, 788);
@@ -25,21 +24,21 @@ namespace arena {
 	{
 		auto result = try_get_arena_tower_path(character, team_side, tower_skin);
 		if (!result.has_value()) throw std::exception(result.error().c_str());
-		auto building_instance_result = Building::create(entity_data, result.value());
+		auto building_instance_result = Entity::create(entity_data, result.value());
 		if (!building_instance_result.has_value()) throw std::exception(building_instance_result.error().c_str());
-		pBuilding building = std::make_shared<Building>(building_instance_result.value());
+		pEntity building = std::make_shared<Entity>(building_instance_result.value());
 		building->setPosition(x, y);
 		this->ground_entities.push_back(building);
 	}
 
-	tl::expected<std::filesystem::path, std::string> Arena::try_get_arena_tower_path(std::string character, std::string team_side, TowerSkin tower_skin)
+	tl::expected<Image, std::string> Arena::try_get_arena_tower_path(std::string character, std::string team_side, TowerSkin tower_skin)
 	{
 		std::string blue_side_name = tower_skin.to_string();
 		std::transform(blue_side_name.begin(), blue_side_name.end(), blue_side_name.begin(), ::tolower);
 		std::filesystem::path asset_directory(Global::get_json()["asset_directory"].get<std::string>());
 		std::filesystem::path arena_tower_file = asset_directory / "essentials" / character / team_side / "tower" / blue_side_name / "01.png";
 		if (!std::filesystem::exists(arena_tower_file)) return tl::make_unexpected(fmt::format("Unable to find the arena tower path containing: {}, {}, {}", character, team_side));
-		return arena_tower_file;
+		return ImageLoader::get_instance().try_load_image(arena_tower_file).value();
 	}
 
 	void Arena::draw_entity(pEntity entity) {
@@ -102,7 +101,7 @@ namespace arena {
 		return Arena(arena_type, blue_side, red_side, canvas);
 	}
 
-	bool Arena::try_add_character(pCharacter character)
+	bool Arena::try_add_character(pEntity character)
 	{
 		for (auto entity : this->ground_entities) {
 			double distance = sqrt(pow(entity->x - character->x, 2) + pow(entity->y - character->y, 2)) * 32;
@@ -146,14 +145,16 @@ namespace arena {
 			this->draw_entity(entity);
 		}
 		if (Global::get_json()["display_bounding_boxes"].get<bool>()) {
-			EntityColorManager& entity_color_manager = EntityColorManager::getInstance();
+			EntityDataManager& entity_data_manager = EntityDataManager::getInstance();
 			for (auto& entity : this->ground_entities) {
-				SkColor average_color = entity_color_manager.get_average_color(entity->entity_data, entity->image);
+				SkColor average_color = entity_data_manager.getAverageColor(entity->entity_data, entity->image);
 				AnnotationBox annotation_box{entity->entity_data->getName(), entity->rect, average_color };
-				entity->draw_annotation_box(this->canvas);
+				annotation_box.draw(canvas);
 			}
 			for (auto& entity : this->air_entities) {
-				entity->draw_annotation_box(this->canvas);
+				SkColor average_color = entity_data_manager.getAverageColor(entity->entity_data, entity->image);
+				AnnotationBox annotation_box{ entity->entity_data->getName(), entity->rect, average_color };
+				annotation_box.draw(canvas);
 			}
 		}
 	}

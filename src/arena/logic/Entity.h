@@ -5,8 +5,6 @@
 
 #include <filesystem>
 
-#include "../data/EntityColorManager.hpp"
-
 #include "../../canvas/ImageLoader.h"
 #include "../../canvas/Drawable.h"
 #include "../../canvas/Canvas.h"
@@ -19,7 +17,7 @@ using namespace arena::data;
 using namespace csv;
 using namespace canvas;
 
-namespace arena {
+namespace arena::logic {
 	class Entity : public Drawable
 	{
 	public:
@@ -27,7 +25,6 @@ namespace arena {
 		void addSpawnCharacter(std::shared_ptr<Entity> spawn_character);
 		void setPosition(int x, int y);
 		void draw(Canvas& canvas);
-		void draw_annotation_box(Canvas& canvas);
 		void draw_shadow(Canvas& canvas);
 		~Entity();
 

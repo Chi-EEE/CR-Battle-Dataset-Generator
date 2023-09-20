@@ -22,20 +22,18 @@
 #include "TowerSkin.h"
 
 #include "Entity.h"
-#include "Building.h"
-#include "Character.h"
 
 #include "../data/EntityDataManager.h"
 #include "../data/EntityData.h"
 
 using namespace canvas;
 
-namespace arena {
+namespace arena::logic {
 	class Arena
 	{
 	public:
 		static tl::expected<Arena, std::string> try_create(ArenaType arena_type, TowerSkin blue_side, TowerSkin red_side);
-		bool try_add_character(pCharacter character);
+		bool try_add_character(pEntity character);
 		void draw();
 		~Arena();
 		Arena clone();
@@ -45,7 +43,7 @@ namespace arena {
 	private:
 		Arena(ArenaType arena_type, TowerSkin blue_side, TowerSkin red_side, Canvas canvas);
 		void add_arena_tower(pEntityData entity_data, std::string character, std::string team_side, TowerSkin tower_skin, int x, int y);
-		tl::expected<std::filesystem::path, std::string> try_get_arena_tower_path(std::string character, std::string team_side, TowerSkin tower_skin);
+		tl::expected<Image, std::string> try_get_arena_tower_path(std::string character, std::string team_side, TowerSkin tower_skin);
 		void draw_entity(pEntity entity);
 		void draw_spawn_entity(pEntity entity);
 

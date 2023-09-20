@@ -41,6 +41,8 @@ namespace arena::data
 
         tl::expected<Image, std::string> getRandomEntityImage(pEntityData entity_data);
 
+        SkColor getAverageColor(pEntityData entity_data, Image& image);
+        
         pEntityData getEntityDataByFileName(std::string fileName);
         pEntityData getEntityDataByName(std::string name);
     private:
@@ -48,6 +50,8 @@ namespace arena::data
         std::unordered_map<std::string, pEntityData> entity_data_name_map;
 
         std::unordered_set<std::string> characters_with_one_orientation;
+ 
+        std::unordered_map<std::string, SkColor> color_map;
     };
 }
 

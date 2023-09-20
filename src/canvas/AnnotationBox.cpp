@@ -11,7 +11,7 @@ namespace canvas {
 
 	}
 
-	void AnnotationBox::draw(Canvas& canvas) const
+	void AnnotationBox::draw(Canvas& canvas)
 	{
 		SkPaint box;
 		box.setColor(color);

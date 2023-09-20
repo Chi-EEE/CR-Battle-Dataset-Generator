@@ -6,7 +6,7 @@
 #include <string>
 #include <unordered_map>
 
-namespace arena {
+namespace arena::logic {
     class TowerSkin
     {
     public:

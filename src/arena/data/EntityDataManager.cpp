@@ -78,7 +78,20 @@ namespace arena::data
 
 		return ImageLoader::get_instance().try_load_image(image_file_path);
 	}
-	;
+
+	SkColor EntityDataManager::getAverageColor(pEntityData entity_data, Image& image) {
+		auto it = this->color_map.find(entity_data->getName());
+		if (it != this->color_map.end())
+			return it->second;
+		auto maybeColor = image.getAverageColor();
+		if (!maybeColor.has_value()) {
+			spdlog::error("Unable to get color from {}'s image", entity_data->getName());
+			return SkColorSetARGB(255, 255, 255, 255);
+		}
+		SkColor color = maybeColor.value();
+		this->color_map.insert(std::make_pair(entity_data->getName(), color));
+		return color;
+	}
 
 	pEntityData EntityDataManager::getEntityDataByFileName(std::string file_name)
 	{
