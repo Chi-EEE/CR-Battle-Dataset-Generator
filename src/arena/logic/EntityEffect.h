@@ -16,7 +16,7 @@ namespace arena::logic {
 		{
 			Empty,
 			Damage,
-			Heal, // TODO: FIX HEAL COLORS
+			Heal,
 			Freeze,
 			Rage,
 			Clone,

@@ -162,11 +162,6 @@ std::vector<EntityEffect> non_stackable_entity_effects = {
 	EntityEffect::Heal,
 };
 
-
-std::vector<EntityEffect> stackable_entity_effects = {
-};
-
-
 tl::expected<bool, std::string> try_read_settings_json() {
 	if (!std::filesystem::is_directory("config") || !std::filesystem::exists("config")) {
 		std::filesystem::create_directory("config");
@@ -220,9 +215,11 @@ std::pair<std::vector<json>, json> generate_battle(int image_id, int character_c
 			if (entity_data == nullptr) {
 				continue;
 			}
+			bool is_blue = random.random_int_from_interval(0, 1);
 			auto maybeCharacter = Entity::create(
 				entity_data,
-				entity_data_manager.getRandomEntityImage(entity_data).value()
+				entity_data_manager.getRandomEntityImage(entity_data, is_blue).value(),
+				is_blue
 			);
 			if (maybeCharacter.has_value()) {
 				auto character = std::make_shared<arena::logic::Entity>(maybeCharacter.value());
@@ -234,22 +231,13 @@ std::pair<std::vector<json>, json> generate_battle(int image_id, int character_c
 				if (random.random_int_from_interval(0, 1)) {
 					std::vector<EntityEffect> non_stackable_entity_effects_vector(non_stackable_entity_effects);
 					do {
-						//if (non_stackable_entity_effects_vector.empty() || random.random_int_from_interval(0, 1)) {
-						//	int index = random.random_int_from_interval(0, stackable_entity_effects.size() - 1);
-						//	EntityEffect effect = stackable_entity_effects[index];
-						//	character->addStackableEffect(effect);
-						//	if (character->hasMaxStackableEffect()) {
-						//		break;
-						//	}
-						//}
-						//else {
-							int index = random.random_int_from_interval(0, non_stackable_entity_effects_vector.size() - 1);
-							EntityEffect effect = non_stackable_entity_effects_vector[index];
-							character->addNonStackableEffect(effect);
-							non_stackable_entity_effects_vector.erase(non_stackable_entity_effects_vector.begin() + index);
-						//}
+						int index = random.random_int_from_interval(0, non_stackable_entity_effects_vector.size() - 1);
+						EntityEffect effect = non_stackable_entity_effects_vector[index];
+						character->addNonStackableEffect(effect);
+						non_stackable_entity_effects_vector.erase(non_stackable_entity_effects_vector.begin() + index);
 					} while (!non_stackable_entity_effects_vector.empty() && random.random_int_from_interval(0, 1));
 				}
+				character->ui = random.random_int_from_interval(0, 1);
 				if (arena.try_add_character(character)) {
 					json character_coco_object = {
 						{"id", total_character_count + character_id},

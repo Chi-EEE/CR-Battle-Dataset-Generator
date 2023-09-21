@@ -39,7 +39,7 @@ namespace arena::data
         ~EntityDataManager();
         void insertEvolutionToml(std::filesystem::path filePath);
 
-        tl::expected<Image, std::string> getRandomEntityImage(pEntityData entity_data);
+        tl::expected<Image, std::string> getRandomEntityImage(pEntityData entity_data, bool is_blue);
 
         SkColor getAverageColor(pEntityData entity_data, Image& image);
         

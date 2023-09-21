@@ -12,7 +12,7 @@ namespace canvas {
 		int height = this->get_height();
 		Canvas canvas = Canvas(width, width);
 		Image snapshot = this->snapshot();
-		canvas.draw_image(snapshot, SkRect::MakeLTRB(0, 0, width, height), nullptr);
+		canvas.draw_image(snapshot, SkRect::MakeLTRB(0, 0, width, height));
 		return canvas;
 	}
 
@@ -25,7 +25,7 @@ namespace canvas {
 		surface->getCanvas()->drawImageRect(canvas.surface->makeImageSnapshot(), dstRect, SkSamplingOptions());
 	}
 
-	void Canvas::draw_image(Image& image, SkRect dstRect, SkPaint* paint = nullptr)
+	void Canvas::draw_image(Image& image, SkRect dstRect, SkPaint* paint)
 	{
 		surface->getCanvas()->drawImageRect(image.get_image(), dstRect, SkSamplingOptions(), paint);
 	}

@@ -3,7 +3,8 @@
 namespace arena::logic {
 	tl::expected<Entity, std::string> Entity::create(
 		pEntityData entity_data,
-		Image entity_image
+		Image entity_image,
+		bool is_blue
 	) {
 		EntityDataManager& entity_data_manager = EntityDataManager::getInstance();
 		std::vector<std::shared_ptr<Entity>> spawn_entities;
@@ -11,15 +12,15 @@ namespace arena::logic {
 		if (spawn_entity_immediately) {
 			auto spawn_entity_data = entity_data_manager.getEntityDataByName(entity_data->getSpawnCharacter());
 			for (int i = 0; i < entity_data->getSpawnNumber(); i++) {
-				auto maybe_spawn_entity_image = entity_data_manager.getRandomEntityImage(spawn_entity_data);
-				auto maybe_spawn_entity = Entity::create(spawn_entity_data, maybe_spawn_entity_image.value());
+				auto maybe_spawn_entity_image = entity_data_manager.getRandomEntityImage(spawn_entity_data, is_blue);
+				auto maybe_spawn_entity = Entity::create(spawn_entity_data, maybe_spawn_entity_image.value(), is_blue);
 				if (!maybe_spawn_entity.has_value()) {
 					return tl::make_unexpected(maybe_spawn_entity.error());
 				}
 				spawn_entities.push_back(std::make_shared<Entity>(maybe_spawn_entity.value()));
 			}
 		}
-		return Entity(entity_data, entity_image, spawn_entities);
+		return Entity(entity_data, entity_image, is_blue, spawn_entities);
 	}
 
 	void Entity::setPosition(SkV2 position)
@@ -59,15 +60,6 @@ namespace arena::logic {
 		}
 	}
 
-	void Entity::addStackableEffect(EntityEffect effect) {
-		return this->stackable_effects.push_back(effect);
-	}
-
-	bool Entity::hasMaxStackableEffect()
-	{
-		return this->stackable_effects.size() >= 2;
-	}
-
 	void Entity::addNonStackableEffect(EntityEffect effect) {
 		this->non_stackable_effects.insert(effect);
 	}
@@ -76,19 +68,8 @@ namespace arena::logic {
 	{
 		SkPaint paint, normal;
 		Canvas entity_canvas(this->size.x, this->size.y);
-		entity_canvas.draw_image(this->image, SkRect{0, 0, this->size.x, this->size.y}, nullptr);
+		entity_canvas.draw_image(this->image, SkRect{0, 0, this->size.x, this->size.y});
 		for (EntityEffect effect : this->non_stackable_effects)
-		{
-			auto effect_pair = effect.get_effect();
-
-			SkBlendMode blend = effect_pair.first;
-			SkColor color = effect_pair.second;
-
-			paint.setBlendMode(blend);
-			paint.setColor(color);
-			entity_canvas.draw_rect(SkRect{ 0, 0, this->size.x, this->size.y }, paint);
-		}
-		for (EntityEffect effect : this->stackable_effects)
 		{
 			auto effect_pair = effect.get_effect();
 
@@ -107,12 +88,18 @@ namespace arena::logic {
 		for (auto& spawn_entity : this->spawn_entities) {
 			canvas.draw(*spawn_entity);
 		}
+
+		if (this->ui) {
+			std::filesystem::path asset_directory(Global::get_json()["asset_directory"].get<std::string>());
+			auto level_ui = ImageLoader::get_instance().try_load_image(asset_directory / "sprites" / "ui" / fmt::format("{}_level.png", this->is_blue ? "player" : "enemy")).value();
+			canvas.draw_image(level_ui, SkRect{ this->position.x, this->rect.fTop, static_cast<float>(level_ui.get_width() * Global::scale), static_cast<float>(level_ui.get_height() * Global::scale) }, nullptr);
+		}
 	}
 
 	void Entity::draw_shadow(Canvas& canvas)
 	{
 		Canvas entity_shadow_canvas = Canvas(this->size.x, this->size.y);
-		entity_shadow_canvas.draw_image(this->image, SkRect::MakeXYWH(0, 0, this->size.x, this->size.y), nullptr);
+		entity_shadow_canvas.draw_image(this->image, SkRect::MakeXYWH(0, 0, this->size.x, this->size.y));
 
 		double new_height = std::floor(entity_shadow_canvas.get_height() * 0.71751412429378531073446327683616);
 		entity_shadow_canvas = entity_shadow_canvas.stretch(SkPoint::Make(this->size.x, this->size.y));
@@ -125,7 +112,7 @@ namespace arena::logic {
 			entity_shadow_canvas.get_height() + this->entity_data->getShadowY()
 		);
 
-		canvas.draw_image(entity_shadow_canvas.replace_pixels_to(), entity_shadow_rect, nullptr);
+		canvas.draw_image(entity_shadow_canvas.replace_pixels_to(), entity_shadow_rect);
 	}
 
 	Entity::~Entity()
@@ -133,7 +120,7 @@ namespace arena::logic {
 
 	}
 
-	Entity::Entity(pEntityData entity_data, Image image, std::vector<std::shared_ptr<Entity>> spawn_entities) : entity_data(entity_data), image(image), spawn_entities(spawn_entities)
+	Entity::Entity(pEntityData entity_data, Image image, bool is_blue, std::vector<std::shared_ptr<Entity>> spawn_entities) : entity_data(entity_data), image(image), is_blue(is_blue), spawn_entities(spawn_entities)
 	{
 		float scale = (this->entity_data->getScale() / 100.0f);
 		float entity_width = (this->image.get_width() * scale) * Global::scale;

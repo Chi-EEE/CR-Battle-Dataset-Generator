@@ -28,11 +28,10 @@ namespace arena::logic {
 	public:
 		static tl::expected<Entity, std::string> create(
 			pEntityData entity_data, 
-			Image entity_image
+			Image entity_image,
+			bool is_blue
 		); 
 		void setPosition(SkV2 position);
-		void addStackableEffect(EntityEffect effect);
-		bool hasMaxStackableEffect();
 		void addNonStackableEffect(EntityEffect effect);
 		void draw(Canvas& canvas);
 		void draw_shadow(Canvas& canvas);
@@ -46,14 +45,18 @@ namespace arena::logic {
 
 		Image image;
 
+		bool is_blue;
+
 		std::vector<std::shared_ptr<Entity>> spawn_entities;
 
 		std::unordered_set<EntityEffect, EntityEffectHasher> non_stackable_effects;
-		std::vector<EntityEffect> stackable_effects;
+
+		bool ui = false;
 	private:
 		Entity(
 			pEntityData entity_data, 
-			Image image, 
+			Image image,
+			bool is_blue,
 			std::vector<std::shared_ptr<Entity>> spawn_entities
 		);
 	};

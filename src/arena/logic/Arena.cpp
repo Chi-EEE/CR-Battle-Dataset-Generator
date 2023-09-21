@@ -8,33 +8,33 @@ namespace arena::logic {
 		auto princess_tower = entity_data_manager.getEntityDataByName("PrincessTower");
 		auto king_tower = entity_data_manager.getEntityDataByName("KingTower");
 
-		add_arena_tower(princess_tower, "princess", "blue", this->blue_side_tower_skin, SkV2{171, 788});
-		add_arena_tower(princess_tower, "princess", "blue", this->blue_side_tower_skin, SkV2{548, 788});
-		add_arena_tower(king_tower, "king", "blue", this->blue_side_tower_skin, SkV2{360, 875});
+		add_arena_tower(princess_tower, "princess", true, this->blue_side_tower_skin, SkV2{171, 788});
+		add_arena_tower(princess_tower, "princess", true, this->blue_side_tower_skin, SkV2{548, 788});
+		add_arena_tower(king_tower, "king", true, this->blue_side_tower_skin, SkV2{360, 875});
 
-		add_arena_tower(princess_tower, "princess", "red", this->red_side_tower_skin, SkV2{171, 262});
-		add_arena_tower(princess_tower, "princess", "red", this->red_side_tower_skin, SkV2{548, 262});
-		add_arena_tower(king_tower, "king", "red", this->red_side_tower_skin, SkV2{360, 167});
+		add_arena_tower(princess_tower, "princess", false, this->red_side_tower_skin, SkV2{171, 262});
+		add_arena_tower(princess_tower, "princess", false, this->red_side_tower_skin, SkV2{548, 262});
+		add_arena_tower(king_tower, "king", false, this->red_side_tower_skin, SkV2{360, 167});
 	}
 
-	void Arena::add_arena_tower(pEntityData entity_data, std::string character, std::string team_side, TowerSkin tower_skin, SkV2 position)
+	void Arena::add_arena_tower(pEntityData entity_data, std::string character, bool is_blue, TowerSkin tower_skin, SkV2 position)
 	{
-		auto result = try_get_arena_tower_path(character, team_side, tower_skin);
+		auto result = try_get_arena_tower_path(character, is_blue, tower_skin);
 		if (!result.has_value()) throw std::exception(result.error().c_str());
-		auto building_instance_result = Entity::create(entity_data, result.value());
+		auto building_instance_result = Entity::create(entity_data, result.value(), is_blue);
 		if (!building_instance_result.has_value()) throw std::exception(building_instance_result.error().c_str());
 		pEntity building = std::make_shared<Entity>(building_instance_result.value());
 		building->setPosition(position);
 		this->ground_entities.push_back(building);
 	}
 
-	tl::expected<Image, std::string> Arena::try_get_arena_tower_path(std::string character, std::string team_side, TowerSkin tower_skin)
+	tl::expected<Image, std::string> Arena::try_get_arena_tower_path(std::string character, bool is_blue, TowerSkin tower_skin)
 	{
 		std::string blue_side_name = tower_skin.to_string();
 		std::transform(blue_side_name.begin(), blue_side_name.end(), blue_side_name.begin(), ::tolower);
 		std::filesystem::path asset_directory(Global::get_json()["asset_directory"].get<std::string>());
-		std::filesystem::path arena_tower_file = asset_directory / "essentials" / character / team_side / "tower" / blue_side_name / "01.png";
-		if (!std::filesystem::exists(arena_tower_file)) return tl::make_unexpected(fmt::format("Unable to find the arena tower path containing: {}, {}, {}", character, team_side));
+		std::filesystem::path arena_tower_file = asset_directory / "essentials" / character / (is_blue ? "blue" : "red") / "tower" / blue_side_name / "01.png";
+		if (!std::filesystem::exists(arena_tower_file)) return tl::make_unexpected(fmt::format("Unable to find the arena tower path containing: {}, {}, {}", character, is_blue));
 		return ImageLoader::get_instance().try_load_image(arena_tower_file);
 	}
 
@@ -62,7 +62,7 @@ namespace arena::logic {
 		}
 		auto image = image_result.value();
 		Canvas canvas = Canvas(image.get_width(), image.get_height());
-		canvas.draw_image(image, SkRect::MakeXYWH(0, 0, image.get_width(), image.get_height()), nullptr);
+		canvas.draw_image(image, SkRect::MakeXYWH(0, 0, image.get_width(), image.get_height()));
 		return Arena(arena_type, blue_side, red_side, canvas);
 	}
 

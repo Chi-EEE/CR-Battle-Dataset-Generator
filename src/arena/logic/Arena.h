@@ -44,8 +44,8 @@ namespace arena::logic {
 		int get_height() { return this->canvas.get_height(); }
 	private:
 		Arena(ArenaType arena_type, TowerSkin blue_side, TowerSkin red_side, Canvas canvas);
-		void add_arena_tower(pEntityData entity_data, std::string character, std::string team_side, TowerSkin tower_skin, SkV2 position);
-		tl::expected<Image, std::string> try_get_arena_tower_path(std::string character, std::string team_side, TowerSkin tower_skin);
+		void add_arena_tower(pEntityData entity_data, std::string character, bool is_blue, TowerSkin tower_skin, SkV2 position);
+		tl::expected<Image, std::string> try_get_arena_tower_path(std::string character, bool is_blue, TowerSkin tower_skin);
 
 		std::vector<pEntity> air_entities;
 		std::vector<pEntity> ground_entities;

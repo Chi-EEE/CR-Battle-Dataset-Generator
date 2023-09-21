@@ -39,7 +39,7 @@ namespace arena::data
 		}
 	}
 
-	tl::expected<Image, std::string> EntityDataManager::getRandomEntityImage(pEntityData entity_data)
+	tl::expected<Image, std::string> EntityDataManager::getRandomEntityImage(pEntityData entity_data, bool is_blue)
 	{
 		Random& random = Random::get_instance();
 		std::filesystem::path asset_directory(Global::get_json()["asset_directory"].get<std::string>());
@@ -48,8 +48,6 @@ namespace arena::data
 		file_name.erase(0, 3); // Remove "/sc"
 
 		auto character_directory = asset_directory / "sprites" / "characters" / file_name;
-
-		bool is_blue = random.random_int_from_interval(0, 1);
 
 		std::vector<std::string> actions{
 			"idle1",
