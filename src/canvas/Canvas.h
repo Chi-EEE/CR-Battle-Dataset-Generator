@@ -37,7 +37,7 @@ namespace canvas {
 		int get_height() {
 			return this->surface->height();
 		}
-		void draw_canvas(Canvas canvas, SkRect dstRect);
+		void draw_canvas(Canvas canvas, SkRect dstRect, SkPaint* paint = nullptr);
 		void draw_image(Image& image, SkRect dstRect, SkPaint* paint = nullptr);
 		void draw_text(std::string string, int x, int y);
 		void draw_rect(SkRect dst, SkPaint box);

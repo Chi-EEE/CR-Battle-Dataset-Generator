@@ -106,12 +106,27 @@ namespace arena::logic {
 				return entity_1->position.y < entity_2->position.y;
 			}
 		);
+
 		for (auto& entity : this->ground_entities) {
 			this->canvas.draw(*entity);
 		}
+
 		for (auto& entity : this->air_entities) {
 			this->canvas.draw(*entity);
 		}
+
+		for (auto& entity : this->ground_entities) {
+			if (entity->ui) {
+				entity->draw_ui(this->canvas);
+			}
+		}
+
+		for (auto& entity : this->air_entities) {
+			if (entity->ui) {
+				entity->draw_ui(this->canvas);
+			}
+		}
+
 		if (Global::get_json()["display_bounding_boxes"].get<bool>()) {
 			EntityDataManager& entity_data_manager = EntityDataManager::getInstance();
 			for (auto& entity : this->ground_entities) {

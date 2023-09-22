@@ -20,9 +20,9 @@ namespace canvas {
 	{
 	}
 
-	void Canvas::draw_canvas(Canvas canvas, SkRect dstRect)
+	void Canvas::draw_canvas(Canvas canvas, SkRect dstRect, SkPaint* paint)
 	{
-		surface->getCanvas()->drawImageRect(canvas.surface->makeImageSnapshot(), dstRect, SkSamplingOptions());
+		surface->getCanvas()->drawImageRect(canvas.surface->makeImageSnapshot(), dstRect, SkSamplingOptions(), paint);
 	}
 
 	void Canvas::draw_image(Image& image, SkRect dstRect, SkPaint* paint)

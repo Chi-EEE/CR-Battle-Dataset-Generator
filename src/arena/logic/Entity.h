@@ -34,6 +34,7 @@ namespace arena::logic {
 		void setPosition(SkV2 position);
 		void addNonStackableEffect(EntityEffect effect);
 		void draw(Canvas& canvas);
+		void draw_ui(Canvas& canvas);
 		void draw_shadow(Canvas& canvas);
 		~Entity();
 

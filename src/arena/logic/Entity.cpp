@@ -7,6 +7,7 @@ namespace arena::logic {
 		bool is_blue
 	) {
 		EntityDataManager& entity_data_manager = EntityDataManager::getInstance();
+		Random& random = Random::get_instance();
 		std::vector<std::shared_ptr<Entity>> spawn_entities;
 		bool spawn_entity_immediately = !entity_data->getSpawnCharacter().empty() && !entity_data->getSpawnPauseTime();
 		if (spawn_entity_immediately) {
@@ -17,7 +18,8 @@ namespace arena::logic {
 				if (!maybe_spawn_entity.has_value()) {
 					return tl::make_unexpected(maybe_spawn_entity.error());
 				}
-				spawn_entities.push_back(std::make_shared<Entity>(maybe_spawn_entity.value()));
+				auto spawn_entity = maybe_spawn_entity.value();
+				spawn_entities.push_back(std::make_shared<Entity>(spawn_entity));
 			}
 		}
 		return Entity(entity_data, entity_image, is_blue, spawn_entities);
@@ -30,7 +32,7 @@ namespace arena::logic {
 
 		int entity_scale = this->entity_data->getScale();
 
-		if (!this->spawn_entities.empty()) {
+		if (this->spawn_entities.empty()) {
 			return;
 		}
 
@@ -66,9 +68,10 @@ namespace arena::logic {
 
 	void Entity::draw(Canvas& canvas)
 	{
-		SkPaint paint, normal;
+		SkRect size_rect = SkRect::MakeIWH(this->size.x, this->size.y);
+		SkPaint paint, crop;
 		Canvas entity_canvas(this->size.x, this->size.y);
-		entity_canvas.draw_image(this->image, SkRect{0, 0, this->size.x, this->size.y});
+		entity_canvas.draw_image(this->image, size_rect);
 		for (EntityEffect effect : this->non_stackable_effects)
 		{
 			auto effect_pair = effect.get_effect();
@@ -78,22 +81,28 @@ namespace arena::logic {
 
 			paint.setBlendMode(blend);
 			paint.setColor(color);
-			entity_canvas.draw_rect(SkRect{ 0, 0, this->size.x, this->size.y }, paint);
+			entity_canvas.draw_rect(size_rect, paint);
 		}
-		normal.setBlendMode(SkBlendMode::kDstIn);
-		entity_canvas.draw_image(this->image, SkRect{0, 0, this->size.x, this->size.y}, & normal);
+		crop.setBlendMode(SkBlendMode::kDstIn);
+		entity_canvas.draw_image(this->image, size_rect, & crop);
 
 		canvas.draw_canvas(entity_canvas, this->rect);
 
 		for (auto& spawn_entity : this->spawn_entities) {
 			canvas.draw(*spawn_entity);
 		}
+	}
 
-		if (this->ui) {
-			std::filesystem::path asset_directory(Global::get_json()["asset_directory"].get<std::string>());
-			auto level_ui = ImageLoader::get_instance().try_load_image(asset_directory / "sprites" / "ui" / fmt::format("{}_level.png", this->is_blue ? "player" : "enemy")).value();
-			canvas.draw_image(level_ui, SkRect{ this->position.x, this->rect.fTop, static_cast<float>(level_ui.get_width() * Global::scale), static_cast<float>(level_ui.get_height() * Global::scale) }, nullptr);
-		}
+	void Entity::draw_ui(Canvas& canvas)
+	{
+		std::filesystem::path asset_directory(Global::get_json()["asset_directory"].get<std::string>());
+		auto level_ui = ImageLoader::get_instance().try_load_image(asset_directory / "sprites" / "ui" / fmt::format("{}_level.png", this->is_blue ? "player" : "enemy")).value();
+
+		auto level_width = level_ui.get_width();
+		auto level_height = level_ui.get_height();
+
+		SkRect level_rect = SkRect::MakeXYWH(this->position.x - (level_width / 2), this->rect.fTop - (level_height / 2), level_width, level_height);
+		canvas.draw_image(level_ui, level_rect);
 	}
 
 	void Entity::draw_shadow(Canvas& canvas)
