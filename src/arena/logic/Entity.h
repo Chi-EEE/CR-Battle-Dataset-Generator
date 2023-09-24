@@ -52,7 +52,8 @@ namespace arena::logic {
 
 		std::unordered_set<EntityEffect, EntityEffectHasher> non_stackable_effects;
 
-		bool ui = false;
+		bool level_ui = false;
+		bool health_ui = false;
 	private:
 		Entity(
 			pEntityData entity_data, 

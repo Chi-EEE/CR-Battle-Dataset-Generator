@@ -116,15 +116,11 @@ namespace arena::logic {
 		}
 
 		for (auto& entity : this->ground_entities) {
-			if (entity->ui) {
-				entity->draw_ui(this->canvas);
-			}
+			entity->draw_ui(this->canvas);
 		}
 
 		for (auto& entity : this->air_entities) {
-			if (entity->ui) {
-				entity->draw_ui(this->canvas);
-			}
+			entity->draw_ui(this->canvas);
 		}
 
 		if (Global::get_json()["display_bounding_boxes"].get<bool>()) {

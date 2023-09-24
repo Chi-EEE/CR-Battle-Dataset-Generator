@@ -84,7 +84,7 @@ namespace arena::logic {
 			entity_canvas.draw_rect(size_rect, paint);
 		}
 		crop.setBlendMode(SkBlendMode::kDstIn);
-		entity_canvas.draw_image(this->image, size_rect, & crop);
+		entity_canvas.draw_image(this->image, size_rect, &crop);
 
 		canvas.draw_canvas(entity_canvas, this->rect);
 
@@ -95,13 +95,49 @@ namespace arena::logic {
 
 	void Entity::draw_ui(Canvas& canvas)
 	{
+		if (!this->level_ui) {
+			return;
+		}
 		std::filesystem::path asset_directory(Global::get_json()["asset_directory"].get<std::string>());
-		auto level_ui = ImageLoader::get_instance().try_load_image(asset_directory / "sprites" / "ui" / fmt::format("{}_level.png", this->is_blue ? "player" : "enemy")).value();
+		ImageLoader& image_loader = ImageLoader::get_instance();
+		auto level_ui = image_loader.try_load_image(asset_directory / "sprites" / "ui" / fmt::format("{}_level.png", this->is_blue ? "player" : "enemy")).value();
 
-		auto level_width = level_ui.get_width();
-		auto level_height = level_ui.get_height();
+		auto level_width = level_ui.get_width() / 2;
+		auto level_height = level_ui.get_height() / 2;
+		if (this->health_ui) {
+			std::string health_bar_type = this->entity_data->getHealthBar();
+			if (health_bar_type == "Small") {
+				return;
+			}
+			else if (health_bar_type == "Medium") {
 
-		SkRect level_rect = SkRect::MakeXYWH(this->position.x - (level_width / 2), this->rect.fTop - (level_height / 2), level_width, level_height);
+				return;
+			}
+			else if (health_bar_type == "High") {
+
+				return;
+			}
+			auto health_bar = image_loader.try_load_image(
+				asset_directory / 
+				"sprites" / 
+				"ui" / 
+				fmt::format("hp_{}_{}.png", this->is_blue ? "player" : "enemy", std::tolower(health_bar_type.c_str()))
+			).value();
+			auto health_bar_width = health_bar.get_width() / 2;
+			auto health_bar_height = health_bar.get_height() / 2;
+			SkRect health_bar_rect = SkRect::MakeXYWH(
+				this->position.x - (health_bar_width / 2),
+				this->rect.fTop - (health_bar_height / 2) + this->entity_data->getHealthBarOffsetY(),
+				health_bar_width,
+				health_bar_height
+			);
+		}
+		SkRect level_rect = SkRect::MakeXYWH(
+			this->position.x - (level_width / 2),
+			this->rect.fTop - (level_height / 2) + this->entity_data->getHealthBarOffsetY(),
+			level_width,
+			level_height
+		);
 		canvas.draw_image(level_ui, level_rect);
 	}
 
@@ -135,6 +171,6 @@ namespace arena::logic {
 		float entity_width = (this->image.get_width() * scale) * Global::scale;
 		float entity_height = (this->image.get_height() * scale) * Global::scale;
 		this->size = { entity_width, entity_height };
-		this->rect = SkRect::MakeXYWH(0, 0, this->size.x, this->size.y);
+		this->rect = SkRect::MakeIWH(this->size.x, this->size.y);
 	}
 }

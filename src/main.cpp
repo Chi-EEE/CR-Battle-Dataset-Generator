@@ -120,6 +120,9 @@ std::vector<std::string> allowed_characters = {
 	// "GoblinBrawlerParty",
 	// "GoblinDummy",
 	"Monk",
+	"Skeleton_EV1",
+	"Barbarian_EV1",
+	"RoyalGiant_EV1",
 };
 
 
@@ -237,7 +240,11 @@ std::pair<std::vector<json>, json> generate_battle(int image_id, int character_c
 						non_stackable_entity_effects_vector.erase(non_stackable_entity_effects_vector.begin() + index);
 					} while (!non_stackable_entity_effects_vector.empty() && random.random_int_from_interval(0, 1));
 				}
-				character->ui = random.random_int_from_interval(0, 1);
+				bool add_level_ui = random.random_int_from_interval(0, 1);
+				if (add_level_ui) {
+					character->level_ui = true;
+					character->health_ui = random.random_int_from_interval(0, 1);
+				}
 				if (arena.try_add_character(character)) {
 					json character_coco_object = {
 						{"id", total_character_count + character_id},
