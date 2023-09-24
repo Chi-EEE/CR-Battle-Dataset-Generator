@@ -135,14 +135,17 @@ namespace arena::logic {
 					health_bar_width,
 					health_bar_height
 				);
+				canvas.draw_image(health_bar, health_bar_rect);
 		}
-		SkRect level_rect = SkRect::MakeXYWH(
-			this->position.x - (level_width / 2),
-			this->rect.fTop - (level_height / 2) + this->entity_data->getHealthBarOffsetY(),
-			level_width,
-			level_height
-		);
-		canvas.draw_image(level_ui, level_rect);
+		else {
+			SkRect level_rect = SkRect::MakeXYWH(
+				this->position.x - (level_width / 2),
+				this->rect.fTop - (level_height / 2) + this->entity_data->getHealthBarOffsetY(),
+				level_width,
+				level_height
+			);
+			canvas.draw_image(level_ui, level_rect);
+		}
 	}
 
 	void Entity::draw_shadow(Canvas& canvas)
