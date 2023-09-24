@@ -106,31 +106,35 @@ namespace arena::logic {
 		auto level_height = level_ui.get_height() / 2;
 		if (this->health_ui) {
 			std::string health_bar_type = this->entity_data->getHealthBar();
-			if (health_bar_type == "Small") {
-				return;
-			}
-			else if (health_bar_type == "Medium") {
 
-				return;
-			}
-			else if (health_bar_type == "High") {
+			std::transform(health_bar_type.begin(), health_bar_type.end(), health_bar_type.begin(),
+				[](unsigned char c) { return std::tolower(c); });
 
-				return;
-			}
-			auto health_bar = image_loader.try_load_image(
-				asset_directory / 
-				"sprites" / 
-				"ui" / 
-				fmt::format("hp_{}_{}.png", this->is_blue ? "player" : "enemy", std::tolower(health_bar_type.c_str()))
-			).value();
-			auto health_bar_width = health_bar.get_width() / 2;
-			auto health_bar_height = health_bar.get_height() / 2;
-			SkRect health_bar_rect = SkRect::MakeXYWH(
-				this->position.x - (health_bar_width / 2),
-				this->rect.fTop - (health_bar_height / 2) + this->entity_data->getHealthBarOffsetY(),
-				health_bar_width,
-				health_bar_height
-			);
+			Image health_bar = [this, &image_loader, asset_directory, health_bar_type]()
+				{
+					std::filesystem::path health_bar_directory = 
+						asset_directory /
+						"sprites" /
+						"ui" /
+						fmt::format("hp_{}_{}", this->is_blue ? "player" : "enemy", health_bar_type);
+					if (!std::filesystem::exists(health_bar_directory)) {
+						health_bar_directory = 
+							asset_directory /
+							"sprites" /
+							"ui" /
+							fmt::format("hp_{}_medium", this->is_blue ? "player" : "enemy");
+					}
+					return image_loader.try_load_image(Random::get_instance().try_get_random_file_from_directory(health_bar_directory).value()).value();
+				}();
+
+				auto health_bar_width = health_bar.get_width() / 2;
+				auto health_bar_height = health_bar.get_height() / 2;
+				SkRect health_bar_rect = SkRect::MakeXYWH(
+					this->position.x - (health_bar_width / 2),
+					this->rect.fTop - (health_bar_height / 2) + this->entity_data->getHealthBarOffsetY(),
+					health_bar_width,
+					health_bar_height
+				);
 		}
 		SkRect level_rect = SkRect::MakeXYWH(
 			this->position.x - (level_width / 2),

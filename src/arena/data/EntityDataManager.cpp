@@ -15,6 +15,10 @@ namespace arena::data
 			this->entity_data_name_map.insert(std::make_pair(entity_data->getName(), entity_data));
 		}
 		this->insertEvolutionToml(asset_directory / "files" / "characters_evo.toml");
+		for (auto entity_data : entity_data_table->getEntries()) { // Could improve this!
+			this->entity_data_file_name_map.insert(std::make_pair(entity_data->getFileName(), entity_data));
+			this->entity_data_name_map.insert(std::make_pair(entity_data->getName(), entity_data));
+		}
 	}
 
 	EntityDataManager::~EntityDataManager()
