@@ -125,7 +125,6 @@ std::vector<std::string> allowed_characters = {
 	"RoyalGiant_EV1",
 };
 
-
 std::vector<ArenaType> allowed_arenas = {
 	ArenaType::Goblin_Stadium,
 	ArenaType::Bone_Pit,
@@ -164,6 +163,89 @@ std::vector<EntityEffect> non_stackable_entity_effects = {
 	EntityEffect::Freeze,
 	EntityEffect::Heal,
 };
+
+tl::expected<bool, std::string> try_read_settings_json();
+std::pair<std::vector<json>, json> generate_battle(int image_id, int character_count, long total_character_count, std::filesystem::path& asset_directory, std::filesystem::path& output_image_directory);
+json get_categories();
+void create_annotations_json(std::filesystem::path& output_directory, json& coco_annotations);
+void create_data_yaml(std::filesystem::path& output_directory);
+
+int main() {
+	auto start = std::chrono::system_clock::now();
+	{
+		std::time_t start_time = std::chrono::system_clock::to_time_t(start);
+		std::cout << "Started computation at " << std::ctime(&start_time) << '\n';
+	}
+
+	auto read_setting_json_result = try_read_settings_json();
+	if (!read_setting_json_result.has_value()) {
+		std::cerr << read_setting_json_result.error() << '\n';
+		return 0;
+	}
+	if (!read_setting_json_result.value()) {
+		std::cerr << "Please set 'ready' to true when you are ready.\n";
+		return 0;
+	}
+
+	int image_count(Global::get_json()["image_count"].get<int>());
+	int character_min_count(Global::get_json()["character_min_count"].get<int>());
+	int character_max_count(Global::get_json()["character_max_count"].get<int>());
+
+	if (character_min_count > character_max_count) {
+		spdlog::error("character_min_count ({}) is greater than character_max_count ({})", character_min_count, character_max_count);
+		return 0;
+	}
+
+	std::filesystem::path asset_directory(Global::get_json()["asset_directory"].get<std::string>());
+	std::filesystem::path output_directory(Global::get_json()["output_directory"].get<std::string>());
+	bool debug(Global::get_json()["debug"].get<bool>());
+	if (debug) {
+		spdlog::set_level(spdlog::level::debug);
+	}
+
+	auto output_image_directory = output_directory / "images";
+	if (!std::filesystem::is_directory(output_image_directory) || !std::filesystem::exists(output_image_directory)) {
+		std::filesystem::create_directory(output_image_directory);
+	}
+
+	std::vector<json> character_coco_objects_vector;
+	std::vector<json> image_coco_object_vector;
+
+	spdlog::info("Starting to generate images and annotations!\n");
+	long total_character_count = 1;
+	for (int image_id = 1; image_id < image_count + 1; image_id++) {
+		int character_count = Random::get_instance().random_int_from_interval(character_min_count, character_max_count);
+		auto result = generate_battle(image_id, character_count, total_character_count, asset_directory, output_image_directory);
+		std::vector<json> character_coco_objects = result.first;
+		json image_coco_object = result.second;
+
+		character_coco_objects_vector.insert(character_coco_objects_vector.end(), character_coco_objects.begin(), character_coco_objects.end());
+		image_coco_object_vector.push_back(image_coco_object);
+		total_character_count += character_count;
+	}
+
+	json coco_annotations = {
+		{"categories", get_categories()},
+		{"images", image_coco_object_vector},
+		{"annotations", character_coco_objects_vector},
+	};
+
+	create_annotations_json(output_directory, coco_annotations);
+
+	create_data_yaml(output_directory);
+
+	spdlog::info("Completed generating all images and annotations!");
+
+	auto end = std::chrono::system_clock::now();
+
+	std::chrono::duration<double> elapsed_seconds = end - start;
+	std::time_t end_time = std::chrono::system_clock::to_time_t(end);
+
+	std::cout << "finished computation at " << std::ctime(&end_time)
+		<< "elapsed time: " << elapsed_seconds.count() << "s"
+		<< std::endl;
+	return 0;
+}
 
 tl::expected<bool, std::string> try_read_settings_json() {
 	if (!std::filesystem::is_directory("config") || !std::filesystem::exists("config")) {
@@ -321,70 +403,13 @@ json get_categories() {
 	return category_json;
 }
 
-int main() {
-	auto start = std::chrono::system_clock::now();
-	{
-		std::time_t start_time = std::chrono::system_clock::to_time_t(start);
-		std::cout << "Started computation at " << std::ctime(&start_time) << '\n';
-	}
-
-	auto read_setting_json_result = try_read_settings_json();
-	if (!read_setting_json_result.has_value()) {
-		std::cerr << read_setting_json_result.error() << '\n';
-		return 0;
-	}
-	if (!read_setting_json_result.value()) {
-		std::cerr << "Please set 'ready' to true when you are ready.\n";
-		return 0;
-	}
-
-	int image_count(Global::get_json()["image_count"].get<int>());
-	int character_min_count(Global::get_json()["character_min_count"].get<int>());
-	int character_max_count(Global::get_json()["character_max_count"].get<int>());
-
-	if (character_min_count > character_max_count) {
-		spdlog::error("character_min_count ({}) is greater than character_max_count ({})", character_min_count, character_max_count);
-		return 0;
-	}
-
-	std::filesystem::path asset_directory(Global::get_json()["asset_directory"].get<std::string>());
-	std::filesystem::path output_directory(Global::get_json()["output_directory"].get<std::string>());
-	bool debug(Global::get_json()["debug"].get<bool>());
-	if (debug) {
-		spdlog::set_level(spdlog::level::debug);
-	}
-
-	auto output_image_directory = output_directory / "images";
-	if (!std::filesystem::is_directory(output_image_directory) || !std::filesystem::exists(output_image_directory)) {
-		std::filesystem::create_directory(output_image_directory);
-	}
-
-	std::vector<json> character_coco_objects_vector;
-	std::vector<json> image_coco_object_vector;
-
-	spdlog::info("Starting to generate images and annotations!\n");
-	long total_character_count = 1;
-	for (int image_id = 1; image_id < image_count + 1; image_id++) {
-		int character_count = Random::get_instance().random_int_from_interval(character_min_count, character_max_count);
-		auto result = generate_battle(image_id, character_count, total_character_count, asset_directory, output_image_directory);
-		std::vector<json> character_coco_objects = result.first;
-		json image_coco_object = result.second;
-
-		character_coco_objects_vector.insert(character_coco_objects_vector.end(), character_coco_objects.begin(), character_coco_objects.end());
-		image_coco_object_vector.push_back(image_coco_object);
-		total_character_count += character_count;
-	}
-
-	json coco_annotations = {
-		{"categories", get_categories()},
-		{"images", image_coco_object_vector},
-		{"annotations", character_coco_objects_vector},
-	};
-
+void create_annotations_json(std::filesystem::path& output_directory, json& coco_annotations) {
 	std::ofstream json_output_file(output_directory / "annotations.json");
 	json_output_file << coco_annotations.dump() << std::endl;
 	json_output_file.close();
+}
 
+void create_data_yaml(std::filesystem::path& output_directory) {
 	toml::array character_array;
 	for (auto& character : allowed_characters) {
 		character_array.push_back(character);
@@ -400,16 +425,4 @@ int main() {
 	std::ofstream yaml_output_file(output_directory / "data.yaml");
 	yaml_output_file << toml::yaml_formatter{ yaml } << std::endl;
 	yaml_output_file.close();
-
-	spdlog::info("Completed generating all images and annotations!");
-
-	auto end = std::chrono::system_clock::now();
-
-	std::chrono::duration<double> elapsed_seconds = end - start;
-	std::time_t end_time = std::chrono::system_clock::to_time_t(end);
-
-	std::cout << "finished computation at " << std::ctime(&end_time)
-		<< "elapsed time: " << elapsed_seconds.count() << "s"
-		<< std::endl;
-	return 0;
 }
