@@ -9,6 +9,7 @@ namespace canvas {
 	// There is not a memory leak here since the images are being loaded here!
 	tl::expected<Image, std::string> canvas::ImageLoader::try_load_image(std::filesystem::path file_path)
 	{
+		std::lock_guard<std::mutex> lock(mtx);
 		auto it = this->images.find(file_path);
 		if (it != this->images.end())
 			return it->second;

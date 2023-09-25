@@ -246,7 +246,7 @@ int main() {
 		int end = start + images_per_thread + (thread_id < remaining_images ? 1 : 0);
 		std::packaged_task<ThreadOutput()> task(std::bind(generate_images, thread_info, start, end));
 		std::shared_future<ThreadOutput> future = task.get_future();
-		thread_futures.emplace_back(thread_id, std::move(future));
+		thread_futures.emplace_back(thread_info, std::move(future));
 		threads.emplace_back(std::move(task));
 		image_id = end;
 	}
@@ -314,6 +314,7 @@ tl::expected<bool, std::string> try_read_settings_json() {
 	}
 	if (!std::filesystem::is_regular_file("config/settings.json") || !std::filesystem::exists("config/settings.json")) {
 		json j = {
+			{"thread_count", 1},
 			{"image_count", 0},
 			{"character_min_count", 0},
 			{"character_max_count", 0},
