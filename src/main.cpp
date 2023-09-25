@@ -280,14 +280,11 @@ int main() {
 		ThreadInfo& thread_info = thread_pair.first;
 		ThreadOutput thread_output = thread_pair.second.get();
 
-		std::cout << "previous end:" << previous_end_character_id << '\n';
 		for (json& character_coco_object : thread_output.character_coco_objects_vector) {
 			int character_id = character_coco_object["id"].get<int64_t>();
 			character_coco_object["id"] = character_id + previous_end_character_id;
-			std::cout << character_coco_object["id"] << '\n';
 		}
 		thread_info.end_character_id = thread_output.character_coco_objects_vector.back()["id"].get<int64_t>();
-		std::cout << "end:" << thread_info.end_character_id << '\n';
 		character_coco_objects_vector.splice(character_coco_objects_vector.end(), std::move(thread_output.character_coco_objects_vector));
 		image_coco_object_vector.splice(image_coco_object_vector.end(), std::move(thread_output.image_coco_object_vector));
 	}
