@@ -171,7 +171,6 @@ std::vector<EntityEffect> non_stackable_entity_effects = {
 
 struct ThreadInfo {
 	int thread_id;
-	std::shared_ptr<int> start_character_id;
 	int end_character_id;
 };
 
@@ -241,7 +240,6 @@ int main() {
 	for (int thread_id = 0; thread_id < thread_count; ++thread_id) {
 		ThreadInfo thread_info{
 			thread_id,
-			0,
 			0
 		};
 		int start = image_id;
@@ -268,18 +266,19 @@ int main() {
 	}
 
 	for (int i = 1; i < thread_futures.size(); i++) {
+		ThreadPair previous_thread_pair = thread_futures[i - 1];
 		ThreadPair thread_pair = thread_futures[i];
 		int threadId = thread_pair.first.thread_id;
 
-		std::shared_ptr<int> start_character_id = thread_pair.first.start_character_id;
-		int end_character_id = thread_pair.first.end_character_id;
+		int previous_end_character_id = previous_thread_pair.first.end_character_id;
 
 		ThreadOutput thread_output = thread_pair.second.get();
 
 		for (auto& character_coco_object : thread_output.character_coco_objects_vector) {
 			int character_id = character_coco_object["id"].get<int64_t>();
-			character_coco_object["id"] = character_id + (threadId * images_per_thread);
+			character_coco_object["id"] = character_id + previous_end_character_id;
 		}
+		thread_pair.first.end_character_id = thread_output.character_coco_objects_vector.back()["id"].get<int64_t>();
 		character_coco_objects_vector.splice(character_coco_objects_vector.end(), thread_output.character_coco_objects_vector);
 		image_coco_object_vector.splice(image_coco_object_vector.end(), thread_output.image_coco_object_vector);
 	}
