@@ -187,7 +187,7 @@ typedef std::pair<
 
 tl::expected<bool, std::string> try_read_settings_json();
 ThreadOutput generate_images(ThreadInfo thread_info, int start_image_id, int end_image_id);
-std::pair<std::list<json>, json> generate_battle(int image_id, int character_count, std::filesystem::path& asset_directory, std::filesystem::path& output_image_directory);
+std::pair<std::list<json>, json> generate_battle(int image_id, int total_character_count, int character_count, Random& random, std::filesystem::path& asset_directory, std::filesystem::path& output_image_directory);
 json get_categories();
 void create_annotations_json(std::filesystem::path& output_directory, json& coco_annotations);
 void create_data_yaml(std::filesystem::path& output_directory);
@@ -260,27 +260,36 @@ int main() {
 	std::list<json> character_coco_objects_vector;
 	std::list<json> image_coco_object_vector;
 	{
+		ThreadInfo& thread_info = thread_futures[0].first;
 		ThreadOutput thread_output = thread_futures[0].second.get();
+
+		json last_character_coco_object = thread_output.character_coco_objects_vector.back();
+		thread_info.end_character_id = last_character_coco_object["id"].get<int64_t>();
+
 		character_coco_objects_vector = std::move(thread_output.character_coco_objects_vector);
 		image_coco_object_vector = std::move(thread_output.image_coco_object_vector);
 	}
 
 	for (int i = 1; i < thread_futures.size(); i++) {
-		ThreadPair previous_thread_pair = thread_futures[i - 1];
-		ThreadPair thread_pair = thread_futures[i];
+		ThreadPair& previous_thread_pair = thread_futures[i - 1];
+		ThreadPair& thread_pair = thread_futures[i];
 		int threadId = thread_pair.first.thread_id;
 
 		int previous_end_character_id = previous_thread_pair.first.end_character_id;
 
+		ThreadInfo& thread_info = thread_pair.first;
 		ThreadOutput thread_output = thread_pair.second.get();
 
-		for (auto& character_coco_object : thread_output.character_coco_objects_vector) {
+		std::cout << "previous end:" << previous_end_character_id << '\n';
+		for (json& character_coco_object : thread_output.character_coco_objects_vector) {
 			int character_id = character_coco_object["id"].get<int64_t>();
 			character_coco_object["id"] = character_id + previous_end_character_id;
+			std::cout << character_coco_object["id"] << '\n';
 		}
-		thread_pair.first.end_character_id = thread_output.character_coco_objects_vector.back()["id"].get<int64_t>();
-		character_coco_objects_vector.splice(character_coco_objects_vector.end(), thread_output.character_coco_objects_vector);
-		image_coco_object_vector.splice(image_coco_object_vector.end(), thread_output.image_coco_object_vector);
+		thread_info.end_character_id = thread_output.character_coco_objects_vector.back()["id"].get<int64_t>();
+		std::cout << "end:" << thread_info.end_character_id << '\n';
+		character_coco_objects_vector.splice(character_coco_objects_vector.end(), std::move(thread_output.character_coco_objects_vector));
+		image_coco_object_vector.splice(image_coco_object_vector.end(), std::move(thread_output.image_coco_object_vector));
 	}
 
 	spdlog::info("Starting to generate images and annotations!\n");
@@ -340,6 +349,8 @@ tl::expected<bool, std::string> try_read_settings_json() {
 
 ThreadOutput generate_images(ThreadInfo thread_info, int start_image_id, int end_image_id)
 {
+	Random& random = Random::get_instance();
+	
 	std::list<json> character_coco_objects_vector;
 	std::list<json> image_coco_object_vector;
 
@@ -350,14 +361,17 @@ ThreadOutput generate_images(ThreadInfo thread_info, int start_image_id, int end
 
 	int character_min_count(Global::get_json()["character_min_count"].get<int>());
 	int character_max_count(Global::get_json()["character_max_count"].get<int>());
+
+	int total_character_count = 0;
 	for (int image_id = start_image_id; image_id < end_image_id; image_id++) {
-		int character_count = Random::get_instance().random_int_from_interval(character_min_count, character_max_count);
-		auto result = generate_battle(image_id, character_count, asset_directory, output_image_directory);
+		int character_count = random.random_int_from_interval(character_min_count, character_max_count);
+		auto result = generate_battle(image_id, total_character_count, character_count, random, asset_directory, output_image_directory);
 		std::list<json> character_coco_objects = result.first;
 		json image_coco_object = result.second;
 
 		character_coco_objects_vector.splice(character_coco_objects_vector.end(), character_coco_objects);
 		image_coco_object_vector.push_back(image_coco_object);
+		total_character_count += character_count;
 	}
 	return ThreadOutput{
 		std::move(character_coco_objects_vector),
@@ -365,9 +379,7 @@ ThreadOutput generate_images(ThreadInfo thread_info, int start_image_id, int end
 	};
 }
 
-std::pair<std::list<json>, json> generate_battle(int image_id, int character_count, std::filesystem::path& asset_directory, std::filesystem::path& output_image_directory) {
-	auto& random = Random::get_instance();
-
+std::pair<std::list<json>, json> generate_battle(int image_id, int total_character_count, int character_count, Random& random, std::filesystem::path& asset_directory, std::filesystem::path& output_image_directory) {
 	auto& entity_data_manager = EntityDataManager::getInstance();
 
 	spdlog::info("Generating image {} with {} characters!\n", image_id, character_count);
@@ -380,7 +392,7 @@ std::pair<std::list<json>, json> generate_battle(int image_id, int character_cou
 	std::list<json> character_coco_objects;
 
 	Arena arena = arena_result.value();
-	for (int character_id = 0; character_id < character_count; character_id++) {
+	for (int character_id = total_character_count; character_id < total_character_count + character_count; character_id++) {
 		int add_attempts = 0;
 		while (add_attempts < 100)
 		{
