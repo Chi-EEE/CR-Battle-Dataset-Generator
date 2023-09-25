@@ -13,7 +13,15 @@ namespace arena::logic {
 		if (spawn_entity_immediately) {
 			auto spawn_entity_data = entity_data_manager.getEntityDataByName(entity_data->getSpawnCharacter());
 			for (int i = 0; i < entity_data->getSpawnNumber(); i++) {
-				auto maybe_spawn_entity_image = entity_data_manager.getRandomEntityImage(spawn_entity_data, is_blue);
+				auto maybe_spawn_entity_image = [&entity_data_manager, &spawn_entity_data, is_blue]() {
+					while (true) {
+						auto character_image_result = entity_data_manager.getRandomEntityImage(spawn_entity_data, is_blue);
+						if (character_image_result.has_value()) {
+							return character_image_result.value();
+						}
+						spdlog::error(character_image_result.error());
+					}
+				}();
 				auto maybe_spawn_entity = Entity::create(spawn_entity_data, maybe_spawn_entity_image.value(), is_blue);
 				if (!maybe_spawn_entity.has_value()) {
 					return tl::make_unexpected(maybe_spawn_entity.error());
@@ -136,6 +144,14 @@ namespace arena::logic {
 					health_bar_height
 				);
 				canvas.draw_image(health_bar, health_bar_rect);
+
+				SkRect level_rect = SkRect::MakeXYWH(
+					health_bar_rect.fLeft - level_width,
+					this->rect.fTop - (level_height / 2) + this->entity_data->getHealthBarOffsetY(),
+					level_width,
+					level_height
+				);
+				canvas.draw_image(level_ui, level_rect);
 		}
 		else {
 			SkRect level_rect = SkRect::MakeXYWH(

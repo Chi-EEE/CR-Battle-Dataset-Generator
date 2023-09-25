@@ -22,12 +22,12 @@ namespace canvas {
 
 	void Canvas::draw_canvas(Canvas canvas, SkRect dstRect, SkPaint* paint)
 	{
-		surface->getCanvas()->drawImageRect(canvas.surface->makeImageSnapshot(), dstRect, SkSamplingOptions(), paint);
+		this->surface->getCanvas()->drawImageRect(canvas.surface->makeImageSnapshot(), dstRect, SkSamplingOptions(), paint);
 	}
 
 	void Canvas::draw_image(Image& image, SkRect dstRect, SkPaint* paint)
 	{
-		surface->getCanvas()->drawImageRect(image.get_image(), dstRect, SkSamplingOptions(), paint);
+		this->surface->getCanvas()->drawImageRect(image.get_image(), dstRect, SkSamplingOptions(), paint);
 	}
 
 	void Canvas::draw_text(std::string string, int x, int y)

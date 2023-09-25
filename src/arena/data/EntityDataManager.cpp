@@ -78,7 +78,17 @@ namespace arena::data
 			image_file_path = maybe_image.value();
 		} while (image_file_path.filename().extension() != ".png");
 
-		return ImageLoader::get_instance().try_load_image(image_file_path);
+		auto load_result = ImageLoader::get_instance().try_load_image(image_file_path);
+		if (load_result.has_value()) {
+			auto image = load_result.value();
+			if (!image.get_width() || !image.get_height()) {
+				return tl::make_unexpected(fmt::format("Unable to load empty image: Either width ({}) or height ({}) is 0 from {}", image.get_width(), image.get_height(), image_file_path.string()));
+			}
+			return load_result.value();
+		}
+		else {
+			return tl::make_unexpected(load_result.error());
+		}
 	}
 
 	SkColor EntityDataManager::getAverageColor(pEntityData entity_data, Image& image) {

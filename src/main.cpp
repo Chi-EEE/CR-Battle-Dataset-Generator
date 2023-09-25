@@ -219,9 +219,18 @@ std::pair<std::vector<json>, json> generate_battle(int image_id, int character_c
 				continue;
 			}
 			bool is_blue = random.random_int_from_interval(0, 1);
+			Image character_image = [&entity_data_manager, &entity_data, is_blue]() {
+				while (true) {
+					auto character_image_result = entity_data_manager.getRandomEntityImage(entity_data, is_blue);
+					if (character_image_result.has_value()) {
+						return character_image_result.value();
+					}
+					spdlog::error(character_image_result.error());
+				}
+			}();
 			auto maybeCharacter = Entity::create(
 				entity_data,
-				entity_data_manager.getRandomEntityImage(entity_data, is_blue).value(),
+				character_image,
 				is_blue
 			);
 			if (maybeCharacter.has_value()) {
@@ -240,10 +249,15 @@ std::pair<std::vector<json>, json> generate_battle(int image_id, int character_c
 						non_stackable_entity_effects_vector.erase(non_stackable_entity_effects_vector.begin() + index);
 					} while (!non_stackable_entity_effects_vector.empty() && random.random_int_from_interval(0, 1));
 				}
-				bool add_level_ui = random.random_int_from_interval(0, 1);
-				if (add_level_ui) {
+				bool ui_state = random.random_int_from_interval(0, 2);
+				switch (ui_state) {
+				case 0:
+					break;
+				case 2:
 					character->level_ui = true;
-					character->health_ui = random.random_int_from_interval(0, 1);
+				case 1:
+					character->health_ui = true;
+					break;
 				}
 				if (arena.try_add_character(character)) {
 					json character_coco_object = {
