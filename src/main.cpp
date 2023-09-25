@@ -247,16 +247,18 @@ std::pair<std::vector<json>, json> generate_battle(int image_id, int character_c
 						EntityEffect effect = non_stackable_entity_effects_vector[index];
 						character->addNonStackableEffect(effect);
 						non_stackable_entity_effects_vector.erase(non_stackable_entity_effects_vector.begin() + index);
-					} while (!non_stackable_entity_effects_vector.empty() && random.random_int_from_interval(0, 1));
+					} while (character->non_stackable_effects.size() < 2 && !non_stackable_entity_effects_vector.empty() && random.random_int_from_interval(0, 1));
 				}
 				bool ui_state = random.random_int_from_interval(0, 2);
 				switch (ui_state) {
 				case 0:
 					break;
+				case 1:
+					character->level_ui = true;
+					character->health_ui = true;
+					break;
 				case 2:
 					character->level_ui = true;
-				case 1:
-					character->health_ui = true;
 					break;
 				}
 				if (arena.try_add_character(character)) {

@@ -22,7 +22,7 @@ namespace arena::logic {
 						spdlog::error(character_image_result.error());
 					}
 				}();
-				auto maybe_spawn_entity = Entity::create(spawn_entity_data, maybe_spawn_entity_image.value(), is_blue);
+				auto maybe_spawn_entity = Entity::create(spawn_entity_data, maybe_spawn_entity_image, is_blue);
 				if (!maybe_spawn_entity.has_value()) {
 					return tl::make_unexpected(maybe_spawn_entity.error());
 				}
@@ -55,14 +55,14 @@ namespace arena::logic {
 			SkV2 spawn_position = SkV2{
 				static_cast<float>(
 					random.random_int_from_interval(
-						this->rect.fLeft + (entity_image_width / 2),
-						this->rect.fRight - (entity_image_width / 2)
+						this->rect.fRight - (entity_image_width / 2),
+						this->rect.fLeft + (entity_image_width / 2)
 					)
 				),
 				static_cast<float>(
 					random.random_int_from_interval(
-						this->rect.fTop + (entity_image_height / 2),
-						this->rect.fBottom - (entity_image_height / 2)
+						this->rect.fBottom - (entity_image_height / 2),
+						this->rect.fTop + (entity_image_height / 2)
 					)
 				)
 			};
