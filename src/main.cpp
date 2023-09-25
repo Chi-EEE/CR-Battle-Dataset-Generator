@@ -4,6 +4,11 @@
 #include <filesystem>
 #include <unordered_set>
 
+#include <list>
+
+#include <thread>
+#include <future>
+
 #include "utils/Global.hpp"
 #include "arena/data/EntityDataManager.h"
 
@@ -164,8 +169,25 @@ std::vector<EntityEffect> non_stackable_entity_effects = {
 	EntityEffect::Heal,
 };
 
+struct ThreadInfo {
+	int thread_id;
+	int end_character_id;
+};
+
+struct ThreadOutput {
+	std::list<json> character_coco_objects_vector;
+	std::list<json> image_coco_object_vector;
+};
+
+typedef std::pair<
+	ThreadInfo,
+	std::shared_future<ThreadOutput>
+> ThreadPair;
+
+
 tl::expected<bool, std::string> try_read_settings_json();
-std::pair<std::vector<json>, json> generate_battle(int image_id, int character_count, long total_character_count, std::filesystem::path& asset_directory, std::filesystem::path& output_image_directory);
+ThreadOutput generate_images(ThreadInfo thread_info, int start_image_id, int end_image_id);
+std::pair<std::list<json>, json> generate_battle(int image_id, int total_character_count, int character_count, Random& random, std::filesystem::path& asset_directory, std::filesystem::path& output_image_directory);
 json get_categories();
 void create_annotations_json(std::filesystem::path& output_directory, json& coco_annotations);
 void create_data_yaml(std::filesystem::path& output_directory);
@@ -188,6 +210,8 @@ int main() {
 	}
 
 	int image_count(Global::get_json()["image_count"].get<int>());
+	int thread_count(Global::get_json()["thread_count"].get<int>());
+
 	int character_min_count(Global::get_json()["character_min_count"].get<int>());
 	int character_max_count(Global::get_json()["character_max_count"].get<int>());
 
@@ -207,22 +231,65 @@ int main() {
 	if (!std::filesystem::is_directory(output_image_directory) || !std::filesystem::exists(output_image_directory)) {
 		std::filesystem::create_directory(output_image_directory);
 	}
+	std::vector<std::thread> threads;
+	std::vector<ThreadPair> thread_futures;
+	int images_per_thread = image_count / thread_count;
+	int remaining_images = image_count % thread_count;
 
-	std::vector<json> character_coco_objects_vector;
-	std::vector<json> image_coco_object_vector;
+	int image_id = 1;
+	for (int thread_id = 0; thread_id < thread_count; ++thread_id) {
+		ThreadInfo thread_info{
+			thread_id,
+			0
+		};
+		int start = image_id;
+		int end = start + images_per_thread + (thread_id < remaining_images ? 1 : 0);
+		std::packaged_task<ThreadOutput()> task(std::bind(generate_images, thread_info, start, end));
+		std::shared_future<ThreadOutput> future = task.get_future();
+		thread_futures.emplace_back(thread_info, std::move(future));
+		threads.emplace_back(std::move(task));
+		image_id = end;
+	}
+
+	std::sort(thread_futures.begin(), thread_futures.end(), [](const auto& t_1, const auto& t_2) -> bool
+		{
+			return t_1.first.thread_id < t_2.first.thread_id;
+		}
+	);
+
+	std::list<json> character_coco_objects_vector;
+	std::list<json> image_coco_object_vector;
+	{
+		ThreadInfo& thread_info = thread_futures[0].first;
+		ThreadOutput thread_output = thread_futures[0].second.get();
+
+		json last_character_coco_object = thread_output.character_coco_objects_vector.back();
+		thread_info.end_character_id = last_character_coco_object["id"].get<int64_t>();
+
+		character_coco_objects_vector = std::move(thread_output.character_coco_objects_vector);
+		image_coco_object_vector = std::move(thread_output.image_coco_object_vector);
+	}
+
+	for (int i = 1; i < thread_futures.size(); i++) {
+		ThreadPair& previous_thread_pair = thread_futures[i - 1];
+		ThreadPair& thread_pair = thread_futures[i];
+		int threadId = thread_pair.first.thread_id;
+
+		int previous_end_character_id = previous_thread_pair.first.end_character_id;
+
+		ThreadInfo& thread_info = thread_pair.first;
+		ThreadOutput thread_output = thread_pair.second.get();
+
+		for (json& character_coco_object : thread_output.character_coco_objects_vector) {
+			int character_id = character_coco_object["id"].get<int64_t>();
+			character_coco_object["id"] = character_id + previous_end_character_id;
+		}
+		thread_info.end_character_id = thread_output.character_coco_objects_vector.back()["id"].get<int64_t>();
+		character_coco_objects_vector.splice(character_coco_objects_vector.end(), std::move(thread_output.character_coco_objects_vector));
+		image_coco_object_vector.splice(image_coco_object_vector.end(), std::move(thread_output.image_coco_object_vector));
+	}
 
 	spdlog::info("Starting to generate images and annotations!\n");
-	long total_character_count = 1;
-	for (int image_id = 1; image_id < image_count + 1; image_id++) {
-		int character_count = Random::get_instance().random_int_from_interval(character_min_count, character_max_count);
-		auto result = generate_battle(image_id, character_count, total_character_count, asset_directory, output_image_directory);
-		std::vector<json> character_coco_objects = result.first;
-		json image_coco_object = result.second;
-
-		character_coco_objects_vector.insert(character_coco_objects_vector.end(), character_coco_objects.begin(), character_coco_objects.end());
-		image_coco_object_vector.push_back(image_coco_object);
-		total_character_count += character_count;
-	}
 
 	json coco_annotations = {
 		{"categories", get_categories()},
@@ -253,6 +320,7 @@ tl::expected<bool, std::string> try_read_settings_json() {
 	}
 	if (!std::filesystem::is_regular_file("config/settings.json") || !std::filesystem::exists("config/settings.json")) {
 		json j = {
+			{"thread_count", 1},
 			{"image_count", 0},
 			{"character_min_count", 0},
 			{"character_max_count", 0},
@@ -276,9 +344,39 @@ tl::expected<bool, std::string> try_read_settings_json() {
 	}
 }
 
-std::pair<std::vector<json>, json> generate_battle(int image_id, int character_count, long total_character_count, std::filesystem::path& asset_directory, std::filesystem::path& output_image_directory) {
-	auto& random = Random::get_instance();
+ThreadOutput generate_images(ThreadInfo thread_info, int start_image_id, int end_image_id)
+{
+	Random& random = Random::get_instance();
+	
+	std::list<json> character_coco_objects_vector;
+	std::list<json> image_coco_object_vector;
 
+	std::filesystem::path asset_directory(Global::get_json()["asset_directory"].get<std::string>());
+	std::filesystem::path output_directory(Global::get_json()["output_directory"].get<std::string>());
+
+	auto output_image_directory = output_directory / "images";
+
+	int character_min_count(Global::get_json()["character_min_count"].get<int>());
+	int character_max_count(Global::get_json()["character_max_count"].get<int>());
+
+	int total_character_count = 0;
+	for (int image_id = start_image_id; image_id < end_image_id; image_id++) {
+		int character_count = random.random_int_from_interval(character_min_count, character_max_count);
+		auto result = generate_battle(image_id, total_character_count, character_count, random, asset_directory, output_image_directory);
+		std::list<json> character_coco_objects = result.first;
+		json image_coco_object = result.second;
+
+		character_coco_objects_vector.splice(character_coco_objects_vector.end(), character_coco_objects);
+		image_coco_object_vector.push_back(image_coco_object);
+		total_character_count += character_count;
+	}
+	return ThreadOutput{
+		std::move(character_coco_objects_vector),
+		std::move(image_coco_object_vector)
+	};
+}
+
+std::pair<std::list<json>, json> generate_battle(int image_id, int total_character_count, int character_count, Random& random, std::filesystem::path& asset_directory, std::filesystem::path& output_image_directory) {
 	auto& entity_data_manager = EntityDataManager::getInstance();
 
 	spdlog::info("Generating image {} with {} characters!\n", image_id, character_count);
@@ -288,10 +386,10 @@ std::pair<std::vector<json>, json> generate_battle(int image_id, int character_c
 		throw std::exception();
 	}
 
-	std::vector<json> character_coco_objects;
+	std::list<json> character_coco_objects;
 
 	Arena arena = arena_result.value();
-	for (int character_id = 0; character_id < character_count; character_id++) {
+	for (int character_id = total_character_count; character_id < total_character_count + character_count; character_id++) {
 		int add_attempts = 0;
 		while (add_attempts < 100)
 		{
@@ -309,66 +407,66 @@ std::pair<std::vector<json>, json> generate_battle(int image_id, int character_c
 					}
 					spdlog::error(character_image_result.error());
 				}
-			}();
-			auto maybeCharacter = Entity::create(
-				entity_data,
-				character_image,
-				is_blue
-			);
-			if (maybeCharacter.has_value()) {
-				auto character = std::make_shared<arena::logic::Entity>(maybeCharacter.value());
-				SkV2 position = SkV2{
-					static_cast<float>(Random::get_instance().random_int_from_interval(64, 664)),
-					static_cast<float>(Random::get_instance().random_int_from_interval(128, 954))
-				};
-				character->setPosition(position);
-				if (random.random_int_from_interval(0, 1)) {
-					std::vector<EntityEffect> non_stackable_entity_effects_vector(non_stackable_entity_effects);
-					do {
-						int index = random.random_int_from_interval(0, non_stackable_entity_effects_vector.size() - 1);
-						EntityEffect effect = non_stackable_entity_effects_vector[index];
-						character->addNonStackableEffect(effect);
-						non_stackable_entity_effects_vector.erase(non_stackable_entity_effects_vector.begin() + index);
-					} while (character->non_stackable_effects.size() < 2 && !non_stackable_entity_effects_vector.empty() && random.random_int_from_interval(0, 1));
-				}
-				bool ui_state = random.random_int_from_interval(0, 2);
-				switch (ui_state) {
-				case 0:
-					break;
-				case 1:
-					character->level_ui = true;
-					character->health_ui = true;
-					break;
-				case 2:
-					character->level_ui = true;
-					break;
-				}
-				if (arena.try_add_character(character)) {
-					json character_coco_object = {
-						{"id", total_character_count + character_id},
-						{"image_id", image_id},
-						{"category_id", character_type_id + 1},
-						{"segmentation", json::array()},
-						{"area", character->size.x * character->size.y},
-						{"bbox", json::array({
-							character->rect.fLeft,
-							character->rect.fTop,
-							character->size.x,
-							character->size.y,
-						})},
-						{"iscrowd", 0},
+				}();
+				auto maybeCharacter = Entity::create(
+					entity_data,
+					character_image,
+					is_blue
+				);
+				if (maybeCharacter.has_value()) {
+					auto character = std::make_shared<arena::logic::Entity>(maybeCharacter.value());
+					SkV2 position = SkV2{
+						static_cast<float>(Random::get_instance().random_int_from_interval(64, 664)),
+						static_cast<float>(Random::get_instance().random_int_from_interval(128, 954))
 					};
-					character_coco_objects.push_back(character_coco_object);
-					break;
+					character->setPosition(position);
+					if (random.random_int_from_interval(0, 1)) {
+						std::vector<EntityEffect> non_stackable_entity_effects_vector(non_stackable_entity_effects);
+						do {
+							int index = random.random_int_from_interval(0, non_stackable_entity_effects_vector.size() - 1);
+							EntityEffect effect = non_stackable_entity_effects_vector[index];
+							character->addNonStackableEffect(effect);
+							non_stackable_entity_effects_vector.erase(non_stackable_entity_effects_vector.begin() + index);
+						} while (character->non_stackable_effects.size() < 2 && !non_stackable_entity_effects_vector.empty() && random.random_int_from_interval(0, 1));
+					}
+					bool ui_state = random.random_int_from_interval(0, 2);
+					switch (ui_state) {
+					case 0:
+						break;
+					case 1:
+						character->level_ui = true;
+						character->health_ui = true;
+						break;
+					case 2:
+						character->level_ui = true;
+						break;
+					}
+					if (arena.try_add_character(character)) {
+						json character_coco_object = {
+							{"id", character_id},
+							{"image_id", image_id},
+							{"category_id", character_type_id + 1},
+							{"segmentation", json::array()},
+							{"area", character->size.x * character->size.y},
+							{"bbox", json::array({
+								character->rect.fLeft,
+								character->rect.fTop,
+								character->size.x,
+								character->size.y,
+							})},
+							{"iscrowd", 0},
+						};
+						character_coco_objects.push_back(character_coco_object);
+						break;
+					}
+					else {
+						add_attempts++;
+					}
 				}
 				else {
+					spdlog::error("Unable to create character, Got error: {}", maybeCharacter.error());
 					add_attempts++;
 				}
-			}
-			else {
-				spdlog::error("Unable to create character, Got error: {}", maybeCharacter.error());
-				add_attempts++;
-			}
 		}
 	}
 	arena.draw();

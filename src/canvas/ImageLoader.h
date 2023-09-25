@@ -6,6 +6,8 @@
 #include <filesystem>
 #include <unordered_map>
 
+#include <mutex>
+
 #include "tl/expected.hpp"
 
 #include "Image.h"
@@ -26,6 +28,8 @@ namespace canvas {
 		}
 	private:
 		std::unordered_map<std::filesystem::path, Image> images;
+
+		std::mutex mtx;
 	};
 }
 
