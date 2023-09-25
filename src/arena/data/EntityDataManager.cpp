@@ -82,7 +82,7 @@ namespace arena::data
 		if (load_result.has_value()) {
 			auto image = load_result.value();
 			if (image.get_width() < 1 || image.get_height() < 1) {
-				return tl::make_unexpected(fmt::format("Unable to load empty image: Either width ({}) or height ({}) is 0 from {}", image.get_width(), image.get_height(), image_file_path.string()));
+				return tl::make_unexpected(fmt::format("Unable to load empty image: Either width ({}) or height ({}) is less than 1 from {}", image.get_width(), image.get_height(), image_file_path.string()));
 			}
 			return load_result.value();
 		}

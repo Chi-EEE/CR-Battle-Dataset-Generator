@@ -381,9 +381,25 @@ int main() {
 		{"annotations", character_coco_objects_vector},
 	};
 
-	std::ofstream outfile(output_directory / "annotations.json");
-	outfile << coco_annotations.dump() << std::endl;
-	outfile.close();
+	std::ofstream json_output_file(output_directory / "annotations.json");
+	json_output_file << coco_annotations.dump() << std::endl;
+	json_output_file.close();
+
+	toml::array character_array;
+	for (auto& character : allowed_characters) {
+		character_array.push_back(character);
+	}
+
+	auto yaml = toml::table{
+		{ "train", "TRAINING_PATH" },
+		{ "val", "VALIDATION_PATH" },
+		{ "nc", static_cast<int64_t>(allowed_characters.size())},
+		{ "names", character_array},
+	};
+
+	std::ofstream yaml_output_file(output_directory / "data.yaml");
+	yaml_output_file << toml::yaml_formatter{ yaml } << std::endl;
+	yaml_output_file.close();
 
 	spdlog::info("Completed generating all images and annotations!");
 
