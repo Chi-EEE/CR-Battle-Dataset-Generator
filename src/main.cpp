@@ -92,7 +92,7 @@ std::vector<std::string> allowed_characters = {
 	//"SpearGoblinGiant",
 	"Ram",
 	//"RamRider",
-	"ThreeMusketeer",
+	// "ThreeMusketeer",
 	"ElectroDragon",
 	"Fisherman",
 	"ElixirGolem1",
@@ -126,8 +126,9 @@ std::vector<std::string> allowed_characters = {
 	// "GoblinDummy",
 	"Monk",
 	"Skeleton_EV1",
-	"Barbarian_EV1",
+	"Firecracker_EV1",
 	"RoyalGiant_EV1",
+	"Barbarian_EV1",
 };
 
 std::vector<ArenaType> allowed_arenas = {
@@ -322,6 +323,7 @@ tl::expected<bool, std::string> try_read_settings_json() {
 		json j = {
 			{"thread_count", 1},
 			{"image_count", 0},
+			{"image_cache_size", 15000}, // 4.5GB
 			{"character_min_count", 0},
 			{"character_max_count", 0},
 			{"asset_directory", ""},

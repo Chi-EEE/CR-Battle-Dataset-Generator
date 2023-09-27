@@ -4,13 +4,14 @@
 #pragma once
 
 #include <filesystem>
-#include <unordered_map>
-
 #include <mutex>
 
 #include "tl/expected.hpp"
 
 #include "Image.h"
+
+#include "../utils/Global.hpp"
+#include "../utils/LRUCache.hpp"
 
 namespace canvas {
 	class ImageLoader
@@ -27,7 +28,7 @@ namespace canvas {
 			return instance;
 		}
 	private:
-		std::unordered_map<std::filesystem::path, Image> images;
+		LRUCache<std::filesystem::path, Image> images;
 
 		std::mutex mtx;
 	};
