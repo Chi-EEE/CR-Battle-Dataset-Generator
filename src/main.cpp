@@ -13,6 +13,8 @@
 #include "arena/data/EntityDataManager.h"
 
 #include "nlohmann/json.hpp"
+#include "nlohmann/json-schema.hpp"
+
 #include "tl/expected.hpp"
 #include "spdlog/spdlog.h"
 
@@ -24,6 +26,7 @@ using namespace arena::data;
 using namespace arena::logic;
 
 using json = nlohmann::json;
+using nlohmann::json_schema::json_validator;
 
 std::vector<std::string> allowed_characters = {
 	"Knight",
@@ -184,6 +187,74 @@ typedef std::pair<
 	ThreadInfo,
 	std::shared_future<ThreadOutput>
 > ThreadPair;
+
+static json person_schema = R"(
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Settings JSON",
+    "properties": {
+		"thread_count": {
+			"description": "The amount of threads to generate images",
+			"type": number,
+            "minimum": 1
+		},
+		"image_count": {
+			"description": "The amount of images to generate",
+			"type": number,
+            "minimum": 1
+		},
+		"image_cache_size": {
+			"description": "The amount of images to generate [Default: 15000]",
+			"type": number,
+            "minimum": 0
+		},
+		"character_min_count": {
+			"description": "Minimum range to randomly generate characters [Default: 5]",
+			"type": number,
+            "minimum": 0
+		},
+		"character_max_count": {
+			"description": "Maximum range to randomly generate characters [Default: 5]",
+			"type": number,
+            "minimum": 0
+		},
+		"asset_directory": {
+			"description": "The directory where the CR assets are located",
+			"type": string
+		},
+		"output_directory": {
+			"description": "The directory where the images are going to be outputted",
+			"type": string
+		},
+		"display_bounding_boxes": {
+			"description": "Whether to display annotation boxes around the characters",
+			"type": boolean
+		},
+		"ready": {
+			"description": "Set to 'true' when ready",
+			"type": boolean
+		},
+		"debug": {
+			"description": "Whether to display debug messages",
+			"type": boolean
+		}
+    },
+    "required": [
+				"thread_count",
+				"image_count",
+				"image_cache_size",
+				"character_min_count",
+				"character_max_count",
+				"asset_directory",
+				"output_directory",
+				"display_bounding_boxes",
+				"ready",
+				"debug"
+                 ],
+    "type": "object"
+}
+
+)"_json;
 
 
 tl::expected<bool, std::string> try_read_settings_json();
