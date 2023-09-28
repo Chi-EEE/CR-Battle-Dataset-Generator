@@ -57,7 +57,16 @@ namespace arena::data
 			"idle1",
 			"run1",
 			"attack1",
+		};;
+
+		if (!entity_data->getAbility().empty()) {
+			actions.push_back("ability1");
 		};
+
+		if (!entity_data->getProjectileSpecial().empty()) {
+			actions.push_back("loading1");
+		}
+
 		auto action = actions[random.random_int_from_interval(0, actions.size() - 1)];
 		std::filesystem::path directory_path = character_directory / fmt::format("{export_name}_{action}_1", fmt::arg("export_name", is_blue ? entity_data->getBlueExportName() : entity_data->getRedExportName()), fmt::arg("action", action));
 		if (characters_with_one_orientation.find(entity_data->getName()) == characters_with_one_orientation.end()) {
