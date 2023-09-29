@@ -13,6 +13,8 @@
 #include "arena/data/EntityDataManager.h"
 
 #include "nlohmann/json.hpp"
+#include "nlohmann/json-schema.hpp"
+
 #include "tl/expected.hpp"
 #include "spdlog/spdlog.h"
 
@@ -24,6 +26,7 @@ using namespace arena::data;
 using namespace arena::logic;
 
 using json = nlohmann::json;
+using nlohmann::json_schema::json_validator;
 
 std::vector<std::string> allowed_characters = {
 	"Knight",
@@ -170,6 +173,72 @@ std::vector<EntityEffect> non_stackable_entity_effects = {
 	EntityEffect::Heal,
 };
 
+static json settings_schema = R"(
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Settings JSON",
+    "properties": {
+		"thread_count": {
+			"description": "The amount of threads to generate images",
+			"type": "integer",
+			"default": 1,
+            "minimum": 1
+		},
+		"image_count": {
+			"description": "The amount of images to generate",
+			"type": "integer",
+			"default": 1,
+            "minimum": 1
+		},
+		"image_cache_size": {
+			"description": "The amount of images to generate",
+			"type": "integer",
+			"default": 15000,
+            "minimum": 0
+		},
+		"character_min_count": {
+			"description": "Minimum range to randomly generate characters",
+			"type": "integer",
+			"default": 5,
+            "minimum": 0
+		},
+		"character_max_count": {
+			"description": "Maximum range to randomly generate characters",
+			"type": "integer",
+			"default": 5,
+            "minimum": 0
+		},
+		"asset_directory": {
+			"description": "The directory where the CR assets are located",
+			"default": "",
+			"type": "string"
+		},
+		"output_directory": {
+			"description": "The directory where the images are going to be outputted",
+			"default": "",
+			"type": "string"
+		},
+		"display_bounding_boxes": {
+			"description": "Whether to display annotation boxes around the characters",
+			"default": false,
+			"type": "boolean"
+		},
+		"ready": {
+			"description": "Set to 'true' when ready",
+			"default": false,
+			"type": "boolean"
+		},
+		"debug": {
+			"description": "Whether to display debug messages",
+			"default": false,
+			"type": "boolean"
+		}
+    },
+    "type": "object"
+}
+
+)"_json;
+
 struct ThreadInfo {
 	int thread_id;
 	int end_character_id;
@@ -184,7 +253,6 @@ typedef std::pair<
 	ThreadInfo,
 	std::shared_future<ThreadOutput>
 > ThreadPair;
-
 
 tl::expected<bool, std::string> try_read_settings_json();
 ThreadOutput generate_images(ThreadInfo thread_info, int start_image_id, int end_image_id);
@@ -209,21 +277,22 @@ int main() {
 		std::cerr << "Please set 'ready' to true when you are ready.\n";
 		return 0;
 	}
+	const json& settings_json = Global::getSettings();
 
-	int image_count(Global::get_json()["image_count"].get<int>());
-	int thread_count(Global::get_json()["thread_count"].get<int>());
+	int image_count(settings_json["image_count"].get<int>());
+	int thread_count(settings_json["thread_count"].get<int>());
 
-	int character_min_count(Global::get_json()["character_min_count"].get<int>());
-	int character_max_count(Global::get_json()["character_max_count"].get<int>());
+	int character_min_count(settings_json["character_min_count"].get<int>());
+	int character_max_count(settings_json["character_max_count"].get<int>());
 
 	if (character_min_count > character_max_count) {
 		spdlog::error("character_min_count ({}) is greater than character_max_count ({})", character_min_count, character_max_count);
 		return 0;
 	}
 
-	std::filesystem::path asset_directory(Global::get_json()["asset_directory"].get<std::string>());
-	std::filesystem::path output_directory(Global::get_json()["output_directory"].get<std::string>());
-	bool debug(Global::get_json()["debug"].get<bool>());
+	std::filesystem::path asset_directory(settings_json["asset_directory"].get<std::string>());
+	std::filesystem::path output_directory(settings_json["output_directory"].get<std::string>());
+	bool debug(settings_json["debug"].get<bool>());
 	if (debug) {
 		spdlog::set_level(spdlog::level::debug);
 	}
@@ -319,47 +388,66 @@ tl::expected<bool, std::string> try_read_settings_json() {
 	if (!std::filesystem::is_directory("config") || !std::filesystem::exists("config")) {
 		std::filesystem::create_directory("config");
 	}
+	json_validator validator;
+	try {
+		validator.set_root_schema(settings_schema);
+	}
+	catch (const std::exception& e) {
+		return tl::make_unexpected(fmt::format("Validation of schema failed, here is why: {}\n", e.what()));
+	}
 	if (!std::filesystem::is_regular_file("config/settings.json") || !std::filesystem::exists("config/settings.json")) {
-		json j = {
-			{"thread_count", 1},
-			{"image_count", 0},
-			{"image_cache_size", 15000}, // 4.5GB
-			{"character_min_count", 0},
-			{"character_max_count", 0},
-			{"asset_directory", ""},
-			{"output_directory", ""},
-			{"display_bounding_boxes", false},
-			{"ready", false},
-			{"debug", false},
-		};
-		std::ofstream outfile("config/settings.json");
-		outfile << j.dump(4) << std::endl;
-		outfile.close();
+		json settings_json = "{}"_json;
+		const auto default_patch = validator.validate(settings_json);
+		settings_json = settings_json.patch(default_patch);
+		std::ofstream settings_file("config/settings.json");
+		settings_file << settings_json.dump(4) << std::endl;
+		settings_file.close();
 		return tl::make_unexpected("Please update the newly created file 'config/settings.json' and set the 'ready' key to true.");
 	}
-	auto load_json_result = Global::try_load_from_file("config/settings.json");
-	if (load_json_result.has_value()) {
-		return Global::get_json()["ready"].get<bool>();
-	}
 	else {
-		return tl::make_unexpected(load_json_result.error());
+		try {
+			std::ifstream settings_file("config/settings.json"); 
+			if (settings_file) {
+				try {
+					json settings_json;
+					settings_file >> settings_json;
+					const auto default_patch = validator.validate(settings_json);
+					if (default_patch != nullptr) {
+						settings_json = settings_json.patch(default_patch);
+					}
+					Global::setSettings(settings_json);
+					return settings_json["ready"].get<bool>();
+				}
+				catch (const std::exception& e) {
+					return tl::make_unexpected(fmt::format("Error loading JSON from file: {}", e.what()));
+				}
+			}
+			else {
+				return tl::make_unexpected("Unable to open 'config/settings.json'");
+			}
+		}
+		catch (const std::exception& e) {
+			return tl::make_unexpected(fmt::format("Validation failed, here is why: {}\n", e.what()));
+		}
 	}
 }
 
 ThreadOutput generate_images(ThreadInfo thread_info, int start_image_id, int end_image_id)
 {
 	Random& random = Random::get_instance();
-	
+
 	std::list<json> character_coco_objects_vector;
 	std::list<json> image_coco_object_vector;
 
-	std::filesystem::path asset_directory(Global::get_json()["asset_directory"].get<std::string>());
-	std::filesystem::path output_directory(Global::get_json()["output_directory"].get<std::string>());
+	const json& settings_json = Global::getSettings();
+
+	std::filesystem::path asset_directory(settings_json["asset_directory"].get<std::string>());
+	std::filesystem::path output_directory(settings_json["output_directory"].get<std::string>());
 
 	auto output_image_directory = output_directory / "images";
 
-	int character_min_count(Global::get_json()["character_min_count"].get<int>());
-	int character_max_count(Global::get_json()["character_max_count"].get<int>());
+	int character_min_count(settings_json["character_min_count"].get<int>());
+	int character_max_count(settings_json["character_max_count"].get<int>());
 
 	int total_character_count = 0;
 	for (int image_id = start_image_id; image_id < end_image_id; image_id++) {
@@ -409,66 +497,66 @@ std::pair<std::list<json>, json> generate_battle(int image_id, int total_charact
 					}
 					spdlog::error(character_image_result.error());
 				}
-				}();
-				auto maybeCharacter = Entity::create(
-					entity_data,
-					character_image,
-					is_blue
-				);
-				if (maybeCharacter.has_value()) {
-					auto character = std::make_shared<arena::logic::Entity>(maybeCharacter.value());
-					SkV2 position = SkV2{
-						static_cast<float>(Random::get_instance().random_int_from_interval(64, 664)),
-						static_cast<float>(Random::get_instance().random_int_from_interval(128, 954))
+			}();
+			auto maybeCharacter = Entity::create(
+				entity_data,
+				character_image,
+				is_blue
+			);
+			if (maybeCharacter.has_value()) {
+				auto character = std::make_shared<arena::logic::Entity>(maybeCharacter.value());
+				SkV2 position = SkV2{
+					static_cast<float>(Random::get_instance().random_int_from_interval(64, 664)),
+					static_cast<float>(Random::get_instance().random_int_from_interval(128, 954))
+				};
+				character->setPosition(position);
+				if (random.random_int_from_interval(0, 1)) {
+					std::vector<EntityEffect> non_stackable_entity_effects_vector(non_stackable_entity_effects);
+					do {
+						int index = random.random_int_from_interval(0, non_stackable_entity_effects_vector.size() - 1);
+						EntityEffect effect = non_stackable_entity_effects_vector[index];
+						character->addNonStackableEffect(effect);
+						non_stackable_entity_effects_vector.erase(non_stackable_entity_effects_vector.begin() + index);
+					} while (character->non_stackable_effects.size() < 2 && !non_stackable_entity_effects_vector.empty() && random.random_int_from_interval(0, 1));
+				}
+				bool ui_state = random.random_int_from_interval(0, 2);
+				switch (ui_state) {
+				case 0:
+					break;
+				case 1:
+					character->level_ui = true;
+					character->health_ui = true;
+					break;
+				case 2:
+					character->level_ui = true;
+					break;
+				}
+				if (arena.try_add_character(character)) {
+					json character_coco_object = {
+						{"id", character_id},
+						{"image_id", image_id},
+						{"category_id", character_type_id + 1},
+						{"segmentation", json::array()},
+						{"area", character->size.x * character->size.y},
+						{"bbox", json::array({
+							character->rect.fLeft,
+							character->rect.fTop,
+							character->size.x,
+							character->size.y,
+						})},
+						{"iscrowd", 0},
 					};
-					character->setPosition(position);
-					if (random.random_int_from_interval(0, 1)) {
-						std::vector<EntityEffect> non_stackable_entity_effects_vector(non_stackable_entity_effects);
-						do {
-							int index = random.random_int_from_interval(0, non_stackable_entity_effects_vector.size() - 1);
-							EntityEffect effect = non_stackable_entity_effects_vector[index];
-							character->addNonStackableEffect(effect);
-							non_stackable_entity_effects_vector.erase(non_stackable_entity_effects_vector.begin() + index);
-						} while (character->non_stackable_effects.size() < 2 && !non_stackable_entity_effects_vector.empty() && random.random_int_from_interval(0, 1));
-					}
-					bool ui_state = random.random_int_from_interval(0, 2);
-					switch (ui_state) {
-					case 0:
-						break;
-					case 1:
-						character->level_ui = true;
-						character->health_ui = true;
-						break;
-					case 2:
-						character->level_ui = true;
-						break;
-					}
-					if (arena.try_add_character(character)) {
-						json character_coco_object = {
-							{"id", character_id},
-							{"image_id", image_id},
-							{"category_id", character_type_id + 1},
-							{"segmentation", json::array()},
-							{"area", character->size.x * character->size.y},
-							{"bbox", json::array({
-								character->rect.fLeft,
-								character->rect.fTop,
-								character->size.x,
-								character->size.y,
-							})},
-							{"iscrowd", 0},
-						};
-						character_coco_objects.push_back(character_coco_object);
-						break;
-					}
-					else {
-						add_attempts++;
-					}
+					character_coco_objects.push_back(character_coco_object);
+					break;
 				}
 				else {
-					spdlog::error("Unable to create character, Got error: {}", maybeCharacter.error());
 					add_attempts++;
 				}
+			}
+			else {
+				spdlog::error("Unable to create character, Got error: {}", maybeCharacter.error());
+				add_attempts++;
+			}
 		}
 	}
 	arena.draw();
