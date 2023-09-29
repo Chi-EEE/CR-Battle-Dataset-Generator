@@ -188,75 +188,6 @@ typedef std::pair<
 	std::shared_future<ThreadOutput>
 > ThreadPair;
 
-static json person_schema = R"(
-{
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "title": "Settings JSON",
-    "properties": {
-		"thread_count": {
-			"description": "The amount of threads to generate images",
-			"type": number,
-            "minimum": 1
-		},
-		"image_count": {
-			"description": "The amount of images to generate",
-			"type": number,
-            "minimum": 1
-		},
-		"image_cache_size": {
-			"description": "The amount of images to generate [Default: 15000]",
-			"type": number,
-            "minimum": 0
-		},
-		"character_min_count": {
-			"description": "Minimum range to randomly generate characters [Default: 5]",
-			"type": number,
-            "minimum": 0
-		},
-		"character_max_count": {
-			"description": "Maximum range to randomly generate characters [Default: 5]",
-			"type": number,
-            "minimum": 0
-		},
-		"asset_directory": {
-			"description": "The directory where the CR assets are located",
-			"type": string
-		},
-		"output_directory": {
-			"description": "The directory where the images are going to be outputted",
-			"type": string
-		},
-		"display_bounding_boxes": {
-			"description": "Whether to display annotation boxes around the characters",
-			"type": boolean
-		},
-		"ready": {
-			"description": "Set to 'true' when ready",
-			"type": boolean
-		},
-		"debug": {
-			"description": "Whether to display debug messages",
-			"type": boolean
-		}
-    },
-    "required": [
-				"thread_count",
-				"image_count",
-				"image_cache_size",
-				"character_min_count",
-				"character_max_count",
-				"asset_directory",
-				"output_directory",
-				"display_bounding_boxes",
-				"ready",
-				"debug"
-                 ],
-    "type": "object"
-}
-
-)"_json;
-
-
 tl::expected<bool, std::string> try_read_settings_json();
 ThreadOutput generate_images(ThreadInfo thread_info, int start_image_id, int end_image_id);
 std::pair<std::list<json>, json> generate_battle(int image_id, int total_character_count, int character_count, Random& random, std::filesystem::path& asset_directory, std::filesystem::path& output_image_directory);
@@ -408,19 +339,102 @@ tl::expected<bool, std::string> try_read_settings_json() {
 		outfile.close();
 		return tl::make_unexpected("Please update the newly created file 'config/settings.json' and set the 'ready' key to true.");
 	}
-	auto load_json_result = Global::try_load_from_file("config/settings.json");
-	if (load_json_result.has_value()) {
-		return Global::get_json()["ready"].get<bool>();
-	}
 	else {
-		return tl::make_unexpected(load_json_result.error());
+
+		static json settings_schema = R"(
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Settings JSON",
+    "properties": {
+		"thread_count": {
+			"description": "The amount of threads to generate images",
+			"type": integer,
+            "minimum": 1
+		},
+		"image_count": {
+			"description": "The amount of images to generate",
+			"type": integer,
+            "minimum": 1
+		},
+		"image_cache_size": {
+			"description": "The amount of images to generate [Default: 15000]",
+			"type": integer,
+            "minimum": 0
+		},
+		"character_min_count": {
+			"description": "Minimum range to randomly generate characters [Default: 5]",
+			"type": integer,
+            "minimum": 0
+		},
+		"character_max_count": {
+			"description": "Maximum range to randomly generate characters [Default: 5]",
+			"type": integer,
+            "minimum": 0
+		},
+		"asset_directory": {
+			"description": "The directory where the CR assets are located",
+			"type": string
+		},
+		"output_directory": {
+			"description": "The directory where the images are going to be outputted",
+			"type": string
+		},
+		"display_bounding_boxes": {
+			"description": "Whether to display annotation boxes around the characters",
+			"type": boolean
+		},
+		"ready": {
+			"description": "Set to 'true' when ready",
+			"type": boolean
+		},
+		"debug": {
+			"description": "Whether to display debug messages",
+			"type": boolean
+		}
+    },
+    "required": [
+				"thread_count",
+				"image_count",
+				"image_cache_size",
+				"character_min_count",
+				"character_max_count",
+				"asset_directory",
+				"output_directory",
+				"display_bounding_boxes",
+				"ready",
+				"debug"
+				],
+    "type": "object"
+}
+
+)"_json;
+		json_validator validator;
+		try {
+			validator.set_root_schema(settings_schema);
+		}
+		catch (const std::exception& e) {
+			return tl::make_unexpected(fmt::format("Validation of schema failed, here is why: {}\n", e.what()));
+		}
+		try {
+			auto load_json_result = Global::try_load_json_file("config/settings.json");
+			if (load_json_result.has_value()) {
+				validator.validate(load_json_result.has_value());
+				return Global::get_json()["ready"].get<bool>();
+			}
+			else {
+				return tl::make_unexpected(load_json_result.error());
+			}
+		}
+		catch (const std::exception& e) {
+			return tl::make_unexpected(fmt::format("Validation failed, here is why: {}\n", e.what()));
+		}
 	}
 }
 
 ThreadOutput generate_images(ThreadInfo thread_info, int start_image_id, int end_image_id)
 {
 	Random& random = Random::get_instance();
-	
+
 	std::list<json> character_coco_objects_vector;
 	std::list<json> image_coco_object_vector;
 
@@ -480,66 +494,66 @@ std::pair<std::list<json>, json> generate_battle(int image_id, int total_charact
 					}
 					spdlog::error(character_image_result.error());
 				}
-				}();
-				auto maybeCharacter = Entity::create(
-					entity_data,
-					character_image,
-					is_blue
-				);
-				if (maybeCharacter.has_value()) {
-					auto character = std::make_shared<arena::logic::Entity>(maybeCharacter.value());
-					SkV2 position = SkV2{
-						static_cast<float>(Random::get_instance().random_int_from_interval(64, 664)),
-						static_cast<float>(Random::get_instance().random_int_from_interval(128, 954))
+			}();
+			auto maybeCharacter = Entity::create(
+				entity_data,
+				character_image,
+				is_blue
+			);
+			if (maybeCharacter.has_value()) {
+				auto character = std::make_shared<arena::logic::Entity>(maybeCharacter.value());
+				SkV2 position = SkV2{
+					static_cast<float>(Random::get_instance().random_int_from_interval(64, 664)),
+					static_cast<float>(Random::get_instance().random_int_from_interval(128, 954))
+				};
+				character->setPosition(position);
+				if (random.random_int_from_interval(0, 1)) {
+					std::vector<EntityEffect> non_stackable_entity_effects_vector(non_stackable_entity_effects);
+					do {
+						int index = random.random_int_from_interval(0, non_stackable_entity_effects_vector.size() - 1);
+						EntityEffect effect = non_stackable_entity_effects_vector[index];
+						character->addNonStackableEffect(effect);
+						non_stackable_entity_effects_vector.erase(non_stackable_entity_effects_vector.begin() + index);
+					} while (character->non_stackable_effects.size() < 2 && !non_stackable_entity_effects_vector.empty() && random.random_int_from_interval(0, 1));
+				}
+				bool ui_state = random.random_int_from_interval(0, 2);
+				switch (ui_state) {
+				case 0:
+					break;
+				case 1:
+					character->level_ui = true;
+					character->health_ui = true;
+					break;
+				case 2:
+					character->level_ui = true;
+					break;
+				}
+				if (arena.try_add_character(character)) {
+					json character_coco_object = {
+						{"id", character_id},
+						{"image_id", image_id},
+						{"category_id", character_type_id + 1},
+						{"segmentation", json::array()},
+						{"area", character->size.x * character->size.y},
+						{"bbox", json::array({
+							character->rect.fLeft,
+							character->rect.fTop,
+							character->size.x,
+							character->size.y,
+						})},
+						{"iscrowd", 0},
 					};
-					character->setPosition(position);
-					if (random.random_int_from_interval(0, 1)) {
-						std::vector<EntityEffect> non_stackable_entity_effects_vector(non_stackable_entity_effects);
-						do {
-							int index = random.random_int_from_interval(0, non_stackable_entity_effects_vector.size() - 1);
-							EntityEffect effect = non_stackable_entity_effects_vector[index];
-							character->addNonStackableEffect(effect);
-							non_stackable_entity_effects_vector.erase(non_stackable_entity_effects_vector.begin() + index);
-						} while (character->non_stackable_effects.size() < 2 && !non_stackable_entity_effects_vector.empty() && random.random_int_from_interval(0, 1));
-					}
-					bool ui_state = random.random_int_from_interval(0, 2);
-					switch (ui_state) {
-					case 0:
-						break;
-					case 1:
-						character->level_ui = true;
-						character->health_ui = true;
-						break;
-					case 2:
-						character->level_ui = true;
-						break;
-					}
-					if (arena.try_add_character(character)) {
-						json character_coco_object = {
-							{"id", character_id},
-							{"image_id", image_id},
-							{"category_id", character_type_id + 1},
-							{"segmentation", json::array()},
-							{"area", character->size.x * character->size.y},
-							{"bbox", json::array({
-								character->rect.fLeft,
-								character->rect.fTop,
-								character->size.x,
-								character->size.y,
-							})},
-							{"iscrowd", 0},
-						};
-						character_coco_objects.push_back(character_coco_object);
-						break;
-					}
-					else {
-						add_attempts++;
-					}
+					character_coco_objects.push_back(character_coco_object);
+					break;
 				}
 				else {
-					spdlog::error("Unable to create character, Got error: {}", maybeCharacter.error());
 					add_attempts++;
 				}
+			}
+			else {
+				spdlog::error("Unable to create character, Got error: {}", maybeCharacter.error());
+				add_attempts++;
+			}
 		}
 	}
 	arena.draw();

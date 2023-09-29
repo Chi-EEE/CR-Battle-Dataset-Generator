@@ -21,7 +21,7 @@ public:
 		return instance;
 	}
 
-	static tl::expected<nullptr_t, std::string> try_load_from_file(const std::string& filename) {
+	static tl::expected<nullptr_t, std::string> try_load_json_file(const std::string& filename) {
 		std::ifstream file(filename);
 		if (file) {
 			try {

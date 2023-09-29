@@ -94,7 +94,7 @@ namespace arena::logic {
 		crop.setBlendMode(SkBlendMode::kDstIn);
 		entity_canvas.draw_image(this->image, size_rect, &crop);
 		if (Random::get_instance().random_int_from_interval(0, 1)) {
-			entity_canvas = entity_canvas.horizonal_flip()
+			entity_canvas = entity_canvas.horizonal_flip();
 		}
 		canvas.draw_canvas(entity_canvas, this->rect);
 
