@@ -108,7 +108,8 @@ namespace arena::logic {
 		if (!this->level_ui) {
 			return;
 		}
-		std::filesystem::path asset_directory(Global::getSettings()["asset_directory"].get<std::string>());
+		const json& settings_json = Global::getSettings();
+		std::filesystem::path asset_directory(settings_json["asset_directory"].get<std::string>());
 		ImageLoader& image_loader = ImageLoader::get_instance();
 		auto level_ui = image_loader.try_load_image(asset_directory / "sprites" / "ui" / fmt::format("{}_level.png", this->is_blue ? "player" : "enemy")).value();
 
