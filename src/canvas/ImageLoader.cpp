@@ -1,7 +1,7 @@
 #include "ImageLoader.h"
 #include <iostream>
 namespace canvas {
-	ImageLoader::ImageLoader() : images(Global::get_json()["image_cache_size"].get<int>())
+	ImageLoader::ImageLoader() : images(Global::getSettings()["image_cache_size"].get<int>())
 	{
 	}
 

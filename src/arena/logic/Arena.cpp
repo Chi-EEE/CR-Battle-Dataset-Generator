@@ -32,7 +32,7 @@ namespace arena::logic {
 	{
 		std::string blue_side_name = tower_skin.to_string();
 		std::transform(blue_side_name.begin(), blue_side_name.end(), blue_side_name.begin(), ::tolower);
-		std::filesystem::path asset_directory(Global::get_json()["asset_directory"].get<std::string>());
+		std::filesystem::path asset_directory(Global::getSettings()["asset_directory"].get<std::string>());
 		std::filesystem::path arena_tower_file = asset_directory / "essentials" / character / (is_blue ? "blue" : "red") / "tower" / blue_side_name / "01.png";
 		if (!std::filesystem::exists(arena_tower_file)) return tl::make_unexpected(fmt::format("Unable to find the arena tower path containing: {}, {}, {}", character, is_blue));
 		return ImageLoader::get_instance().try_load_image(arena_tower_file);
@@ -45,7 +45,7 @@ namespace arena::logic {
 		std::string arena_type_name = arena_type.to_string();
 		std::transform(arena_type_name.begin(), arena_type_name.end(), arena_type_name.begin(), ::tolower);
 
-		std::filesystem::path asset_directory(Global::get_json()["asset_directory"].get<std::string>());
+		std::filesystem::path asset_directory(Global::getSettings()["asset_directory"].get<std::string>());
 
 		std::string time = "default";
 		if (random.random_int_from_interval(0, 1)) time = "overtime";
@@ -123,7 +123,7 @@ namespace arena::logic {
 			entity->draw_ui(this->canvas);
 		}
 
-		if (Global::get_json()["display_bounding_boxes"].get<bool>()) {
+		if (Global::getSettings()["display_bounding_boxes"].get<bool>()) {
 			EntityDataManager& entity_data_manager = EntityDataManager::getInstance();
 			for (auto& entity : this->ground_entities) {
 				SkColor average_color = entity_data_manager.getAverageColor(entity->entity_data, entity->image);

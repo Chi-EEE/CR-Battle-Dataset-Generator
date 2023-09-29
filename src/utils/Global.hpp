@@ -15,28 +15,14 @@ using json = nlohmann::json;
 class Global {
 public:
 	static double scale;
+	static json settings;
 
-	static json& get_json() {
-		static json instance;
-		return instance;
+	static const json& getSettings() {
+		return settings;
 	}
-
-	static tl::expected<nullptr_t, std::string> try_load_json_file(const std::string& filename) {
-		std::ifstream file(filename);
-		if (file) {
-			try {
-				json j;
-				file >> j;
-				get_json() = j;
-				return nullptr;
-			}
-			catch (const std::exception& e) {
-				return tl::make_unexpected(fmt::format("Error loading JSON from file: {}", e.what()));
-			}
-		}
-		else {
-			return tl::make_unexpected(fmt::format("Error opening file: {}", filename));
-		}
+	
+	static void setSettings(const json& newSettings) {
+		settings = newSettings;
 	}
 };
 

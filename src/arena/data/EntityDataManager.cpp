@@ -4,7 +4,7 @@ namespace arena::data
 {
 	EntityDataManager::EntityDataManager()
 	{
-		std::filesystem::path asset_directory(Global::get_json()["asset_directory"].get<std::string>());
+		std::filesystem::path asset_directory(Global::getSettings()["asset_directory"].get<std::string>());
 		auto& file_manager_instance = FileManager::FileManager::getInstance();
 		file_manager_instance.createTable(File::Entity, new EntityDataTable{});
 		file_manager_instance.addCSVFile(File::Entity, (asset_directory / "files" / "buildings.csv").string());
@@ -46,7 +46,7 @@ namespace arena::data
 	tl::expected<Image, std::string> EntityDataManager::getRandomEntityImage(pEntityData entity_data, bool is_blue)
 	{
 		Random& random = Random::get_instance();
-		std::filesystem::path asset_directory(Global::get_json()["asset_directory"].get<std::string>());
+		std::filesystem::path asset_directory(Global::getSettings()["asset_directory"].get<std::string>());
 
 		std::string file_name = entity_data->getFileName();
 		file_name.erase(0, 3); // Remove "/sc"
