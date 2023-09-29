@@ -412,7 +412,9 @@ tl::expected<bool, std::string> try_read_settings_json() {
 					json settings_json;
 					settings_file >> settings_json;
 					const auto default_patch = validator.validate(settings_json);
-					settings_json = settings_json.patch(default_patch);
+					if (default_patch != nullptr) {
+						settings_json = settings_json.patch(default_patch);
+					}
 					Global::setSettings(settings_json);
 					return settings_json["ready"].get<bool>();
 				}
