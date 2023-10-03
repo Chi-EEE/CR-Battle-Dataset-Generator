@@ -18,7 +18,7 @@
 #include "tl/expected.hpp"
 #include "spdlog/spdlog.h"
 
-//#include "csv.hpp"
+#include "csv.hpp"
 
 #include "canvas/Canvas.h"
 #include "arena/logic/Arena.h"

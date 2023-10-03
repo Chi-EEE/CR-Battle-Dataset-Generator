@@ -28,7 +28,7 @@
 
 using namespace canvas;
 using namespace arena::data;
-using namespace file::csv;
+using namespace file::_csv;
 
 namespace arena::logic {
 	class Arena

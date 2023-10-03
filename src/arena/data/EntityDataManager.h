@@ -22,7 +22,7 @@
 #include "../../canvas/ImageLoader.h"
 
 using namespace file;
-using namespace file::csv;
+using namespace file::_csv;
 using namespace canvas;
 
 namespace arena::data

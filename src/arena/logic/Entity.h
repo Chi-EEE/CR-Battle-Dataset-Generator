@@ -19,7 +19,7 @@
 #include "EntityEffect.h"
 
 using namespace arena::data;
-using namespace file::csv;
+using namespace file::_csv;
 using namespace canvas;
 
 namespace arena::logic {
