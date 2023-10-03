@@ -13,8 +13,8 @@
 #include "../../files/data/Data.h"
 #include "../../files/csv/CSVRow.h"
 
-using namespace csv;
-using namespace data;
+using namespace file::csv;
+using namespace file::data;
 
 namespace arena::data
 {

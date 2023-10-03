@@ -10,9 +10,9 @@
 
 #include "../../files/csv/CSVRow.h"
 
-using namespace csv;
+using namespace file::csv;
 
-namespace data
+namespace file::data
 {
     class Data
     {

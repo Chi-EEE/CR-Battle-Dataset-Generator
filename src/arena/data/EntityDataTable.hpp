@@ -14,7 +14,7 @@
 
 #include "EntityData.h"
 
-using namespace data;
+using namespace file::data;
 
 namespace arena::data {
     class EntityDataTable : public Table<EntityData>

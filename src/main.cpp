@@ -18,6 +18,8 @@
 #include "tl/expected.hpp"
 #include "spdlog/spdlog.h"
 
+//#include "csv.hpp"
+
 #include "canvas/Canvas.h"
 #include "arena/logic/Arena.h"
 
@@ -239,6 +241,20 @@ static json settings_schema = R"(
 
 )"_json;
 
+struct CharacterStatistic {
+	int count;
+	std::unordered_map<std::string, int> effect_count_map;
+	std::unordered_map<int, int> ui_count_map;
+};
+
+struct BattleResult {
+	std::list<json> character_coco_objects;
+	json image_coco_object;
+
+	ArenaType arena_type;
+	std::unordered_map<std::string, CharacterStatistic> character_stats_map;
+};
+
 struct ThreadInfo {
 	int thread_id;
 	int end_character_id;
@@ -247,6 +263,8 @@ struct ThreadInfo {
 struct ThreadOutput {
 	std::list<json> character_coco_objects_vector;
 	std::list<json> image_coco_object_vector;
+	std::unordered_map<std::string, int> arena_count_map;
+	std::unordered_map<std::string, CharacterStatistic> character_stats_map;
 };
 
 typedef std::pair<
@@ -256,7 +274,7 @@ typedef std::pair<
 
 tl::expected<bool, std::string> try_read_settings_json();
 ThreadOutput generate_images(ThreadInfo thread_info, int start_image_id, int end_image_id);
-std::pair<std::list<json>, json> generate_battle(int image_id, int total_character_count, int character_count, Random& random, std::filesystem::path& asset_directory, std::filesystem::path& output_image_directory);
+BattleResult generate_battle(int image_id, int total_character_count, int character_count, Random& random, std::filesystem::path& asset_directory, std::filesystem::path& output_image_directory);
 json get_categories();
 void create_annotations_json(std::filesystem::path& output_directory, json& coco_annotations);
 void create_data_yaml(std::filesystem::path& output_directory);
@@ -406,7 +424,7 @@ tl::expected<bool, std::string> try_read_settings_json() {
 	}
 	else {
 		try {
-			std::ifstream settings_file("config/settings.json"); 
+			std::ifstream settings_file("config/settings.json");
 			if (settings_file) {
 				try {
 					json settings_json;
@@ -438,6 +456,8 @@ ThreadOutput generate_images(ThreadInfo thread_info, int start_image_id, int end
 
 	std::list<json> character_coco_objects_vector;
 	std::list<json> image_coco_object_vector;
+	std::unordered_map<std::string, int> arena_count_map;
+	std::unordered_map<std::string, CharacterStatistic> character_stats_map;
 
 	const json& settings_json = Global::getSettings();
 
@@ -452,30 +472,73 @@ ThreadOutput generate_images(ThreadInfo thread_info, int start_image_id, int end
 	int total_character_count = 0;
 	for (int image_id = start_image_id; image_id < end_image_id; image_id++) {
 		int character_count = random.random_int_from_interval(character_min_count, character_max_count);
-		auto result = generate_battle(image_id, total_character_count, character_count, random, asset_directory, output_image_directory);
-		std::list<json> character_coco_objects = result.first;
-		json image_coco_object = result.second;
+		BattleResult result = generate_battle(image_id, total_character_count, character_count, random, asset_directory, output_image_directory);
+		std::list<json> character_coco_objects = result.character_coco_objects;
+		json image_coco_object = result.image_coco_object;
 
 		character_coco_objects_vector.splice(character_coco_objects_vector.end(), character_coco_objects);
 		image_coco_object_vector.push_back(image_coco_object);
+
+		auto arena_it = arena_count_map.find(result.arena_type.to_string());
+		if (arena_it != arena_count_map.end())
+			arena_it->second = arena_it->second + 1;
+		else
+			arena_count_map.insert(std::make_pair(result.arena_type.to_string(), 1));
+		
+		for (const auto& character_pair : result.character_stats_map) {
+			const std::string& character_name = character_pair.first;
+			CharacterStatistic character_stat = character_pair.second;
+
+			auto character_it = character_stats_map.find(character_name);
+			if (character_it != character_stats_map.end()) {
+				CharacterStatistic &main_character_stat = std::ref(character_it->second);
+				main_character_stat.count += character_stat.count;
+				for (const auto& effect_pair : character_stat.effect_count_map) {
+					const std::string& effect_name = effect_pair.first;
+					int effect_count = effect_pair.second;
+					auto effect_it = main_character_stat.effect_count_map.find(effect_name);
+					if (effect_it != main_character_stat.effect_count_map.end())
+						effect_it->second += effect_count;
+					else
+						main_character_stat.effect_count_map.insert(effect_pair);
+				}
+				for (const auto& ui_pair : character_stat.ui_count_map) {
+					const int& ui_type = ui_pair.first;
+					int ui_count = ui_pair.second;
+					auto effect_it = main_character_stat.ui_count_map.find(ui_type);
+					if (effect_it != main_character_stat.ui_count_map.end())
+						effect_it->second += ui_count;
+					else
+						main_character_stat.ui_count_map.insert(ui_pair);
+				}
+			}
+			else {
+				character_stats_map.insert(character_pair);
+			}
+		}
+
 		total_character_count += character_count;
 	}
 	return ThreadOutput{
 		std::move(character_coco_objects_vector),
-		std::move(image_coco_object_vector)
+		std::move(image_coco_object_vector),
+		std::move(arena_count_map),
+		std::move(character_stats_map),
 	};
 }
 
-std::pair<std::list<json>, json> generate_battle(int image_id, int total_character_count, int character_count, Random& random, std::filesystem::path& asset_directory, std::filesystem::path& output_image_directory) {
+BattleResult generate_battle(int image_id, int total_character_count, int character_count, Random& random, std::filesystem::path& asset_directory, std::filesystem::path& output_image_directory) {
 	auto& entity_data_manager = EntityDataManager::getInstance();
 
 	spdlog::info("Generating image {} with {} characters!\n", image_id, character_count);
-	auto arena_result = Arena::try_create(allowed_arenas[random.random_int_from_interval(0, allowed_arenas.size() - 1)], TowerSkin::Default, TowerSkin::Default);
+	auto arena_type = allowed_arenas[random.random_int_from_interval(0, allowed_arenas.size() - 1)];
+	auto arena_result = Arena::try_create(arena_type, TowerSkin::Default, TowerSkin::Default);
 	if (!arena_result.has_value()) {
 		spdlog::error("An error has occurred: {}\n", arena_result.error());
 		throw std::exception();
 	}
 
+	std::unordered_map<std::string, CharacterStatistic> character_stats_map;
 	std::list<json> character_coco_objects;
 
 	Arena arena = arena_result.value();
@@ -484,7 +547,8 @@ std::pair<std::list<json>, json> generate_battle(int image_id, int total_charact
 		while (add_attempts < 100)
 		{
 			int character_type_id = random.random_int_from_interval(0, allowed_characters.size() - 1);
-			auto entity_data = entity_data_manager.getEntityDataByName(allowed_characters[character_type_id]);
+			std::string character_type_name = allowed_characters[character_type_id];
+			auto entity_data = entity_data_manager.getEntityDataByName(character_type_name);
 			if (entity_data == nullptr) {
 				continue;
 			}
@@ -510,12 +574,31 @@ std::pair<std::list<json>, json> generate_battle(int image_id, int total_charact
 					static_cast<float>(Random::get_instance().random_int_from_interval(128, 954))
 				};
 				character->setPosition(position);
+
+				CharacterStatistic character_stat;
+				auto effect_it = character_stats_map.find(character_type_name);
+				if (effect_it != character_stats_map.end()) 
+				{
+					character_stat = std::ref(effect_it->second);
+					character_stat.count = character_stat.count + 1;
+				}
+				else 
+				{
+					character_stat = CharacterStatistic{ 1 };
+					character_stats_map.insert(std::make_pair(character_type_name, std::ref(character_stat)));
+				}
+
 				if (random.random_int_from_interval(0, 1)) {
 					std::vector<EntityEffect> non_stackable_entity_effects_vector(non_stackable_entity_effects);
 					do {
 						int index = random.random_int_from_interval(0, non_stackable_entity_effects_vector.size() - 1);
 						EntityEffect effect = non_stackable_entity_effects_vector[index];
 						character->addNonStackableEffect(effect);
+
+						auto effect_it = character_stat.effect_count_map.find(effect.to_string());
+						if (effect_it != character_stat.effect_count_map.end()) effect_it->second = effect_it->second + 1;
+						else character_stat.effect_count_map.insert(std::make_pair(effect.to_string(), 1));
+
 						non_stackable_entity_effects_vector.erase(non_stackable_entity_effects_vector.begin() + index);
 					} while (character->non_stackable_effects.size() < 2 && !non_stackable_entity_effects_vector.empty() && random.random_int_from_interval(0, 1));
 				}
@@ -531,6 +614,10 @@ std::pair<std::list<json>, json> generate_battle(int image_id, int total_charact
 					character->level_ui = true;
 					break;
 				}
+				auto ui_it = character_stat.ui_count_map.find(ui_state);
+				if (ui_it != character_stat.ui_count_map.end()) ui_it->second = ui_it->second + 1;
+				else character_stat.ui_count_map.insert(std::make_pair(ui_state, 1));
+
 				if (arena.try_add_character(character)) {
 					json character_coco_object = {
 						{"id", character_id},
@@ -575,7 +662,13 @@ std::pair<std::list<json>, json> generate_battle(int image_id, int total_charact
 		{"height", arena.get_height()},
 		{"file_name", output_destination},
 	};
-	return std::make_pair(character_coco_objects, image_coco_object);
+	return BattleResult{
+		character_coco_objects,
+		image_coco_object,
+
+		arena_type,
+		character_stats_map,
+	};
 }
 
 json get_categories() {

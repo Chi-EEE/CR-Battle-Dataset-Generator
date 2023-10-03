@@ -4,7 +4,7 @@
 #pragma once
 
 
-namespace data
+namespace file::data
 {
 	class AbstractTable
 	{

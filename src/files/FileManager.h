@@ -12,37 +12,39 @@
 #include "data/File.h"
 #include "../arena/data/EntityData.h"
 
-using namespace data;
+using namespace file::data;
 
-class FileManager
-{
-public:
-    FileManager() {
-    }
-    
-	FileManager(FileManager const&) = delete;
-    
-	FileManager& operator=(FileManager const&) = delete;
-	
-	~FileManager();
-    
-	static FileManager& getInstance() {
-        static FileManager instance;
-        return instance;
-    }
+namespace file {
+	class FileManager
+	{
+	public:
+		FileManager() {
+		}
 
-	void createTable(File csvFileType, AbstractTable* table);
+		FileManager(FileManager const&) = delete;
 
-	void addCSVFile(File csvFileType, std::string fileName);
+		FileManager& operator=(FileManager const&) = delete;
 
-	AbstractTable* getTable(File fileType);
-private:
-	inline bool contains(File fileType) {
-		auto it = this->tables.find(fileType);
-		return it != this->tables.end();
-	}
+		~FileManager();
 
-	std::unordered_map<File, AbstractTable*> tables;
-};
+		static FileManager& getInstance() {
+			static FileManager instance;
+			return instance;
+		}
+
+		void createTable(File csvFileType, AbstractTable* table);
+
+		void addCSVFile(File csvFileType, std::string fileName);
+
+		AbstractTable* getTable(File fileType);
+	private:
+		inline bool contains(File fileType) {
+			auto it = this->tables.find(fileType);
+			return it != this->tables.end();
+		}
+
+		std::unordered_map<File, AbstractTable*> tables;
+	};
+}
 
 #endif

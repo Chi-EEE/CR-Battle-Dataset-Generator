@@ -30,6 +30,24 @@ namespace arena::logic {
 		constexpr bool operator==(EntityEffect a) const { return value == a.value; }
 		constexpr bool operator!=(EntityEffect a) const { return value != a.value; }
 
+        std::string to_string() const
+        {
+            switch (value)
+            {
+			case EntityEffect::Damage:
+				return "Damage";
+			case EntityEffect::Heal:
+				return "Heal";
+			case EntityEffect::Freeze:
+				return "Freeze";
+			case EntityEffect::Rage:
+				return "Rage";
+			case EntityEffect::Clone:
+				return "Clone";
+            default: return "Empty";
+            }
+        }
+
 		std::pair<SkBlendMode, SkColor> get_effect() const
 		{
 			switch (value)

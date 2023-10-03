@@ -12,7 +12,7 @@
 #include "../csv/CSVIterator.h"
 #include "../data/Data.h"
 
-namespace data
+namespace file::data
 {
     template<typename T>
     class Table : public AbstractTable

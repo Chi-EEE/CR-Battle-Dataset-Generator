@@ -5,7 +5,7 @@
 
 #include "CSVIterator.h"
 
-namespace csv
+namespace file::csv
 {
     // https://stackoverflow.com/a/1120224
     class CSVRange

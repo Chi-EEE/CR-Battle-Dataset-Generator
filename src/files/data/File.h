@@ -3,7 +3,7 @@
 
 #pragma once
 
-namespace data
+namespace file::data
 {
     enum File
     {

@@ -11,7 +11,7 @@
 #include <string>
 #include <string_view>
 
-namespace csv
+namespace file::csv
 {
 	// https://stackoverflow.com/a/1120224
 	class CSVRow

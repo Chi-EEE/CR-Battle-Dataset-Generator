@@ -66,7 +66,7 @@ namespace arena::data
 		};
 
 		if (!entity_data->getProjectileSpecial().empty()) {
-			actions.push_back("loading1");
+			actions.push_back("loading1"); // Evo firecracker does not have this!
 		}
 
 		auto action = actions[random.random_int_from_interval(0, actions.size() - 1)];

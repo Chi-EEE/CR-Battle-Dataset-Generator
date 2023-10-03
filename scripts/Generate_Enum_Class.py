@@ -63,10 +63,17 @@ public:
     return {class_name}::{enum_values[0]}; // Return default value if no match is found
   }}
 
+  static std::vector<std::string> values() {{
+    return std::vector<std::string>{{\n'''
+    # Generate mapping from string to enum value using unordered_map
+    for value in enum_values:
+        cpp_code += f'    "{value}",\n'
+
+    cpp_code += f'''    }};
+  }}
 private:
   Value value;
 }};
-typedef std::shared_ptr<{class_name}> p{class_name};
 
 #endif
 '''

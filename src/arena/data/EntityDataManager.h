@@ -21,7 +21,8 @@
 #include "../../canvas/Image.h"
 #include "../../canvas/ImageLoader.h"
 
-using namespace csv;
+using namespace file;
+using namespace file::csv;
 using namespace canvas;
 
 namespace arena::data

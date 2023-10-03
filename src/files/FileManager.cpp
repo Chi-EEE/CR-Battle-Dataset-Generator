@@ -1,39 +1,41 @@
 #include "FileManager.h"
 
-FileManager::~FileManager() {
-	for (auto table = this->tables.begin(); table != this->tables.end(); ++table)
-	{
-		delete (*table).second;
+namespace file {
+	FileManager::~FileManager() {
+		for (auto table = this->tables.begin(); table != this->tables.end(); ++table)
+		{
+			delete (*table).second;
+		}
+		this->tables.clear();
 	}
-	this->tables.clear();
-}
 
-AbstractTable* FileManager::getTable(File fileType)
-{
-	if (contains(fileType))
+	AbstractTable* FileManager::getTable(File fileType)
 	{
-		return this->tables[fileType];
+		if (contains(fileType))
+		{
+			return this->tables[fileType];
+		}
+		else
+		{
+			std::cerr << "Unable to find the File Enum for " << fileType;
+			return nullptr;
+		}
 	}
-	else
-	{
-		std::cerr << "Unable to find the File Enum for " << fileType;
-		return nullptr;
-	}
-}
 
-void FileManager::addCSVFile(File fileType, std::string fileName)
-{
-	if (contains(fileType))
+	void FileManager::addCSVFile(File fileType, std::string fileName)
 	{
-		this->tables[fileType]->insertCSV(fileName);
+		if (contains(fileType))
+		{
+			this->tables[fileType]->insertCSV(fileName);
+		}
+		else
+		{
+			std::cerr << "Unable to find the File Enum for " << fileType;
+		}
 	}
-	else
-	{
-		std::cerr << "Unable to find the File Enum for " << fileType;
-	}
-}
 
-void FileManager::createTable(File fileType, AbstractTable* table)
-{
-	this->tables.insert(std::make_pair(fileType, table));
+	void FileManager::createTable(File fileType, AbstractTable* table)
+	{
+		this->tables.insert(std::make_pair(fileType, table));
+	}
 }
