@@ -279,6 +279,7 @@ json get_categories();
 void create_annotations_json(std::filesystem::path& output_directory, json& coco_annotations);
 void create_data_yaml(std::filesystem::path& output_directory);
 void create_csv_stats(
+	std::filesystem::path& output_directory,
 	std::unordered_map<std::string, int> arena_count_map,
 	std::unordered_map<std::string, std::shared_ptr<CharacterStatistic>> character_stats_map
 );
@@ -474,7 +475,7 @@ int main() {
 
 	create_data_yaml(output_directory);
 
-	create_csv_stats(arena_count_map, character_stats_map);
+	create_csv_stats(output_directory, arena_count_map, character_stats_map);
 
 	spdlog::info("Completed generating all images and annotations!");
 
@@ -689,6 +690,12 @@ BattleResult generate_battle(int image_id, int total_character_count, int charac
 						non_stackable_entity_effects_vector.erase(non_stackable_entity_effects_vector.begin() + index);
 					} while (character->non_stackable_effects.size() < 2 && !non_stackable_entity_effects_vector.empty() && random.random_int_from_interval(0, 1));
 				}
+				else {
+					auto effect_it = character_stat->effect_count_map.find("Empty");
+					if (effect_it != character_stat->effect_count_map.end()) effect_it->second = effect_it->second + 1;
+					else character_stat->effect_count_map.insert(std::make_pair("Empty", 1));
+					character->non_stackable_effects.insert(EntityEffect::Empty);
+				}
 				bool ui_state = random.random_int_from_interval(0, 2);
 				switch (ui_state) {
 				case 0:
@@ -796,8 +803,42 @@ void create_data_yaml(std::filesystem::path& output_directory) {
 }
 
 void create_csv_stats(
+	std::filesystem::path& output_directory,
 	std::unordered_map<std::string, int> arena_count_map,
 	std::unordered_map<std::string, std::shared_ptr<CharacterStatistic>> character_stats_map
 ) {
-	std::cout << "HI\n";
+	std::ofstream arena_csv(output_directory / "arena.csv");
+	auto arena_csv_writer = csv::make_csv_writer(arena_csv);
+	std::vector<std::string> arena_headers = { "Name", "Count" };
+	arena_csv_writer << arena_headers;
+	for (const auto& arena_pair : arena_count_map) {
+		const std::string& arena_name = arena_pair.first;
+		int arena_count = arena_pair.second;
+		arena_csv_writer << std::vector<std::string>({ arena_name, std::to_string(arena_count) });
+	}
+
+	auto entity_effect_values = EntityEffect::values();
+	std::ofstream character_csv(output_directory / "character.csv");
+	auto character_csv_writer = csv::make_csv_writer(character_csv);
+	std::vector<std::string> character_headers = { "Name", "Count" };
+	for (auto effect_name : entity_effect_values) {
+		character_headers.push_back(effect_name);
+	}
+	character_csv_writer << character_headers;
+	for (const auto& character_pair : character_stats_map) {
+		const std::string& character_name = character_pair.first;
+		std::shared_ptr<CharacterStatistic> character_stat = character_pair.second;
+		std::vector<std::string> character_row;
+		character_row.reserve(2 + entity_effect_values.size());
+		character_row.push_back(character_name);
+		character_row.push_back(std::to_string(character_stat->count));
+		for (auto effect_name : entity_effect_values) {
+			auto effect_it = character_stat->effect_count_map.find(effect_name);
+			if (effect_it != character_stat->effect_count_map.end())
+				character_row.push_back(std::to_string(effect_it->second));
+			else
+				character_row.push_back("0");
+		}
+		character_csv_writer << character_row;
+	}
 }

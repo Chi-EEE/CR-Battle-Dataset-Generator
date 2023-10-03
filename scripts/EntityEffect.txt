@@ -1,0 +1,6 @@
+Empty
+Damage
+Heal
+Freeze
+Rage
+Clone
