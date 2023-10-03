@@ -278,6 +278,10 @@ BattleResult generate_battle(int image_id, int total_character_count, int charac
 json get_categories();
 void create_annotations_json(std::filesystem::path& output_directory, json& coco_annotations);
 void create_data_yaml(std::filesystem::path& output_directory);
+void create_csv_stats(
+	std::unordered_map<std::string, int> arena_count_map,
+	std::unordered_map<std::string, std::shared_ptr<CharacterStatistic>> character_stats_map
+);
 
 int main() {
 	auto start = std::chrono::system_clock::now();
@@ -415,11 +419,50 @@ int main() {
 			character_coco_object["id"] = character_id + previous_end_character_id;
 		}
 		thread_info.end_character_id = thread_output.character_coco_objects_vector.back()["id"].get<int64_t>();
+		
 		character_coco_objects_vector.splice(character_coco_objects_vector.end(), std::move(thread_output.character_coco_objects_vector));
 		image_coco_object_vector.splice(image_coco_object_vector.end(), std::move(thread_output.image_coco_object_vector));
-	}
 
-	spdlog::info("Starting to generate images and annotations!\n");
+		for (const auto& arena_pair : thread_output.arena_count_map) {
+			const std::string& arena_name = arena_pair.first;
+			int arena_count = arena_pair.second;
+			auto arena_it = arena_count_map.find(arena_name);
+			if (arena_it != arena_count_map.end())
+				arena_it->second += arena_count;
+			else
+				arena_count_map.insert(arena_pair);
+		}
+
+		for (const auto& character_pair : thread_output.character_stats_map) {
+			const std::string& character_name = character_pair.first;
+			std::shared_ptr<CharacterStatistic> character_stat = character_pair.second;
+			auto character_it = character_stats_map.find(character_name);
+			if (character_it != character_stats_map.end()) {
+				std::shared_ptr<CharacterStatistic> main_character_stat = character_it->second;
+				main_character_stat->count += character_stat->count;
+				for (const auto& effect_pair : character_stat->effect_count_map) {
+					const std::string& effect_name = effect_pair.first;
+					int effect_count = effect_pair.second;
+					auto effect_it = main_character_stat->effect_count_map.find(effect_name);
+					if (effect_it != main_character_stat->effect_count_map.end())
+						effect_it->second += effect_count;
+					else
+						main_character_stat->effect_count_map.insert(effect_pair);
+				}
+				for (const auto& ui_pair : character_stat->ui_count_map) {
+					const int& ui_type = ui_pair.first;
+					int ui_count = ui_pair.second;
+					auto effect_it = main_character_stat->ui_count_map.find(ui_type);
+					if (effect_it != main_character_stat->ui_count_map.end())
+						effect_it->second += ui_count;
+					else
+						main_character_stat->ui_count_map.insert(ui_pair);
+				}
+			}
+			else
+				character_stats_map.insert(character_pair);
+		}
+	}
 
 	json coco_annotations = {
 		{"categories", get_categories()},
@@ -430,6 +473,8 @@ int main() {
 	create_annotations_json(output_directory, coco_annotations);
 
 	create_data_yaml(output_directory);
+
+	create_csv_stats(arena_count_map, character_stats_map);
 
 	spdlog::info("Completed generating all images and annotations!");
 
@@ -705,11 +750,11 @@ BattleResult generate_battle(int image_id, int total_character_count, int charac
 		{"file_name", output_destination},
 	};
 	return BattleResult{
-		character_coco_objects,
-		image_coco_object,
+		std::move(character_coco_objects),
+		std::move(image_coco_object),
 
-		arena_type,
-		character_stats_map,
+		std::move(arena_type),
+		std::move(character_stats_map),
 	};
 }
 
@@ -748,4 +793,11 @@ void create_data_yaml(std::filesystem::path& output_directory) {
 	std::ofstream yaml_output_file(output_directory / "data.yaml");
 	yaml_output_file << toml::yaml_formatter{ yaml } << std::endl;
 	yaml_output_file.close();
+}
+
+void create_csv_stats(
+	std::unordered_map<std::string, int> arena_count_map,
+	std::unordered_map<std::string, std::shared_ptr<CharacterStatistic>> character_stats_map
+) {
+	std::cout << "HI\n";
 }
