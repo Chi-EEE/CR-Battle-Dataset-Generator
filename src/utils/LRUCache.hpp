@@ -2,12 +2,11 @@
 #include <unordered_map>
 #include <assert.h>
 
-using namespace std;
 
 template <class KEY_T, class VAL_T> class LRUCache{
 private:
-        list< pair<KEY_T,VAL_T> > item_list;
-        unordered_map<KEY_T, decltype(item_list.begin()) > item_map;
+        std::list< std::pair<KEY_T,VAL_T> > item_list;
+        std::unordered_map<KEY_T, decltype(item_list.begin()) > item_map;
         size_t cache_size;
 private:
         void clean(void){
@@ -28,8 +27,8 @@ public:
                         item_list.erase(it->second);
                         item_map.erase(it);
                 }
-                item_list.push_front(make_pair(key,val));
-                item_map.insert(make_pair(key, item_list.begin()));
+                item_list.push_front(std::make_pair(key,val));
+                item_map.insert(std::make_pair(key, item_list.begin()));
                 clean();
         };
         bool exist(const KEY_T &key){
