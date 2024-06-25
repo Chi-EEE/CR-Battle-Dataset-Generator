@@ -223,6 +223,13 @@ static json settings_schema = R"(
 			"default": false,
 			"type": "boolean"
 		},
+		"unique_color_change": {
+			"description": "The chance of the color of the character to be changed",
+			"type": "integer",
+			"default": 20,
+            "minimum": 0,
+            "maximum": 100
+		},
 		"ready": {
 			"description": "Set to 'true' when ready",
 			"default": false,
@@ -256,7 +263,7 @@ typedef std::pair<
 
 tl::expected<bool, std::string> try_read_settings_json();
 ThreadOutput generate_images(ThreadInfo thread_info, int start_image_id, int end_image_id);
-std::pair<std::list<json>, json> generate_battle(int image_id, int total_character_count, int character_count, Random& random, std::filesystem::path& asset_directory, std::filesystem::path& output_image_directory);
+std::pair<std::list<json>, json> generate_battle(int image_id, int total_character_count, int character_count, int unique_color_change, Random& random, std::filesystem::path& asset_directory, std::filesystem::path& output_image_directory);
 json get_categories();
 void create_annotations_json(std::filesystem::path& output_directory, json& coco_annotations);
 void create_data_yaml(std::filesystem::path& output_directory);
@@ -448,11 +455,12 @@ ThreadOutput generate_images(ThreadInfo thread_info, int start_image_id, int end
 
 	int character_min_count(settings_json["character_min_count"].get<int>());
 	int character_max_count(settings_json["character_max_count"].get<int>());
+	int unique_color_change(settings_json["unique_color_change"].get<int>());
 
 	int total_character_count = 0;
 	for (int image_id = start_image_id; image_id < end_image_id; image_id++) {
 		int character_count = random.random_int_from_interval(character_min_count, character_max_count);
-		auto result = generate_battle(image_id, total_character_count, character_count, random, asset_directory, output_image_directory);
+		auto result = generate_battle(image_id, total_character_count, character_count, unique_color_change, random, asset_directory, output_image_directory);
 		std::list<json> character_coco_objects = result.first;
 		json image_coco_object = result.second;
 
@@ -466,7 +474,7 @@ ThreadOutput generate_images(ThreadInfo thread_info, int start_image_id, int end
 	};
 }
 
-std::pair<std::list<json>, json> generate_battle(int image_id, int total_character_count, int character_count, Random& random, std::filesystem::path& asset_directory, std::filesystem::path& output_image_directory) {
+std::pair<std::list<json>, json> generate_battle(int image_id, int total_character_count, int character_count, int unique_color_change, Random& random, std::filesystem::path& asset_directory, std::filesystem::path& output_image_directory) {
 	auto& entity_data_manager = EntityDataManager::getInstance();
 
 	spdlog::info("Generating image {} with {} characters!\n", image_id, character_count);
@@ -510,7 +518,7 @@ std::pair<std::list<json>, json> generate_battle(int image_id, int total_charact
 					static_cast<float>(Random::get_instance().random_int_from_interval(128, 954))
 				};
 				character->setPosition(position);
-				if (random.random_int_from_interval(0, 1)) {
+				if (random.random_int_from_interval(0, 100) <= unique_color_change) {
 					std::vector<EntityEffect> non_stackable_entity_effects_vector(non_stackable_entity_effects);
 					do {
 						int index = random.random_int_from_interval(0, non_stackable_entity_effects_vector.size() - 1);
